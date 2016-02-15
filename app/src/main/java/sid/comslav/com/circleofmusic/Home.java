@@ -17,13 +17,36 @@ import org.json.JSONObject;
 import java.util.concurrent.ExecutionException;
 
 public class Home extends AppCompatActivity {
+    int count;
+    String songs[];
+    JSONObject obj;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
+        APIHelper api = new APIHelper();
+
+        try {
+            obj=new JSONObject(api.execute("http://circleofmusic-sidzi.rhcloud.com/getTrackCount").get());
+            count=(int)obj.get("count");
+        } catch (JSONException | ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
+        songs=new String[count];
+        for(int i=0;i<count;i++)
+        {
+            try {
+                songs[i]= obj.get("file"+i).toString();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
         GridView gVTrackList = (GridView)findViewById(R.id.gVTrackList);
         gVTrackList.setAdapter(new TrackAdapter());
+
 
     }
 
@@ -53,18 +76,7 @@ public class Home extends AppCompatActivity {
     private class TrackAdapter extends BaseAdapter {
         @Override
         public int getCount() {
-            String str = null;
-            APIHelper api = new APIHelper();
-            try {
-                return (int) (new JSONObject(api.execute("http://circleofmusic-sidzi.rhcloud.com/getTrackCount").get()).get("count"));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
-            return 0;
+            return count;
         }
 
         @Override
@@ -82,7 +94,7 @@ public class Home extends AppCompatActivity {
 
 
             TextView tv = new TextView(getApplicationContext());
-            tv.setText("Hello");
+            tv.setText(songs[i]);
             tv.setTextColor(Color.BLACK);
             return tv;
         }
