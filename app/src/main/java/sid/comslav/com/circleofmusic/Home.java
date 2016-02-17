@@ -1,6 +1,8 @@
 package sid.comslav.com.circleofmusic;
 
+import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -14,12 +16,19 @@ import android.widget.TextView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.concurrent.ExecutionException;
 
 public class Home extends AppCompatActivity {
     int count;
     String songs[];
     JSONObject obj;
+    Uri uri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +38,7 @@ public class Home extends AppCompatActivity {
         APIHelper api = new APIHelper();
 
         try {
-            obj=new JSONObject(api.execute("http://circleofmusic-sidzi.rhcloud.com/getTrackCount").get());
+            obj=new JSONObject(api.execute("http://circleofmusic-sidzi.rhcloud.com/getTrackList").get());
             count=(int)obj.get("count");
         } catch (JSONException | ExecutionException | InterruptedException e) {
             e.printStackTrace();
@@ -66,7 +75,82 @@ public class Home extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.upload) {
+
+            Intent intent_upload = new Intent();
+            intent_upload.setType("audio/*");
+            intent_upload.setAction(Intent.ACTION_GET_CONTENT);
+            startActivityForResult(intent_upload,1);
+
+            HttpURLConnection connection;
+            connection = null;
+            DataOutputStream outputStream;
+            outputStream = null;
+            DataInputStream inputStream = null;
+            String pathToOurFile = "uri";
+            String urlServer = "http://circleofmusic-sidzi.rhcloud.com/uploadFiles";
+            String lineEnd = "\r\n";
+            String twoHyphens = "--";
+            String boundary =  "*****";
+
+            int bytesRead, bytesAvailable, bufferSize;
+            byte[] buffer;
+            int maxBufferSize = 1024*1024;
+
+            try
+            {
+                FileInputStream fileInputStream = new FileInputStream(new File(pathToOurFile) );
+
+                URL url = new URL(urlServer);
+                connection = (HttpURLConnection) url.openConnection();
+
+                // Allow Inputs &amp; Outputs.
+                connection.setDoInput(true);
+                connection.setDoOutput(true);
+                connection.setUseCaches(false);
+
+                // Set HTTP method to POST.
+                connection.setRequestMethod("POST");
+
+                connection.setRequestProperty("Connection", "Keep-Alive");
+                connection.setRequestProperty("Content-Type", "multipart/form-data;boundary="+boundary);
+
+                outputStream = new DataOutputStream( connection.getOutputStream() );
+                outputStream.writeBytes(twoHyphens + boundary + lineEnd);
+                outputStream.writeBytes("Content-Disposition: form-data; name=\"uploadedfile\";filename=\"" + pathToOurFile +"\"" + lineEnd);
+                outputStream.writeBytes(lineEnd);
+
+                bytesAvailable = fileInputStream.available();
+                bufferSize = Math.min(bytesAvailable, maxBufferSize);
+                buffer = new byte[bufferSize];
+
+                // Read file
+                bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+
+                while (bytesRead > 0)
+                {
+                    outputStream.write(buffer, 0, bufferSize);
+                    bytesAvailable = fileInputStream.available();
+                    bufferSize = Math.min(bytesAvailable, maxBufferSize);
+                    bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+                }
+
+                outputStream.writeBytes(lineEnd);
+                outputStream.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
+
+                // Responses from the server (code and message)
+                int serverResponseCode = connection.getResponseCode();
+                String serverResponseMessage = connection.getResponseMessage();
+
+                fileInputStream.close();
+                outputStream.flush();
+                outputStream.close();
+            }
+            catch (Exception ex)
+            {
+                //Exception handling
+            }
+
             return true;
         }
 
@@ -99,4 +183,18 @@ public class Home extends AppCompatActivity {
             return tv;
         }
     }
+    @Override
+    protected void onActivityResult(int requestCode,int resultCode,Intent data){
+
+        if(requestCode == 1){
+
+            if(resultCode == RESULT_OK){
+
+                //the selected audio.
+                uri = data.getData();
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
 }
