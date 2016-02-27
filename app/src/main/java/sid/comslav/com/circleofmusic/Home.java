@@ -1,7 +1,10 @@
 package sid.comslav.com.circleofmusic;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -34,29 +37,37 @@ public class Home extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+        if (!isNetworkAvailable()) {
+            //Show prompt to connect to the internet
+        } else {
+            APIHelper api = new APIHelper();
 
-        APIHelper api = new APIHelper();
-
-        try {
-            obj=new JSONObject(api.execute("http://circleofmusic-sidzi.rhcloud.com/getTrackList").get());
-            count=(int)obj.get("count");
-        } catch (JSONException | ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-        }
-        songs=new String[count];
-        for(int i=0;i<count;i++)
-        {
             try {
-                songs[i]= obj.get("file"+i).toString();
-            } catch (JSONException e) {
+                obj = new JSONObject(api.execute("http://circleofmusic-sidzi.rhcloud.com/getTrackList").get());
+                count = (int) obj.get("count");
+            } catch (JSONException | ExecutionException | InterruptedException e) {
                 e.printStackTrace();
             }
+            songs = new String[count];
+            for (int i = 0; i < count; i++) {
+                try {
+                    songs[i] = obj.get("file" + i).toString();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            GridView gVTrackList = (GridView) findViewById(R.id.gVTrackList);
+            gVTrackList.setAdapter(new TrackAdapter());
         }
 
-        GridView gVTrackList = (GridView)findViewById(R.id.gVTrackList);
-        gVTrackList.setAdapter(new TrackAdapter());
+    }
 
-
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
 
@@ -80,13 +91,92 @@ public class Home extends AppCompatActivity {
             Intent intent_upload = new Intent();
             intent_upload.setType("audio/*");
             intent_upload.setAction(Intent.ACTION_GET_CONTENT);
-            startActivityForResult(intent_upload,1);
+            startActivityForResult(intent_upload, 1);
 
 
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if (requestCode == 1) {
+
+            if (resultCode == RESULT_OK) {
+
+                //the selected audio.
+                uri = data.getData();
+
+                HttpURLConnection connection;
+                connection = null;
+                DataOutputStream outputStream;
+                outputStream = null;
+                DataInputStream inputStream = null;
+                String pathToOurFile = uri.toString();
+                String urlServer = "http://circleofmusic-sidzi.rhcloud.com/uploadFiles";
+                String lineEnd = "\r\n";
+                String twoHyphens = "--";
+                String boundary = "*****";
+
+                int bytesRead, bytesAvailable, bufferSize;
+                byte[] buffer;
+                int maxBufferSize = 1024 * 1024;
+
+                try {
+                    FileInputStream fileInputStream = new FileInputStream(new File(pathToOurFile));
+
+                    URL url = new URL(urlServer);
+                    connection = (HttpURLConnection) url.openConnection();
+
+                    // Allow Inputs &amp; Outputs.
+                    connection.setDoInput(true);
+                    connection.setDoOutput(true);
+                    connection.setUseCaches(false);
+
+                    // Set HTTP method to POST.
+                    connection.setRequestMethod("POST");
+
+                    connection.setRequestProperty("Connection", "Keep-Alive");
+                    connection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
+
+                    outputStream = new DataOutputStream(connection.getOutputStream());
+                    outputStream.writeBytes(twoHyphens + boundary + lineEnd);
+                    outputStream.writeBytes("Content-Disposition: form-data; name=\"uploadedfile\";filename=\"" + pathToOurFile + "\"" + lineEnd);
+                    outputStream.writeBytes(lineEnd);
+
+                    bytesAvailable = fileInputStream.available();
+                    bufferSize = Math.min(bytesAvailable, maxBufferSize);
+                    buffer = new byte[bufferSize];
+
+                    // Read file
+                    bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+
+                    while (bytesRead > 0) {
+                        outputStream.write(buffer, 0, bufferSize);
+                        bytesAvailable = fileInputStream.available();
+                        bufferSize = Math.min(bytesAvailable, maxBufferSize);
+                        bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+                    }
+
+                    outputStream.writeBytes(lineEnd);
+                    outputStream.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
+
+                    // Responses from the server (code and message)
+                    int serverResponseCode = connection.getResponseCode();
+                    String serverResponseMessage = connection.getResponseMessage();
+
+                    fileInputStream.close();
+                    outputStream.flush();
+                    outputStream.close();
+                } catch (Exception ex) {
+                    //Exception handling
+                }
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     private class TrackAdapter extends BaseAdapter {
@@ -114,88 +204,6 @@ public class Home extends AppCompatActivity {
             tv.setTextColor(Color.BLACK);
             return tv;
         }
-    }
-    @Override
-    protected void onActivityResult(int requestCode,int resultCode,Intent data){
-
-        if(requestCode == 1){
-
-            if(resultCode == RESULT_OK){
-
-                //the selected audio.
-                uri = data.getData();
-
-                HttpURLConnection connection;
-                connection = null;
-                DataOutputStream outputStream;
-                outputStream = null;
-                DataInputStream inputStream = null;
-                String pathToOurFile = uri.toString();
-                String urlServer = "http://circleofmusic-sidzi.rhcloud.com/uploadFiles";
-                String lineEnd = "\r\n";
-                String twoHyphens = "--";
-                String boundary =  "*****";
-
-                int bytesRead, bytesAvailable, bufferSize;
-                byte[] buffer;
-                int maxBufferSize = 1024*1024;
-
-                try
-                {
-                    FileInputStream fileInputStream = new FileInputStream(new File(pathToOurFile) );
-
-                    URL url = new URL(urlServer);
-                    connection = (HttpURLConnection) url.openConnection();
-
-                    // Allow Inputs &amp; Outputs.
-                    connection.setDoInput(true);
-                    connection.setDoOutput(true);
-                    connection.setUseCaches(false);
-
-                    // Set HTTP method to POST.
-                    connection.setRequestMethod("POST");
-
-                    connection.setRequestProperty("Connection", "Keep-Alive");
-                    connection.setRequestProperty("Content-Type", "multipart/form-data;boundary="+boundary);
-
-                    outputStream = new DataOutputStream( connection.getOutputStream() );
-                    outputStream.writeBytes(twoHyphens + boundary + lineEnd);
-                    outputStream.writeBytes("Content-Disposition: form-data; name=\"uploadedfile\";filename=\"" + pathToOurFile +"\"" + lineEnd);
-                    outputStream.writeBytes(lineEnd);
-
-                    bytesAvailable = fileInputStream.available();
-                    bufferSize = Math.min(bytesAvailable, maxBufferSize);
-                    buffer = new byte[bufferSize];
-
-                    // Read file
-                    bytesRead = fileInputStream.read(buffer, 0, bufferSize);
-
-                    while (bytesRead > 0)
-                    {
-                        outputStream.write(buffer, 0, bufferSize);
-                        bytesAvailable = fileInputStream.available();
-                        bufferSize = Math.min(bytesAvailable, maxBufferSize);
-                        bytesRead = fileInputStream.read(buffer, 0, bufferSize);
-                    }
-
-                    outputStream.writeBytes(lineEnd);
-                    outputStream.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
-
-                    // Responses from the server (code and message)
-                    int serverResponseCode = connection.getResponseCode();
-                    String serverResponseMessage = connection.getResponseMessage();
-
-                    fileInputStream.close();
-                    outputStream.flush();
-                    outputStream.close();
-                }
-                catch (Exception ex)
-                {
-                    //Exception handling
-                }
-            }
-        }
-        super.onActivityResult(requestCode, resultCode, data);
     }
 
 }
