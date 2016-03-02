@@ -1,17 +1,21 @@
 package sid.comslav.com.circleofmusic;
 
+import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.TextView;
@@ -19,12 +23,6 @@ import android.widget.TextView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.concurrent.ExecutionException;
 
 public class Home extends AppCompatActivity {
@@ -32,6 +30,7 @@ public class Home extends AppCompatActivity {
     String songs[];
     JSONObject obj;
     Uri uri;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,9 +58,34 @@ public class Home extends AppCompatActivity {
 
             GridView gVTrackList = (GridView) findViewById(R.id.gVTrackList);
             gVTrackList.setAdapter(new TrackAdapter());
-        }
+            gVTrackList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View v,
+                                        int position, long id) {
 
+                    String selectedItem = songs[position];
+                    //String selectedItem = parent.getItemAtPosition(position).toString();
+                    //DownloadKaCode
+                    String url = "http://circleofmusic-sidzi.rhcloud.com/downloadTrack" + selectedItem;
+                    DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+                    request.setDescription("Downloading");
+                    request.setTitle(selectedItem);
+// in order for this if to run, you must use the android 3.2 to compile your app
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                        request.allowScanningByMediaScanner();
+                        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                    }
+                    request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "name-of-the-file.ext");
+
+// get download service and enqueue file
+                    DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+                    manager.enqueue(request);
+
+                }
+            });
+        }
     }
+
 
     private boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager
@@ -110,70 +134,7 @@ public class Home extends AppCompatActivity {
                 //the selected audio.
                 uri = data.getData();
 
-                HttpURLConnection connection;
-                connection = null;
-                DataOutputStream outputStream;
-                outputStream = null;
-                DataInputStream inputStream = null;
-                String pathToOurFile = uri.toString();
-                String urlServer = "http://circleofmusic-sidzi.rhcloud.com/uploadFiles";
-                String lineEnd = "\r\n";
-                String twoHyphens = "--";
-                String boundary = "*****";
 
-                int bytesRead, bytesAvailable, bufferSize;
-                byte[] buffer;
-                int maxBufferSize = 1024 * 1024;
-
-                try {
-                    FileInputStream fileInputStream = new FileInputStream(new File(pathToOurFile));
-
-                    URL url = new URL(urlServer);
-                    connection = (HttpURLConnection) url.openConnection();
-
-                    // Allow Inputs &amp; Outputs.
-                    connection.setDoInput(true);
-                    connection.setDoOutput(true);
-                    connection.setUseCaches(false);
-
-                    // Set HTTP method to POST.
-                    connection.setRequestMethod("POST");
-
-                    connection.setRequestProperty("Connection", "Keep-Alive");
-                    connection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
-
-                    outputStream = new DataOutputStream(connection.getOutputStream());
-                    outputStream.writeBytes(twoHyphens + boundary + lineEnd);
-                    outputStream.writeBytes("Content-Disposition: form-data; name=\"uploadedfile\";filename=\"" + pathToOurFile + "\"" + lineEnd);
-                    outputStream.writeBytes(lineEnd);
-
-                    bytesAvailable = fileInputStream.available();
-                    bufferSize = Math.min(bytesAvailable, maxBufferSize);
-                    buffer = new byte[bufferSize];
-
-                    // Read file
-                    bytesRead = fileInputStream.read(buffer, 0, bufferSize);
-
-                    while (bytesRead > 0) {
-                        outputStream.write(buffer, 0, bufferSize);
-                        bytesAvailable = fileInputStream.available();
-                        bufferSize = Math.min(bytesAvailable, maxBufferSize);
-                        bytesRead = fileInputStream.read(buffer, 0, bufferSize);
-                    }
-
-                    outputStream.writeBytes(lineEnd);
-                    outputStream.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
-
-                    // Responses from the server (code and message)
-                    int serverResponseCode = connection.getResponseCode();
-                    String serverResponseMessage = connection.getResponseMessage();
-
-                    fileInputStream.close();
-                    outputStream.flush();
-                    outputStream.close();
-                } catch (Exception ex) {
-                    //Exception handling
-                }
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
