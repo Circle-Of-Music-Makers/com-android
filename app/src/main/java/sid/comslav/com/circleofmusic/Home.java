@@ -27,7 +27,7 @@ import java.util.concurrent.ExecutionException;
 
 public class Home extends AppCompatActivity {
     int count;
-    String songs[];
+    String songs[], songpath;
     JSONObject obj;
     Uri uri;
 
@@ -116,7 +116,7 @@ public class Home extends AppCompatActivity {
             intent_upload.setType("audio/*");
             intent_upload.setAction(Intent.ACTION_GET_CONTENT);
             startActivityForResult(intent_upload, 1);
-
+            //doFileUpload();
 
             return true;
         }
@@ -133,8 +133,9 @@ public class Home extends AppCompatActivity {
 
                 //the selected audio.
                 uri = data.getData();
-
-
+                songpath = uri.toString();
+                UploadSong song = new UploadSong();
+                song.execute(songpath);
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -166,5 +167,6 @@ public class Home extends AppCompatActivity {
             return tv;
         }
     }
+
 
 }
