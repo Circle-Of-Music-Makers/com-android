@@ -1,7 +1,9 @@
 package sid.comslav.com.circleofmusic;
 
+import android.app.AlertDialog;
 import android.app.DownloadManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
@@ -10,6 +12,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -38,6 +41,29 @@ public class Home extends AppCompatActivity {
         setContentView(R.layout.activity_home);
         if (!isNetworkAvailable()) {
             //Show prompt to connect to the internet
+
+            // Internet Connection is not present
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("Connect to wifi or quit")
+                    .setCancelable(false)
+                    .setPositiveButton("Connect to WIFI", new DialogInterface.OnClickListener() {
+
+                        public void onClick(DialogInterface dialog, int id) {
+                            startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
+                        }
+                    })
+                    .setNegativeButton("Quit", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            this.finish();
+                        }
+
+                        private void finish() {
+                        }
+                    });
+            AlertDialog alert = builder.create();
+            alert.show();
+
+            return;
         } else {
             APIHelper api = new APIHelper();
 
@@ -64,7 +90,6 @@ public class Home extends AppCompatActivity {
                                         int position, long id) {
 
                     String selectedItem = songs[position];
-                    //String selectedItem = parent.getItemAtPosition(position).toString();
                     //DownloadKaCode
                     String url = "http://circleofmusic-sidzi.rhcloud.com/downloadTrack" + selectedItem;
                     DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
