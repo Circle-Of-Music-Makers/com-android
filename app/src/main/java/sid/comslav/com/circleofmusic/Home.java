@@ -40,8 +40,6 @@ public class Home extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
         if (!isNetworkAvailable()) {
-            //Show prompt to connect to the internet
-
             // Internet Connection is not present
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setMessage("Connect to wifi or quit")
@@ -49,16 +47,19 @@ public class Home extends AppCompatActivity {
                     .setPositiveButton("Connect to WIFI", new DialogInterface.OnClickListener() {
 
                         public void onClick(DialogInterface dialog, int id) {
+                            //goes to wifi settings
                             startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
                         }
                     })
                     .setNegativeButton("Quit", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
-                            this.finish();
+                            //closes the app and return to home screen
+                            Intent intent = new Intent(Intent.ACTION_MAIN);
+                            intent.addCategory(Intent.CATEGORY_HOME);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
                         }
 
-                        private void finish() {
-                        }
                     });
             AlertDialog alert = builder.create();
             alert.show();

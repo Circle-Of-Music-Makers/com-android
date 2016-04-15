@@ -24,7 +24,9 @@ public class UploadSong extends AsyncTask<String, Void, String> {
         HttpURLConnection conn = null;
         DataOutputStream dos = null;
         DataInputStream inStream = null;
-        String existingFileName = Environment.getExternalStorageDirectory().getAbsolutePath() + params[0];
+        String inp = params[0];
+        String existingFileName = Environment.getExternalStorageDirectory().getAbsolutePath() + inp;
+        //String existingFileName = ""+inp.substring(7);
         String lineEnd = "\r\n";
         String twoHyphens = "--";
         String boundary = "*****";
