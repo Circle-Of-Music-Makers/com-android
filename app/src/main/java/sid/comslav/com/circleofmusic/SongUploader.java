@@ -28,14 +28,15 @@ public class SongUploader extends AsyncTask {
     @Override
     protected Object doInBackground(Object[] params) {
         HttpClient httpClient = new DefaultHttpClient();
-        HttpPost httpPost = new HttpPost("http://circleofmusic-sidzi.rhcloud.com/upYourTrack");
+        HttpPost httpPost = new HttpPost("http://posttestserver.com/post.php");
+        File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath(), "lol.m4a");
         try {
             InputStream musicInput = cR.openInputStream(uri);
             if (musicInput != null) {
                 InputStreamEntity reqEntity = new InputStreamEntity(
-                        new FileInputStream(new File(Environment.getExternalStorageDirectory().getAbsolutePath(), "lol.mp3")), -1
+                        new FileInputStream(file), -1
                 );
-                reqEntity.setContentType("audio/*");
+                reqEntity.setContentType("multipart/form-data");
                 reqEntity.setChunked(true);
                 httpPost.setEntity(reqEntity);
                 HttpResponse response = httpClient.execute(httpPost);

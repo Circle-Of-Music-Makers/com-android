@@ -68,53 +68,53 @@ public class Home extends AppCompatActivity {
                     });
             AlertDialog alert = builder.create();
             alert.show();
+        }
+        APIHelper api = new APIHelper();
 
-            return;
-        } else {
-            APIHelper api = new APIHelper();
-
+        try {
+            obj = new JSONObject(api.execute("http://circleofmusic-sidzi.rhcloud.com/getTrackList").get());
+            count = (int) obj.get("count");
+        } catch (JSONException | ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
+        songs = new String[count];
+        for (int i = 0; i < count; i++) {
             try {
-                obj = new JSONObject(api.execute("http://circleofmusic-sidzi.rhcloud.com/getTrackList").get());
-                count = (int) obj.get("count");
-            } catch (JSONException | ExecutionException | InterruptedException e) {
+                songs[i] = obj.get("file" + i).toString();
+            } catch (JSONException e) {
                 e.printStackTrace();
             }
-            songs = new String[count];
-            for (int i = 0; i < count; i++) {
-                try {
-                    songs[i] = obj.get("file" + i).toString();
-                } catch (JSONException e) {
-                    e.printStackTrace();
+        }
+
+        GridView gVTrackList = (GridView) findViewById(R.id.gVTrackList);
+        gVTrackList.setAdapter(new TrackAdapter());
+        gVTrackList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View v,
+                                    int position, long id) {
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
+                    String[] perms = {"android.permission.WRITE_EXTERNAL_STORAGE"};
+                    requestPermissions(perms, 202);
                 }
-            }
-
-            GridView gVTrackList = (GridView) findViewById(R.id.gVTrackList);
-            gVTrackList.setAdapter(new TrackAdapter());
-            gVTrackList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View v,
-                                        int position, long id) {
-
-                    String selectedItem = songs[position];
-                    //DownloadKaCode
-                    String url = "http://circleofmusic-sidzi.rhcloud.com/downloadTrack" + selectedItem;
-                    DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
-                    request.setDescription("Downloading");
-                    request.setTitle(selectedItem);
+                String selectedItem = songs[position];
+                //DownloadKaCode
+                String url = "http://circleofmusic-sidzi.rhcloud.com/downloadTrack" + selectedItem;
+                DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+                request.setDescription("Downloading");
+                request.setTitle(selectedItem);
 // in order for this if to run, you must use the android 3.2 to compile your app
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                        request.allowScanningByMediaScanner();
-                        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-                    }
-                    request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, selectedItem);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                    request.allowScanningByMediaScanner();
+                    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                }
+                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, selectedItem);
 
 // get download service and enqueue file
-                    DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
-                    manager.enqueue(request);
+                DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+                manager.enqueue(request);
 
-                }
-            });
-        }
+            }
+        });
     }
 
 
@@ -167,6 +167,16 @@ public class Home extends AppCompatActivity {
                     requestPermissions(perms, 200);
                 }
                 songUploader.execute();
+//                try {
+//                    String uploadId =
+//                            new MultipartUploadRequest(getApplicationContext(), "http://upload.server.com/path")
+//                                    .addFileToUpload("/absolute/path/to/your/file", "your-param-name")
+//                                    .setNotificationConfig(new UploadNotificationConfig())
+//                                    .setMaxRetries(2)
+//                                    .startUpload();
+//                } catch (Exception exc) {
+//                    Log.e("AndroidUploadService", exc.getMessage(), exc);
+//                }
             }
         }
 
