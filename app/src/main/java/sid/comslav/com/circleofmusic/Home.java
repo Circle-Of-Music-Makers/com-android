@@ -143,12 +143,8 @@ public class Home extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.upload) {
-
-            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-            intent.setType("audio/*");
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-            startActivityForResult(intent, READ_REQUEST_CODE);
-
+            Intent intent = new Intent(this, UploadView.class);
+            startActivity(intent);
             return true;
         }
 
