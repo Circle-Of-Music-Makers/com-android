@@ -6,7 +6,6 @@ import android.app.DownloadManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -14,10 +13,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,8 +24,6 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.TextView;
 
-import net.gotev.uploadservice.BinaryUploadRequest;
-import net.gotev.uploadservice.UploadNotificationConfig;
 import net.gotev.uploadservice.UploadService;
 
 import org.json.JSONException;
@@ -38,12 +33,11 @@ import java.util.concurrent.ExecutionException;
 
 
 public class Home extends AppCompatActivity {
+    private static final int READ_REQUEST_CODE = 42;
     int count;
     String songs[], songpath;
     JSONObject obj;
     Uri uri;
-    private static final int READ_REQUEST_CODE = 42;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -150,14 +144,9 @@ public class Home extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.upload) {
 
-//            Intent intent_upload = new Intent();
-//            intent_upload.setType("audio/*");
-//            intent_upload.setAction(Intent.ACTION_GET_CONTENT);
-//            startActivityForResult(intent_upload, 1);
-//            //doFileUpload();
-            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
             intent.setType("audio/*");
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
             startActivityForResult(intent, READ_REQUEST_CODE);
 
             return true;
@@ -168,39 +157,16 @@ public class Home extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent resultData) {
-
+        super.onActivityResult(requestCode, resultCode, resultData);
         if (requestCode == READ_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            // The document selected by the user won't be returned in the intent.
-            // Instead, a URI to that document will be contained in the return intent
-            // provided to this method as a parameter.
-            // Pull that URI using resultData.getData().
-            Uri uri = null;
             if (resultData != null) {
                 uri = resultData.getData();
-                Cursor cursor = null;
-                try {
-                    cursor = getApplicationContext().getContentResolver().query(uri, new String[]{MediaStore.Audio.Media.DATA}, null, null, null);
-                    if (cursor != null) {
-                        cursor.moveToFirst();
-                        Log.i("Cursor Out", cursor.getString(1));
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } finally {
-                    if (cursor != null)
-                        cursor.close();
+                SongUploader songUploader = new SongUploader(getContentResolver(), uri);
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
+                    String[] perms = {"android.permission.READ_EXTERNAL_STORAGE"};
+                    requestPermissions(perms, 200);
                 }
-                try {
-                    String uploadId =
-                            new BinaryUploadRequest(getApplicationContext(), "http://circleofmusic-sidzi.rhcloud.com/upYourTrack")
-                                    .setFileToUpload("")
-                                    .setNotificationConfig(new UploadNotificationConfig())
-                                    .setMaxRetries(2)
-                                    .startUpload();
-                } catch (Exception exc) {
-                    Log.e("AndroidUploadService", exc.getMessage(), exc);
-                }
-
+                songUploader.execute();
             }
         }
 
