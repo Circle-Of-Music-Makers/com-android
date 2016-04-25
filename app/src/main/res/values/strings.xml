@@ -1,7 +1,4 @@
 <resources>
     <string name="app_name">Circle of Music</string>
-
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
-    <string name="upload">upload</string>
+    <string name="upload">Upload</string>
 </resources>

@@ -1,6 +1,5 @@
 package sid.comslav.com.circleofmusic;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DownloadManager;
 import android.content.Context;
@@ -33,11 +32,9 @@ import java.util.concurrent.ExecutionException;
 
 
 public class Home extends AppCompatActivity {
-    private static final int READ_REQUEST_CODE = 42;
     int count;
-    String songs[], songpath;
+    String songs[];
     JSONObject obj;
-    Uri uri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,19 +94,19 @@ public class Home extends AppCompatActivity {
                     requestPermissions(perms, 202);
                 }
                 String selectedItem = songs[position];
-                //DownloadKaCode
+                //Code for Downloading
                 String url = "http://circleofmusic-sidzi.rhcloud.com/downloadTrack" + selectedItem;
                 DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
                 request.setDescription("Downloading");
                 request.setTitle(selectedItem);
-// in order for this if to run, you must use the android 3.2 to compile your app
+                // in order for this if to run, you must use the android 3.2 to compile your app
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
                     request.allowScanningByMediaScanner();
                     request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
                 }
                 request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, selectedItem);
 
-// get download service and enqueue file
+                // get download service and enqueue file
                 DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
                 manager.enqueue(request);
 
@@ -143,39 +140,12 @@ public class Home extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.upload) {
-            Intent intent = new Intent(this, UploadView.class);
+            Intent intent = new Intent(this, ListFileActivity.class);
             startActivity(intent);
             return true;
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent resultData) {
-        super.onActivityResult(requestCode, resultCode, resultData);
-        if (requestCode == READ_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            if (resultData != null) {
-                uri = resultData.getData();
-                SongUploader songUploader = new SongUploader(getContentResolver(), uri);
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
-                    String[] perms = {"android.permission.READ_EXTERNAL_STORAGE"};
-                    requestPermissions(perms, 200);
-                }
-                songUploader.execute();
-//                try {
-//                    String uploadId =
-//                            new MultipartUploadRequest(getApplicationContext(), "http://upload.server.com/path")
-//                                    .addFileToUpload("/absolute/path/to/your/file", "your-param-name")
-//                                    .setNotificationConfig(new UploadNotificationConfig())
-//                                    .setMaxRetries(2)
-//                                    .startUpload();
-//                } catch (Exception exc) {
-//                    Log.e("AndroidUploadService", exc.getMessage(), exc);
-//                }
-            }
-        }
-
     }
 
     private class TrackAdapter extends BaseAdapter {
