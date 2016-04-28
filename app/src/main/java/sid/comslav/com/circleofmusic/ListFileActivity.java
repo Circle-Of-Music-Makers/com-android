@@ -66,6 +66,7 @@ public class ListFileActivity extends ListActivity {
         } else {
             SongUploader songUploader = new SongUploader(getApplicationContext(), filename);
             songUploader.execute();
+            finish();
         }
     }
 }
