@@ -88,6 +88,7 @@ public class Home extends AppCompatActivity {
         }
 
         GridView gVTrackList = (GridView) findViewById(R.id.gVTrackList);
+        assert gVTrackList != null;
         gVTrackList.setAdapter(new TrackAdapter());
         gVTrackList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
