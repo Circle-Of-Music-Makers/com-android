@@ -41,6 +41,10 @@ public class Home extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
         UploadService.NAMESPACE = BuildConfig.APPLICATION_ID;
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
+            String[] perms = {"android.permission.ACCESS_NETWORK_STATE"};
+            requestPermissions(perms, 202);
+        }
         if (!isNetworkAvailable()) {
             // Internet Connection is not present
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
