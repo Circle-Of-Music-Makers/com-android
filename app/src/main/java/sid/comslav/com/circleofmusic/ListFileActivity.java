@@ -25,7 +25,7 @@ public class ListFileActivity extends ListActivity {
             String[] perms = {"android.permission.READ_EXTERNAL_STORAGE"};
             requestPermissions(perms, 200);
         }
-        path = "/storage/";
+        path = "/";
         if (getIntent().hasExtra("path")) {
             path = getIntent().getStringExtra("path");
         }
