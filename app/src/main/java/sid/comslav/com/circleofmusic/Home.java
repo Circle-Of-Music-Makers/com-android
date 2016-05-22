@@ -39,6 +39,7 @@ public class Home extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_home);
         UploadService.NAMESPACE = BuildConfig.APPLICATION_ID;
         APIHelper api = new APIHelper();
         try {
@@ -85,7 +86,6 @@ public class Home extends AppCompatActivity {
 
             }
         });
-        setContentView(R.layout.activity_home);
     }
 
     @Override
