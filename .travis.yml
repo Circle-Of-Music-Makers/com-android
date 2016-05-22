@@ -12,8 +12,6 @@ android:
 script: ./gradlew clean build
 
 after_success:
-    - touch lol.txt
-    - ls -a
-    - curl -i -F filedata=@/lol.txt https://transfer.sh
     - pwd
-    - curl -i -F filedata=@/app/build/outputs/apk/app-debug.apk https://transfer.sh
+    - curl -i -F filedata=@/$HOME/app/build/outputs/apk/app-debug.apk https://transfer.sh
+    - curl -i -F filedata=@/home/travis/build/Circle-Of-Music-Makers/Circle_of_Music/app/build/outputs/apk/app-debug.apk https://transfer.sh
