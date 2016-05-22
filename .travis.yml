@@ -10,3 +10,7 @@ android:
     - extra-android-m2repository
 
 script: ./gradlew clean build
+
+after_success:
+    - cp app/build/outputs/apk/app-debug.apk .
+    - curl -i -F filedata=@/tmp/hello.txt https://transfer.sh
