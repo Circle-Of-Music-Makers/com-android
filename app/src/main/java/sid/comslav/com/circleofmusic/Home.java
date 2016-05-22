@@ -146,6 +146,10 @@ public class Home extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.upload) {
             Intent intent = new Intent(this, ListFileActivity.class);
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
+            String[] perms = {"android.permission.READ_EXTERNAL_STORAGE"};
+            requestPermissions(perms, 200);
+        }
             startActivity(intent);
             return true;
         }
