@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.os.Environment;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ public class ListFileActivity extends ListActivity {
             String[] perms = {"android.permission.READ_EXTERNAL_STORAGE"};
             requestPermissions(perms, 200);
         }
-        path = "/";
+        path = Environment.getExternalStorageDirectory().getAbsolutePath();
         if (getIntent().hasExtra("path")) {
             path = getIntent().getStringExtra("path");
         }
