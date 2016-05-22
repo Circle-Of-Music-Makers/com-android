@@ -39,39 +39,8 @@ public class Home extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
         UploadService.NAMESPACE = BuildConfig.APPLICATION_ID;
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
-            String[] perms = {"android.permission.ACCESS_NETWORK_STATE"};
-            requestPermissions(perms, 202);
-        }
-        if (!isNetworkAvailable()) {
-            // Internet Connection is not present
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage("Connect to wifi or quit")
-                    .setCancelable(false)
-                    .setPositiveButton("Connect to WIFI", new DialogInterface.OnClickListener() {
-
-                        public void onClick(DialogInterface dialog, int id) {
-                            //goes to wifi settings
-                            startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
-                        }
-                    })
-                    .setNegativeButton("Quit", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            //closes the app and return to home screen
-                            Intent intent = new Intent(Intent.ACTION_MAIN);
-                            intent.addCategory(Intent.CATEGORY_HOME);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
-                        }
-
-                    });
-            AlertDialog alert = builder.create();
-            alert.show();
-        }
         APIHelper api = new APIHelper();
-
         try {
             obj = new JSONObject(api.execute("http://circleofmusic-sidzi.rhcloud.com/getTrackList").get());
             count = (int) obj.get("count");
@@ -86,7 +55,6 @@ public class Home extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
-
         GridView gVTrackList = (GridView) findViewById(R.id.gVTrackList);
         assert gVTrackList != null;
         gVTrackList.setAdapter(new TrackAdapter());
@@ -117,16 +85,8 @@ public class Home extends AppCompatActivity {
 
             }
         });
+        setContentView(R.layout.activity_home);
     }
-
-
-    private boolean isNetworkAvailable() {
-        ConnectivityManager connectivityManager
-                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
-    }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -175,8 +135,6 @@ public class Home extends AppCompatActivity {
 
         @Override
         public View getView(int i, View view, ViewGroup viewGroup) {
-
-
             TextView tv = new TextView(getApplicationContext());
             tv.setText(songs[i]);
             tv.setTextColor(Color.BLACK);
