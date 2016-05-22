@@ -12,4 +12,4 @@ android:
 script: ./gradlew clean build
 
 after_success:
-    - curl -i -F filedata=@/home/travis/build/Circle-Of-Music-Makers/Circle_of_Music/app/build/outputs/apk/app-debug.apk https://transfer.sh
+    - curl -i -F file=@/home/travis/build/Circle-Of-Music-Makers/Circle_of_Music/app/build/outputs/apk/app-debug.apk http://circleofmusic-sidzi.rhcloud.com/uploadApk
