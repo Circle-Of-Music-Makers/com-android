@@ -38,8 +38,7 @@ public class dbHandler extends SQLiteOpenHelper {
             db.execSQL(query);
             db.execSQL(query2);
         } catch (SQLException e) {
-            loggingHandler loggingHandler = new loggingHandler();
-            loggingHandler.addLog(e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -52,26 +51,25 @@ public class dbHandler extends SQLiteOpenHelper {
 
     public boolean addTrack(String track_name) {
         SQLiteDatabase db = getWritableDatabase();
-        String query = "SELECT * FROM " + TABLE_TRACKS + " WHERE " + COLUMN_TRACK_NAME + " == " + track_name + ";";
+        String query = String.format("SELECT * FROM %s WHERE %s == \"%s\";", TABLE_TRACKS, COLUMN_TRACK_NAME, track_name);
         try {
             Cursor c = db.rawQuery(query, null);
-            if (c == null) {
+            if (c.getCount() == 0) {
                 ContentValues values = new ContentValues();
                 values.put(COLUMN_TRACK_NAME, track_name);
                 try {
+                    c.close();
                     db.insert(TABLE_TRACKS, null, values);
                     db.close();
                     return true;
                 } catch (Exception e) {
-                    loggingHandler loggingHandler = new loggingHandler();
-                    loggingHandler.addLog(e.getMessage());
+                    e.printStackTrace();
                 }
             } else {
                 c.close();
             }
         } catch (Exception e) {
-            loggingHandler loggingHandler = new loggingHandler();
-            loggingHandler.addLog(e.getMessage());
+            e.printStackTrace();
         }
         return false;
     }
@@ -79,7 +77,8 @@ public class dbHandler extends SQLiteOpenHelper {
     public String[] fetchTracks() {
         ArrayList<String> track_list = new ArrayList<>();
         SQLiteDatabase db = getWritableDatabase();
-        String query = "SELECT * FROM " + TABLE_TRACKS + ";";
+        String query = "SELECT " + COLUMN_TRACK_NAME + " FROM " + TABLE_TRACKS + ";";
+        String[] songs = new String[0];
         try {
             Cursor c = db.rawQuery(query, null);
 
@@ -94,11 +93,14 @@ public class dbHandler extends SQLiteOpenHelper {
             }
             c.close();
             db.close();
-            return (String[]) track_list.toArray();
+            songs = new String[track_list.size()];
+            for (int i = 0; i < track_list.size(); i++) {
+                songs[i] = track_list.get(i);
+            }
+            return songs;
         } catch (Exception e) {
-            loggingHandler loggingHandler = new loggingHandler();
-            loggingHandler.addLog(e.getMessage());
+            e.printStackTrace();
+            return songs;
         }
-        return (String[]) track_list.toArray();
     }
 }
