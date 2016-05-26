@@ -42,8 +42,8 @@ public class Home extends AppCompatActivity {
         ConnectivityManager cm = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+        UploadService.NAMESPACE = BuildConfig.APPLICATION_ID;
         if (isConnected) {
-            UploadService.NAMESPACE = BuildConfig.APPLICATION_ID;
             APIHelper api = new APIHelper();
             try {
                 obj = new JSONObject(api.execute("http://circleofmusic-sidzi.rhcloud.com/getTrackList").get());
@@ -54,15 +54,14 @@ public class Home extends AppCompatActivity {
             songs = new String[count];
             for (int i = 0; i < count; i++) {
                 try {
-                    songs[i] = obj.get("file" + i).toString();
-                    dbInstance.addTrack(songs[i]);
+                    dbInstance.addTrack(obj.get("file" + i).toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
-        } else {
-            songs = dbInstance.fetchTracks();
         }
+        songs = dbInstance.fetchTracks();
+        count = songs.length;
         GridView gVTrackList = (GridView) findViewById(R.id.gVTrackList);
         assert gVTrackList != null;
         gVTrackList.setAdapter(new TrackAdapter());
