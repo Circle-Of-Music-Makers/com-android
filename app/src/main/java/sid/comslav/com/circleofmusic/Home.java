@@ -1,9 +1,7 @@
 package sid.comslav.com.circleofmusic;
 
-import android.app.AlertDialog;
 import android.app.DownloadManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
@@ -12,7 +10,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -30,6 +27,7 @@ import org.json.JSONObject;
 
 import java.util.concurrent.ExecutionException;
 
+import sid.comslav.com.circleofmusic.helper.dbHandler;
 
 public class Home extends AppCompatActivity {
     int count;
@@ -40,21 +38,30 @@ public class Home extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-        UploadService.NAMESPACE = BuildConfig.APPLICATION_ID;
-        APIHelper api = new APIHelper();
-        try {
-            obj = new JSONObject(api.execute("http://circleofmusic-sidzi.rhcloud.com/getTrackList").get());
-            count = (int) obj.get("count");
-        } catch (JSONException | ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-        }
-        songs = new String[count];
-        for (int i = 0; i < count; i++) {
+        dbHandler dbInstance = new dbHandler(this, null);
+        ConnectivityManager cm = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+        if (isConnected) {
+            UploadService.NAMESPACE = BuildConfig.APPLICATION_ID;
+            APIHelper api = new APIHelper();
             try {
-                songs[i] = obj.get("file" + i).toString();
-            } catch (JSONException e) {
+                obj = new JSONObject(api.execute("http://circleofmusic-sidzi.rhcloud.com/getTrackList").get());
+                count = (int) obj.get("count");
+            } catch (JSONException | ExecutionException | InterruptedException e) {
                 e.printStackTrace();
             }
+            songs = new String[count];
+            for (int i = 0; i < count; i++) {
+                try {
+                    songs[i] = obj.get("file" + i).toString();
+                    dbInstance.addTrack(songs[i]);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        } else {
+            songs = dbInstance.fetchTracks();
         }
         GridView gVTrackList = (GridView) findViewById(R.id.gVTrackList);
         assert gVTrackList != null;
@@ -107,9 +114,9 @@ public class Home extends AppCompatActivity {
         if (id == R.id.upload) {
             Intent intent = new Intent(this, ListFileActivity.class);
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
-            String[] perms = {"android.permission.READ_EXTERNAL_STORAGE"};
-            requestPermissions(perms, 200);
-        }
+                String[] perms = {"android.permission.READ_EXTERNAL_STORAGE"};
+                requestPermissions(perms, 200);
+            }
             startActivity(intent);
             return true;
         }
