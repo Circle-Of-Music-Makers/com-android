@@ -11,14 +11,9 @@ android {
         versionCode 1
         versionName "1.0"
     }
-//    signingConfigs {
-//        release{
-//            storeFile file("signingkey.keystore")
-//        }
-//    }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
