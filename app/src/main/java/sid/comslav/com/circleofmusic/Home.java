@@ -64,6 +64,9 @@ public class Home extends AppCompatActivity {
         }
         songs = dbInstance.fetchTracks();
         count = songs.length;
+        if (newUploadIndicator == null) {
+            newUploadIndicator = new boolean[count];
+        }
         GridView gVTrackList = (GridView) findViewById(R.id.gVTrackList);
         assert gVTrackList != null;
         gVTrackList.setAdapter(new TrackAdapter());
@@ -145,9 +148,9 @@ public class Home extends AppCompatActivity {
             TextView tv = new TextView(getApplicationContext());
             tv.setText(songs[i]);
             if (newUploadIndicator[i]) {
-                tv.setTextColor(Color.BLACK);
-            } else {
                 tv.setTextColor(Color.RED);
+            } else {
+                tv.setTextColor(Color.BLACK);
             }
             return tv;
         }
