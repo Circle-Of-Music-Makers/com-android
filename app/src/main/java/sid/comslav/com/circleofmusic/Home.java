@@ -32,6 +32,7 @@ import sid.comslav.com.circleofmusic.helper.dbHandler;
 public class Home extends AppCompatActivity {
     int count;
     String songs[];
+    boolean newUploadIndicator[];
     JSONObject obj;
 
     @Override
@@ -52,9 +53,10 @@ public class Home extends AppCompatActivity {
                 e.printStackTrace();
             }
             songs = new String[count];
+            newUploadIndicator = new boolean[count];
             for (int i = 0; i < count; i++) {
                 try {
-                    dbInstance.addTrack(obj.get("file" + i).toString());
+                    newUploadIndicator[i] = dbInstance.addTrack(obj.get("file" + i).toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -142,10 +144,12 @@ public class Home extends AppCompatActivity {
         public View getView(int i, View view, ViewGroup viewGroup) {
             TextView tv = new TextView(getApplicationContext());
             tv.setText(songs[i]);
-            tv.setTextColor(Color.BLACK);
+            if (newUploadIndicator[i]) {
+                tv.setTextColor(Color.BLACK);
+            } else {
+                tv.setTextColor(Color.RED);
+            }
             return tv;
         }
     }
-
-
 }
