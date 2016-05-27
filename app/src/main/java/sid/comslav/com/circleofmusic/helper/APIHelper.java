@@ -1,4 +1,4 @@
-package sid.comslav.com.circleofmusic;
+package sid.comslav.com.circleofmusic.helper;
 
 import android.os.AsyncTask;
 
@@ -26,7 +26,7 @@ public class APIHelper extends AsyncTask<String, Void, String> {
 
         try {
             stream = downloadUrl(url);
-            str = readIt(stream, 500);
+            str = readIt(stream, 1000);
         } finally {
             if (stream != null) {
                 stream.close();
