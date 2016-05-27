@@ -2,6 +2,7 @@ package sid.comslav.com.circleofmusic;
 
 import android.app.ListActivity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
