@@ -22,6 +22,13 @@ public class ListFileActivity extends ListActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_files);
+        if (checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
+                String[] perms = {"android.permission.READ_EXTERNAL_STORAGE"};
+                requestPermissions(perms, 200);
+            }
+      }
         path = "/";
         if (getIntent().hasExtra("path")) {
             path = getIntent().getStringExtra("path");
