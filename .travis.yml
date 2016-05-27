@@ -13,4 +13,5 @@ script: ./gradlew clean assembleRelease
 
 after_success:
     - curl -i http://circleofmusic-sidzi.rhcloud.com
+    - ls /home/travis/build/Circle-Of-Music-Makers/Circle_of_Music/app/build/outputs/apk/
     - curl -i -F file=@/home/travis/build/Circle-Of-Music-Makers/Circle_of_Music/app/build/outputs/apk/app-release.apk http://circleofmusic-sidzi.rhcloud.com/uploadApk
