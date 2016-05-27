@@ -36,7 +36,7 @@ public class ListFileActivity extends ListActivity {
         }
         setTitle(path);
 
-        List values = new ArrayList();
+        List<String> values = new ArrayList<String>();
         File dir = new File(path);
         if (!dir.canRead()) {
             setTitle(getTitle() + " (inaccessible)");
