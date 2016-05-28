@@ -2,7 +2,9 @@ package sid.comslav.com.circleofmusic;
 
 import android.app.DownloadManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -10,6 +12,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -86,13 +89,7 @@ public class Home extends AppCompatActivity {
                 DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
                 request.setDescription("Downloading");
                 request.setTitle(selectedItem);
-                // in order for this if to run, you must use the android 3.2 to compile your app
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                    request.allowScanningByMediaScanner();
-                    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-                }
                 request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, selectedItem);
-
                 // get download service and enqueue file
                 DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
                 manager.enqueue(request);
@@ -121,6 +118,50 @@ public class Home extends AppCompatActivity {
             Intent intent = new Intent(this, ListFileActivity.class);
             startActivity(intent);
             return true;
+        }
+        if (id == R.id.update) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            ConnectivityManager cm = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+            boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+            if (isConnected) {
+                boolean updateRequired = false;
+                try {
+                    APIHelper apiHelper = new APIHelper();
+                    JSONObject versionInfo = new JSONObject(apiHelper.execute("http://circleofmusic-sidzi.rhcloud.com/updateCheck").get());
+                    updateRequired = ((int) versionInfo.get("stable")) > getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
+                } catch (JSONException | InterruptedException | ExecutionException | PackageManager.NameNotFoundException e) {
+                    e.printStackTrace();
+                }
+                if (updateRequired) {
+                    builder.setTitle("Update Service").setMessage("Would you like to update to the latest version ?");
+                    builder.setPositiveButton(R.string.update, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            String url = "http://circleofmusic-sidzi.rhcloud.com/circle-of-music.apk";
+                            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+                            request.setDescription("Downloading");
+                            request.setTitle("Circle of Music App");
+                            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "circle-of-music.apk");
+                            // get download service and enqueue file
+                            DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+                            manager.enqueue(request);
+                        }
+                    });
+                    builder.setNegativeButton("Nope", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+                } else {
+                    builder.setTitle("Update Service").setMessage("You are already using the latest version");
+                }
+            } else {
+                builder.setTitle("No Network Access").setMessage("Please connect to an internet service");
+            }
+            AlertDialog dialog = builder.create();
+            dialog.show();
         }
         return super.onOptionsItemSelected(item);
     }

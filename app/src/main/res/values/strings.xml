@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Circle of Music</string>
     <string name="upload">Upload</string>
+    <string name="update">Update</string>
 </resources>

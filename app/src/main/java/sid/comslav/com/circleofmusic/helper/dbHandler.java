@@ -19,9 +19,9 @@ public class dbHandler extends SQLiteOpenHelper {
     public static final String COLUMN_TRACK_NAME = "track_name";
     public static final String COLUMN_TRACK_NAME_TYPE = "TEXT";
     //    TABLE 2
-    public static final String TABLE_VERSION = "version_data";
-    public static final String COLUMN_VERSION_ID = "version_id";
-    public static final String COLUMN_VERSION_ID_TYPE = "REAL PRIMARY KEY";
+//    public static final String TABLE_VERSION = "version_data";
+//    public static final String COLUMN_VERSION_ID = "version_id";
+//    public static final String COLUMN_VERSION_ID_TYPE = "REAL PRIMARY KEY";
 
     public dbHandler(Context context, SQLiteDatabase.CursorFactory factory) {
         super(context, DATABASE_NAME, factory, DATABASE_VERSION);
@@ -33,10 +33,10 @@ public class dbHandler extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         String query = "CREATE TABLE IF NOT EXISTS " + TABLE_TRACKS + "\n(\n" + COLUMN_TRACK_ID + " " + COLUMN_TRACK_ID_TYPE + " , " + COLUMN_TRACK_NAME + " " + COLUMN_TRACK_NAME_TYPE + "\n);";
-        String query2 = "CREATE TABLE IF NOT EXISTS " + TABLE_VERSION + "\n(\n" + COLUMN_VERSION_ID + " " + COLUMN_VERSION_ID_TYPE + "\n);";
+//        String query2 = "CREATE TABLE IF NOT EXISTS " + TABLE_VERSION + "\n(\n" + COLUMN_VERSION_ID + " " + COLUMN_VERSION_ID_TYPE + "\n);";
         try {
             db.execSQL(query);
-            db.execSQL(query2);
+//            db.execSQL(query2);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -45,7 +45,7 @@ public class dbHandler extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_TRACKS);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_VERSION);
+//        db.execSQL("DROP TABLE IF EXISTS " + TABLE_VERSION);
         onCreate(db);
     }
 
