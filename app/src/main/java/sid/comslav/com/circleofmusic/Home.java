@@ -66,11 +66,12 @@ public class Home extends AppCompatActivity {
                     e.printStackTrace();
                 }
             }
-        }
-        songs = dbInstance.fetchTracks();
-        count = songs.length;
-        if (newUploadIndicator == null) {
-            newUploadIndicator = new boolean[count];
+        } else {
+            songs = dbInstance.fetchTracks();
+            count = songs.length;
+            if (newUploadIndicator == null) {
+                newUploadIndicator = new boolean[count];
+            }
         }
         GridView gVTrackList = (GridView) findViewById(R.id.gVTrackList);
         assert gVTrackList != null;
