@@ -25,6 +25,7 @@ import net.gotev.uploadservice.UploadService;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.DecimalFormat;
 import java.util.concurrent.ExecutionException;
 
 import sid.comslav.com.circleofmusic.helper.APIHelper;
