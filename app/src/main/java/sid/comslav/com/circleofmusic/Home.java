@@ -57,7 +57,7 @@ public class Home extends AppCompatActivity {
             newUploadIndicator = new boolean[count];
             for (int i = 0; i < count; i++) {
                 try {
-                    newUploadIndicator[i] = dbInstance.addTrack(obj.get("file" + i).toString());
+                    newUploadIndicator[i] = dbInstance.addTrack(obj.get("file" + new DecimalFormat("000").format(i)).toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
