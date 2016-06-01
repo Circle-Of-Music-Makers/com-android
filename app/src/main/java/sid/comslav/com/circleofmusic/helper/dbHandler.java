@@ -10,7 +10,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import java.util.ArrayList;
 
 public class dbHandler extends SQLiteOpenHelper {
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 2;
     public static final String DATABASE_NAME = "circle_of_music.db";
     //    TABLE 1
     public static final String TABLE_TRACKS = "track_list";
