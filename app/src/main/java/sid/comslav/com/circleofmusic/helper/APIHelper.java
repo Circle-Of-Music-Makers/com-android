@@ -9,7 +9,7 @@ import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class APIHelper extends AsyncTask<String, Void, String> {
+public class apiHelper extends AsyncTask<String, Void, String> {
     @Override
     protected String doInBackground(String... url) {
         try {

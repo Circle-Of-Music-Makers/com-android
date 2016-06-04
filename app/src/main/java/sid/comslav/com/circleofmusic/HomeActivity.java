@@ -31,10 +31,10 @@ import org.json.JSONObject;
 import java.text.DecimalFormat;
 import java.util.concurrent.ExecutionException;
 
-import sid.comslav.com.circleofmusic.helper.APIHelper;
+import sid.comslav.com.circleofmusic.helper.apiHelper;
 import sid.comslav.com.circleofmusic.helper.dbHandler;
 
-public class Home extends AppCompatActivity {
+public class HomeActivity extends AppCompatActivity {
     int count;
     String songs[];
     boolean newUploadIndicator[];
@@ -50,7 +50,7 @@ public class Home extends AppCompatActivity {
         boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
         UploadService.NAMESPACE = BuildConfig.APPLICATION_ID;
         if (isConnected) {
-            APIHelper api = new APIHelper();
+            apiHelper api = new apiHelper();
             try {
                 obj = new JSONObject(api.execute("http://circleofmusic-sidzi.rhcloud.com/getTrackList").get());
                 count = (int) obj.get("count");
@@ -129,7 +129,7 @@ public class Home extends AppCompatActivity {
             if (isConnected) {
                 boolean updateRequired = false;
                 try {
-                    APIHelper apiHelper = new APIHelper();
+                    apiHelper apiHelper = new apiHelper();
                     JSONObject versionInfo = new JSONObject(apiHelper.execute("http://circleofmusic-sidzi.rhcloud.com/updateCheck").get());
                     updateRequired = ((int) versionInfo.get("stable")) > getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
                 } catch (JSONException | InterruptedException | ExecutionException | PackageManager.NameNotFoundException e) {
