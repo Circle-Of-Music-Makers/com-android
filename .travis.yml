@@ -19,4 +19,5 @@ after_success:
     - VERSIONINFOCOM="$(cat /home/travis/build/Circle-Of-Music-Makers/Android-Application/app/build.gradle | grep "versionCode" | tr ' ' '\n' | grep -e "\d")"
     - curl -i http://circleofmusic-sidzi.rhcloud.com/updateAppVersion$VERSIONINFOCOM
     - ls /home/travis/build/Circle-Of-Music-Makers/Android-Application/app/build/outputs/apk/
+    - echo $TRAVIS_BUILD_DIR
     - curl -i -F file=@/home/travis/build/Circle-Of-Music-Makers/Android-Application/app/build/outputs/apk/app-release.apk http://circleofmusic-sidzi.rhcloud.com/uploadApk
