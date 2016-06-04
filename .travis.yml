@@ -11,13 +11,11 @@ android:
 
 before_install:
     - curl -i http://circleofmusic-sidzi.rhcloud.com
-    - curl -o /home/travis/build/Circle-Of-Music-Makers/Android-Application/app/myreleasekey.jks http://circleofmusic-sidzi.rhcloud.com/getSigningKey
+    - curl -o $TRAVIS_BUILD_DIR/app/myreleasekey.jks http://circleofmusic-sidzi.rhcloud.com/getSigningKey
 
 script: ./gradlew clean assembleRelease
 
 after_success:
-    - VERSIONINFOCOM="$(cat /home/travis/build/Circle-Of-Music-Makers/Android-Application/app/build.gradle | grep "versionCode" | tr ' ' '\n' | grep -e "\d")"
-    - curl -i http://circleofmusic-sidzi.rhcloud.com/updateAppVersion$VERSIONINFOCOM
-    - ls /home/travis/build/Circle-Of-Music-Makers/Android-Application/app/build/outputs/apk/
-    - echo $TRAVIS_BUILD_DIR
-    - curl -i -F file=@/home/travis/build/Circle-Of-Music-Makers/Android-Application/app/build/outputs/apk/app-release.apk http://circleofmusic-sidzi.rhcloud.com/uploadApk
+    - VERSIONINFOAPP="$(cat $TRAVIS_BUILD_DIR/app/build.gradle | grep "versionCode" | tr ' ' '\n' | grep -e "\d")"
+    - curl -i http://circleofmusic-sidzi.rhcloud.com/updateAppVersion$VERSIONINFOAPP
+    - curl -i -F file=@$TRAVIS_BUILD_DIR/app/build/outputs/apk/app-release.apk http://circleofmusic-sidzi.rhcloud.com/uploadApk
