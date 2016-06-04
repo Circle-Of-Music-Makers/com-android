@@ -1,9 +1,11 @@
 package sid.comslav.com.circleofmusic;
 
 import android.app.DownloadManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
@@ -28,6 +30,7 @@ import net.gotev.uploadservice.UploadService;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.text.DecimalFormat;
 import java.util.concurrent.ExecutionException;
 
@@ -86,18 +89,19 @@ public class HomeActivity extends AppCompatActivity {
                     requestPermissions(perms, 202);
                 }
                 String selectedItem = songs[position];
-                //Code for Downloading
-                String url = "http://circleofmusic-sidzi.rhcloud.com/downloadTrack" + selectedItem;
-                DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
-                request.setDescription("Downloading");
-                request.setTitle(selectedItem);
-                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, selectedItem);
-                // get download service and enqueue file
-                DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
-                manager.enqueue(request);
-
+                downloadMusicTrack(selectedItem);
             }
         });
+    }
+
+    void downloadMusicTrack(String selectedItem) {
+        String url = "http://circleofmusic-sidzi.rhcloud.com/downloadTrack" + selectedItem;
+        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+        request.setDescription("Downloading");
+        request.setTitle(selectedItem);
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, selectedItem);
+        DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+        manager.enqueue(request);
     }
 
     @Override
@@ -140,20 +144,32 @@ public class HomeActivity extends AppCompatActivity {
                     builder.setPositiveButton(R.string.update, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
+                            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
+                                String[] perms = {"android.permission.WRITE_EXTERNAL_STORAGE"};
+                                requestPermissions(perms, 202);
+                            }
+                            BroadcastReceiver onComplete = new BroadcastReceiver() {
+                                @Override
+                                public void onReceive(Context context, Intent intent) {
+                                    Intent promptInstall = new Intent(Intent.ACTION_VIEW)
+                                            .setDataAndType(Uri.fromFile(new File(Environment.getExternalStoragePublicDirectory(Environment.getDownloadCacheDirectory().getAbsolutePath()) + "/circle-of-music.apk")),
+                                                    "application/vnd.android.package-archive");
+                                    startActivity(promptInstall);
+                                }
+                            };
                             String url = "http://circleofmusic-sidzi.rhcloud.com/circle-of-music.apk";
                             DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
                             request.setDescription("Downloading");
                             request.setTitle("Circle of Music App");
                             request.setDestinationInExternalPublicDir(Environment.getDownloadCacheDirectory().getAbsolutePath(), "circle-of-music.apk");
-                            // get download service and enqueue file
+                            try {
+                                new File(Environment.getExternalStoragePublicDirectory(Environment.getDownloadCacheDirectory().getAbsolutePath()) + "/circle-of-music.apk").delete();
+                            } catch (NullPointerException e) {
+                                e.printStackTrace();
+                            }
                             DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
                             manager.enqueue(request);
-//                            How to check when the download has finished
-//                            After that following code is to be executed (will work only after signing the apk)
-                            Intent promptInstall = new Intent(Intent.ACTION_VIEW)
-                                    .setDataAndType(Uri.parse(Environment.getDownloadCacheDirectory().getAbsolutePath() + "circle-of-music.apk"),
-                                            "application/vnd.android.package-archive");
-                            startActivity(promptInstall);
+                            registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
                         }
                     });
                     builder.setNegativeButton("Nope", new DialogInterface.OnClickListener() {
@@ -171,6 +187,7 @@ public class HomeActivity extends AppCompatActivity {
             AlertDialog dialog = builder.create();
             dialog.show();
         }
+
         return super.onOptionsItemSelected(item);
     }
 
