@@ -8,7 +8,7 @@ android {
         applicationId "sid.comslav.com.circleofmusic"
         minSdkVersion 19
         targetSdkVersion 23
-        versionCode 2
+        versionCode 3
         versionName "Margarita"
     }
     signingConfigs {
