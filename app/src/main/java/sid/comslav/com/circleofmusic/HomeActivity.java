@@ -144,16 +144,16 @@ public class HomeActivity extends AppCompatActivity {
                             DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
                             request.setDescription("Downloading");
                             request.setTitle("Circle of Music App");
-                            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "circle-of-music.apk");
+                            request.setDestinationInExternalPublicDir(Environment.getDownloadCacheDirectory().getAbsolutePath(), "circle-of-music.apk");
                             // get download service and enqueue file
                             DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
                             manager.enqueue(request);
 //                            How to check when the download has finished
 //                            After that following code is to be executed (will work only after signing the apk)
-//                            Intent promptInstall = new Intent(Intent.ACTION_VIEW)
-//                                    .setDataAndType(Uri.parse(Environment.DIRECTORY_DOWNLOADS+"circle-of-music.apk"),
-//                                            "application/vnd.android.package-archive");
-//                            startActivity(promptInstall);
+                            Intent promptInstall = new Intent(Intent.ACTION_VIEW)
+                                    .setDataAndType(Uri.parse(Environment.getDownloadCacheDirectory().getAbsolutePath() + "circle-of-music.apk"),
+                                            "application/vnd.android.package-archive");
+                            startActivity(promptInstall);
                         }
                     });
                     builder.setNegativeButton("Nope", new DialogInterface.OnClickListener() {
