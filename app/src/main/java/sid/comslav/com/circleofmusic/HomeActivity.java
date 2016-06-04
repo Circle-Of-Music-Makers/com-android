@@ -5,23 +5,17 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
-import android.widget.GridView;
-import android.widget.TextView;
 
 import net.gotev.uploadservice.UploadService;
 
@@ -29,10 +23,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.DecimalFormat;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import sid.comslav.com.circleofmusic.helper.apiHelper;
-import sid.comslav.com.circleofmusic.helper.dbHandler;
+import sid.comslav.com.circleofmusic.helpers.apiHelper;
+import sid.comslav.com.circleofmusic.helpers.dbHandler;
 
 public class HomeActivity extends AppCompatActivity {
     int count;
@@ -74,30 +69,18 @@ public class HomeActivity extends AppCompatActivity {
                 newUploadIndicator = new boolean[count];
             }
         }
-        GridView gVTrackList = (GridView) findViewById(R.id.gVTrackList);
-        assert gVTrackList != null;
-        gVTrackList.setAdapter(new TrackAdapter());
-        gVTrackList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View v,
-                                    int position, long id) {
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
-                    String[] perms = {"android.permission.WRITE_EXTERNAL_STORAGE"};
-                    requestPermissions(perms, 202);
-                }
-                String selectedItem = songs[position];
-                //Code for Downloading
-                String url = "http://circleofmusic-sidzi.rhcloud.com/downloadTrack" + selectedItem;
-                DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
-                request.setDescription("Downloading");
-                request.setTitle(selectedItem);
-                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, selectedItem);
-                // get download service and enqueue file
-                DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
-                manager.enqueue(request);
+    }
 
-            }
-        });
+    public void downloadFile(String selectedItem) {
+        String url = "http://circleofmusic-sidzi.rhcloud.com/downloadTrack" + selectedItem;
+        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+        request.setDescription("Downloading");
+        request.setTitle(selectedItem);
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, selectedItem);
+        // get download service and enqueue file
+        DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+        manager.enqueue(request);
+
     }
 
     @Override
@@ -174,32 +157,23 @@ public class HomeActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private class TrackAdapter extends BaseAdapter {
+    private class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.MyViewHolder> {
+        private List<String>
+
         @Override
-        public int getCount() {
-            return count;
+
+        public void onBindViewHolder(TrackAdapter.MyViewHolder holder, int position) {
+
         }
 
         @Override
-        public Object getItem(int i) {
-            return null;
-        }
-
-        @Override
-        public long getItemId(int i) {
+        public int getItemCount() {
             return 0;
         }
 
         @Override
-        public View getView(int i, View view, ViewGroup viewGroup) {
-            TextView tv = new TextView(getApplicationContext());
-            tv.setText(songs[i]);
-            if (newUploadIndicator[i]) {
-                tv.setTextColor(Color.RED);
-            } else {
-                tv.setTextColor(Color.BLACK);
-            }
-            return tv;
+        public TrackAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            return null;
         }
     }
 }

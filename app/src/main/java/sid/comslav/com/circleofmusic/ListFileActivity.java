@@ -8,12 +8,13 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.os.Environment;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import sid.comslav.com.circleofmusic.helpers.uploadHelper;
 
 public class ListFileActivity extends ListActivity {
 
@@ -25,11 +26,11 @@ public class ListFileActivity extends ListActivity {
         setContentView(R.layout.activity_list_files);
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
             if (checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
+                    != PackageManager.PERMISSION_GRANTED) {
                 String[] perms = {"android.permission.READ_EXTERNAL_STORAGE"};
                 requestPermissions(perms, 200);
             }
-      }
+        }
         path = "/";
         if (getIntent().hasExtra("path")) {
             path = getIntent().getStringExtra("path");
@@ -69,8 +70,8 @@ public class ListFileActivity extends ListActivity {
             intent.putExtra("path", filename);
             startActivity(intent);
         } else {
-            SongUploader songUploader = new SongUploader(getApplicationContext(), filename);
-            songUploader.execute();
+            uploadHelper uploadHelper = new uploadHelper(getApplicationContext(), filename);
+            uploadHelper.execute("http://circleofmusic-sidzi.rhcloud.com/upYourTrack");
             finish();
         }
     }
