@@ -12,10 +12,10 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.ViewGroup;
 
 import net.gotev.uploadservice.UploadService;
 
@@ -23,7 +23,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.DecimalFormat;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import sid.comslav.com.circleofmusic.helpers.apiHelper;
@@ -34,6 +33,9 @@ public class HomeActivity extends AppCompatActivity {
     String songs[];
     boolean newUploadIndicator[];
     JSONObject obj;
+    private RecyclerView mRecyclerView;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +71,15 @@ public class HomeActivity extends AppCompatActivity {
                 newUploadIndicator = new boolean[count];
             }
         }
+        mRecyclerView = (RecyclerView) findViewById(R.id.rVTrackList);
+
+        // use a linear layout manager
+        mLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mRecyclerView.setHasFixedSize(true);
+        mAdapter = new TrackListAdapter(songs, newUploadIndicator);
+        mRecyclerView.setAdapter(mAdapter);
+
     }
 
     public void downloadFile(String selectedItem) {
@@ -155,25 +166,5 @@ public class HomeActivity extends AppCompatActivity {
             dialog.show();
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    private class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.MyViewHolder> {
-        private List<String>
-
-        @Override
-
-        public void onBindViewHolder(TrackAdapter.MyViewHolder holder, int position) {
-
-        }
-
-        @Override
-        public int getItemCount() {
-            return 0;
-        }
-
-        @Override
-        public TrackAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            return null;
-        }
     }
 }
