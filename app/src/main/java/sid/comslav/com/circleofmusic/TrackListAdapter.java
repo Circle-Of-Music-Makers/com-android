@@ -21,7 +21,7 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
     @Override
     public TrackListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.track_row_layout, parent, false);
-        view.setPadding(0, 0, 5, 5);
+        view.setPadding(0, 0, 10, 10);
         return new ViewHolder(view);
     }
 
