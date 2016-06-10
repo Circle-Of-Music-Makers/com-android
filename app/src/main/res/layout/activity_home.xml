@@ -8,10 +8,10 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".HomeActivity">
 
-    <GridView
-        android:id="@+id/gVTrackList"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rVTrackList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:numColumns="1" />
+        android:scrollbars="vertical" />
 
 </RelativeLayout>

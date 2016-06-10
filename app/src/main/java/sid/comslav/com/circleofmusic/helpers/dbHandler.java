@@ -1,4 +1,4 @@
-package sid.comslav.com.circleofmusic.helper;
+package sid.comslav.com.circleofmusic.helpers;
 
 import android.content.ContentValues;
 import android.content.Context;

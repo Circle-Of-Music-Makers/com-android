@@ -16,13 +16,13 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.GridView;
 import android.widget.TextView;
 
 import net.gotev.uploadservice.UploadService;
@@ -34,8 +34,8 @@ import java.io.File;
 import java.text.DecimalFormat;
 import java.util.concurrent.ExecutionException;
 
-import sid.comslav.com.circleofmusic.helper.apiHelper;
-import sid.comslav.com.circleofmusic.helper.dbHandler;
+import sid.comslav.com.circleofmusic.helpers.apiHelper;
+import sid.comslav.com.circleofmusic.helpers.dbHandler;
 
 public class HomeActivity extends AppCompatActivity {
     int count;
@@ -77,21 +77,16 @@ public class HomeActivity extends AppCompatActivity {
                 newUploadIndicator = new boolean[count];
             }
         }
-        GridView gVTrackList = (GridView) findViewById(R.id.gVTrackList);
-        assert gVTrackList != null;
-        gVTrackList.setAdapter(new TrackAdapter());
-        gVTrackList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View v,
-                                    int position, long id) {
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
-                    String[] perms = {"android.permission.WRITE_EXTERNAL_STORAGE"};
-                    requestPermissions(perms, 202);
-                }
-                String selectedItem = songs[position];
-                downloadMusicTrack(selectedItem);
-            }
-        });
+        RecyclerView mRecyclerView;
+        RecyclerView.Adapter mAdapter;
+        RecyclerView.LayoutManager mLayoutManager;
+
+        mRecyclerView = (RecyclerView) findViewById(R.id.rVTrackList);
+        mLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mRecyclerView.setHasFixedSize(true);
+        mAdapter = new TrackListAdapter(songs, newUploadIndicator);
+        mRecyclerView.setAdapter(mAdapter);
     }
 
     void downloadMusicTrack(String selectedItem) {

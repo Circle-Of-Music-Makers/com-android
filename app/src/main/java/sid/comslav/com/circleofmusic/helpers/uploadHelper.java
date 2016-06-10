@@ -1,4 +1,4 @@
-package sid.comslav.com.circleofmusic;
+package sid.comslav.com.circleofmusic.helpers;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -7,11 +7,11 @@ import android.util.Log;
 import net.gotev.uploadservice.MultipartUploadRequest;
 import net.gotev.uploadservice.UploadNotificationConfig;
 
-public class SongUploader extends AsyncTask {
+public class uploadHelper extends AsyncTask {
     private String path;
     private Context context;
 
-    SongUploader(Context context, String filename) {
+    public uploadHelper(Context context, String filename) {
         path = filename;
         this.context = context;
     }
