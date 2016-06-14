@@ -17,12 +17,14 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
     private String[] mDataSet;
     private boolean[] newNotification;
     private Context mContext;
+    private boolean[] download_status;
 
 
-    public TrackListAdapter(String[] mDataSet, boolean[] newNotification, Context mContext) {
+    public TrackListAdapter(String[] mDataSet, boolean[] newNotification, boolean[] download_status, Context mContext) {
         this.mDataSet = mDataSet;
         this.newNotification = newNotification;
         this.mContext = mContext;
+        this.download_status = download_status;
     }
 
     @Override
@@ -56,7 +58,11 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         if (newNotification[position]) {
             holder.mTextView.setTextColor(Color.GREEN);
         }
-        holder.sTextView.setText("Track Info After Download");
+        if (download_status[position]) {
+            holder.sTextView.setText("");
+        } else {
+            holder.sTextView.setText("Artistry");
+        }
     }
 
     @Override

@@ -87,7 +87,7 @@ public class HomeActivity extends AppCompatActivity {
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setHasFixedSize(true);
-        mAdapter = new TrackListAdapter(songs, newUploadIndicator, getApplicationContext());
+        mAdapter = new TrackListAdapter(songs, newUploadIndicator, download_status, getApplicationContext());
         mRecyclerView.setAdapter(mAdapter);
     }
 

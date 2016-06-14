@@ -60,6 +60,7 @@ public class dbHandler extends SQLiteOpenHelper {
             if (c.getCount() == 0) {
                 ContentValues values = new ContentValues();
                 values.put(COLUMN_TRACK_NAME, track_name);
+                values.put(COLUMN_DOWNLOADED, 0);
                 try {
                     c.close();
                     db.insert(TABLE_TRACKS, null, values);
@@ -140,9 +141,10 @@ public class dbHandler extends SQLiteOpenHelper {
 
     public void setDownloadStatus(String selectedItem) {
         SQLiteDatabase db = getWritableDatabase();
-        String query = String.format("INSERT INTO %s (%s) VALUES(1) WHERE %s == \"%s\";", TABLE_TRACKS, COLUMN_DOWNLOADED, COLUMN_TRACK_NAME, selectedItem);
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COLUMN_DOWNLOADED, 1);
         try {
-            db.execSQL(query);
+            db.update(TABLE_TRACKS, contentValues, COLUMN_TRACK_NAME + "=", new String[]{selectedItem});
         } catch (Exception e) {
             e.printStackTrace();
         }
