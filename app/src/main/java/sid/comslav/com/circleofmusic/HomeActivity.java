@@ -41,6 +41,7 @@ public class HomeActivity extends AppCompatActivity {
     int count;
     String songs[];
     boolean newUploadIndicator[];
+    boolean download_status[];
     JSONObject obj;
 
     @Override
@@ -72,6 +73,7 @@ public class HomeActivity extends AppCompatActivity {
             }
         } else {
             songs = dbInstance.fetchTracks();
+            download_status = dbInstance.fetchDownloadStatus();
             count = songs.length;
             if (newUploadIndicator == null) {
                 newUploadIndicator = new boolean[count];
@@ -85,9 +87,10 @@ public class HomeActivity extends AppCompatActivity {
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setHasFixedSize(true);
-        mAdapter = new TrackListAdapter(songs, newUploadIndicator);
+        mAdapter = new TrackListAdapter(songs, newUploadIndicator, getApplicationContext());
         mRecyclerView.setAdapter(mAdapter);
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

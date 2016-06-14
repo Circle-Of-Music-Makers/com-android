@@ -10,7 +10,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import java.util.ArrayList;
 
 public class dbHandler extends SQLiteOpenHelper {
-    public static final int DATABASE_VERSION = 2;
+    public static final int DATABASE_VERSION = 3;
     public static final String DATABASE_NAME = "circle_of_music.db";
     //    TABLE 1
     public static final String TABLE_TRACKS = "track_list";
@@ -18,6 +18,9 @@ public class dbHandler extends SQLiteOpenHelper {
     public static final String COLUMN_TRACK_ID_TYPE = "INTEGER PRIMARY KEY AUTOINCREMENT";
     public static final String COLUMN_TRACK_NAME = "track_name";
     public static final String COLUMN_TRACK_NAME_TYPE = "TEXT";
+    public static final String COLUMN_DOWNLOADED = "downloaded";
+    public static final String COLUMN_DOWNLOADED_TYPE = "TINYINT";
+
     //    TABLE 2
 //    public static final String TABLE_VERSION = "version_data";
 //    public static final String COLUMN_VERSION_ID = "version_id";
@@ -32,7 +35,7 @@ public class dbHandler extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String query = "CREATE TABLE IF NOT EXISTS " + TABLE_TRACKS + "\n(\n" + COLUMN_TRACK_ID + " " + COLUMN_TRACK_ID_TYPE + " , " + COLUMN_TRACK_NAME + " " + COLUMN_TRACK_NAME_TYPE + "\n);";
+        String query = "CREATE TABLE IF NOT EXISTS " + TABLE_TRACKS + "\n(\n" + COLUMN_TRACK_ID + " " + COLUMN_TRACK_ID_TYPE + " , " + COLUMN_TRACK_NAME + " " + COLUMN_TRACK_NAME_TYPE + " , " + COLUMN_DOWNLOADED + " " + COLUMN_DOWNLOADED_TYPE + "\n);";
 //        String query2 = "CREATE TABLE IF NOT EXISTS " + TABLE_VERSION + "\n(\n" + COLUMN_VERSION_ID + " " + COLUMN_VERSION_ID_TYPE + "\n);";
         try {
             db.execSQL(query);
@@ -101,6 +104,47 @@ public class dbHandler extends SQLiteOpenHelper {
         } catch (Exception e) {
             e.printStackTrace();
             return songs;
+        }
+    }
+
+    public boolean[] fetchDownloadStatus() {
+        ArrayList<Integer> track_list = new ArrayList<>();
+        SQLiteDatabase db = getWritableDatabase();
+        String query = "SELECT " + COLUMN_DOWNLOADED + " FROM " + TABLE_TRACKS + ";";
+        boolean[] songs = new boolean[0];
+
+        try {
+            Cursor c = db.rawQuery(query, null);
+
+            c.moveToFirst();
+            int index = 0;
+            while (!c.isAfterLast()) {
+                if (c.getString(c.getColumnIndex(COLUMN_DOWNLOADED)) != null) {
+                    track_list.add(index, c.getInt(c.getColumnIndex(COLUMN_DOWNLOADED)));
+                    index++;
+                }
+                c.moveToNext();
+            }
+            c.close();
+            db.close();
+            songs = new boolean[track_list.size()];
+            for (int i = 0; i < track_list.size(); i++) {
+                songs[i] = track_list.get(i) > 0;
+            }
+            return songs;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return songs;
+        }
+    }
+
+    public void setDownloadStatus(String selectedItem) {
+        SQLiteDatabase db = getWritableDatabase();
+        String query = String.format("INSERT INTO %s (%s) VALUES(1) WHERE %s == \"%s\";", TABLE_TRACKS, COLUMN_DOWNLOADED, COLUMN_TRACK_NAME, selectedItem);
+        try {
+            db.execSQL(query);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

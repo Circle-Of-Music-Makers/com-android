@@ -11,21 +11,43 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import sid.comslav.com.circleofmusic.helpers.dbHandler;
+
 public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.ViewHolder> {
     private String[] mDataSet;
     private boolean[] newNotification;
+    private Context mContext;
 
 
-    public TrackListAdapter(String[] mDataSet, boolean[] newNotification) {
+    public TrackListAdapter(String[] mDataSet, boolean[] newNotification, Context mContext) {
         this.mDataSet = mDataSet;
         this.newNotification = newNotification;
+        this.mContext = mContext;
     }
 
     @Override
     public TrackListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.track_row_layout, parent, false);
-        view.setPadding(0, 0, 5, 5);
-        return new ViewHolder(view);
+        TrackListAdapter.ViewHolder vh = new ViewHolder(view, new TrackListAdapter.ViewHolder.ImViewHolderClick() {
+            @Override
+            public void downTrack(View track) {
+                downloadMusicTrack(((TextView) track).getText().toString());
+            }
+        });
+        return vh;
+    }
+
+    void downloadMusicTrack(String selectedItem) {
+        String url = "http://circleofmusic-sidzi.rhcloud.com/downloadTrack" + selectedItem;
+        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+        request.setDescription("Downloading");
+        request.setTitle(selectedItem);
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, selectedItem);
+        DownloadManager manager = (DownloadManager) mContext.getSystemService(Context.DOWNLOAD_SERVICE);
+        manager.enqueue(request);
+//        TODO Add on broadcast receive to check if download completed successfully before adding to db
+        dbHandler dbInstance = new dbHandler(mContext, null);
+        dbInstance.setDownloadStatus(selectedItem);
     }
 
     @Override
@@ -45,26 +67,23 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public TextView mTextView;
         public TextView sTextView;
+        public ImViewHolderClick mListener;
 
-        public ViewHolder(View view) {
+        public ViewHolder(View view, ImViewHolderClick listener) {
             super(view);
             this.mTextView = (TextView) view.findViewById(R.id.tvTrackName);
             this.sTextView = (TextView) view.findViewById(R.id.tvTrackInfo);
+            mListener = listener;
+            mTextView.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View v) {
-            downloadMusicTrack(v.toString());
+            mListener.downTrack(v);
         }
 
-        void downloadMusicTrack(String selectedItem) {
-            String url = "http://circleofmusic-sidzi.rhcloud.com/downloadTrack" + selectedItem;
-            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
-            request.setDescription("Downloading");
-            request.setTitle(selectedItem);
-            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, selectedItem);
-            DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
-            manager.enqueue(request);
+        public interface ImViewHolderClick {
+            void downTrack(View track);
         }
     }
 }
