@@ -89,16 +89,6 @@ public class HomeActivity extends AppCompatActivity {
         mRecyclerView.setAdapter(mAdapter);
     }
 
-    void downloadMusicTrack(String selectedItem) {
-        String url = "http://circleofmusic-sidzi.rhcloud.com/downloadTrack" + selectedItem;
-        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
-        request.setDescription("Downloading");
-        request.setTitle(selectedItem);
-        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, selectedItem);
-        DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
-        manager.enqueue(request);
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
