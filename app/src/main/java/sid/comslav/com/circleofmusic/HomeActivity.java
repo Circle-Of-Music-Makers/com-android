@@ -7,7 +7,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -20,10 +19,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.TextView;
+
+import com.rollbar.android.Rollbar;
 
 import net.gotev.uploadservice.UploadService;
 
@@ -47,6 +44,7 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Rollbar.init(this, "d3ece0922a4b44718a20f8ea3f3a397b", "production");
         setContentView(R.layout.activity_home);
         dbHandler dbInstance = new dbHandler(this, null);
         ConnectivityManager cm = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -177,34 +175,5 @@ public class HomeActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    private class TrackAdapter extends BaseAdapter {
-        @Override
-        public int getCount() {
-            return count;
-        }
-
-        @Override
-        public Object getItem(int i) {
-            return null;
-        }
-
-        @Override
-        public long getItemId(int i) {
-            return 0;
-        }
-
-        @Override
-        public View getView(int i, View view, ViewGroup viewGroup) {
-            TextView tv = new TextView(getApplicationContext());
-            tv.setText(songs[i]);
-            if (newUploadIndicator[i]) {
-                tv.setTextColor(Color.RED);
-            } else {
-                tv.setTextColor(Color.BLACK);
-            }
-            return tv;
-        }
     }
 }

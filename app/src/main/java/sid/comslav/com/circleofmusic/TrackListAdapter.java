@@ -3,6 +3,7 @@ package sid.comslav.com.circleofmusic;
 import android.app.DownloadManager;
 import android.content.Context;
 import android.graphics.Color;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Environment;
 import android.support.v7.widget.RecyclerView;
@@ -10,6 +11,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import java.io.File;
 
 import sid.comslav.com.circleofmusic.helpers.dbHandler;
 
@@ -58,10 +61,12 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         if (newNotification[position]) {
             holder.mTextView.setTextColor(Color.GREEN);
         }
+        MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
         if (download_status[position]) {
-            holder.sTextView.setText("");
+            mediaMetadataRetriever.setDataSource(mContext, Uri.fromFile(new File(Environment.DIRECTORY_DOWNLOADS + holder.mTextView.toString())));
+            holder.sTextView.setText(mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST));
         } else {
-            holder.sTextView.setText("Artistry");
+            holder.sTextView.setText("");
         }
     }
 
