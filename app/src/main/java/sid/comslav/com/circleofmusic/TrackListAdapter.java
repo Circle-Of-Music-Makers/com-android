@@ -1,7 +1,10 @@
 package sid.comslav.com.circleofmusic;
 
 import android.app.DownloadManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
@@ -12,20 +15,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.util.Objects;
+
 import sid.comslav.com.circleofmusic.helpers.dbHandler;
 
 public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.ViewHolder> {
-    private String[] mDataSet;
-    private boolean[] newNotification;
+    private String[] mTrackList;
+    private String[] mTrackPathList;
+    private int[] mTrackStatus;
     private Context mContext;
-    private boolean[] download_status;
 
 
-    public TrackListAdapter(String[] mDataSet, boolean[] newNotification, boolean[] download_status, Context mContext) {
-        this.mDataSet = mDataSet;
-        this.newNotification = newNotification;
+    public TrackListAdapter(String[] mTrackList, int[] mTrackStatus, String[] mTrackPathList, Context mContext) {
+        this.mTrackList = mTrackList;
         this.mContext = mContext;
-        this.download_status = download_status;
+        this.mTrackStatus = mTrackStatus;
+        this.mTrackPathList = mTrackPathList;
     }
 
     @Override
@@ -40,7 +45,14 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         return vh;
     }
 
-    void downloadMusicTrack(String selectedItem) {
+    void downloadMusicTrack(final String selectedItem) {
+        BroadcastReceiver onComplete = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                dbHandler dbInstance = new dbHandler(mContext, null);
+                dbInstance.setStatus(selectedItem, Environment.getExternalStorageDirectory().getAbsolutePath() + "/Download/" + selectedItem);
+            }
+        };
         String url = "http://circleofmusic-sidzi.rhcloud.com/downloadTrack" + selectedItem;
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
         request.setDescription("Downloading");
@@ -48,20 +60,22 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, selectedItem);
         DownloadManager manager = (DownloadManager) mContext.getSystemService(Context.DOWNLOAD_SERVICE);
         manager.enqueue(request);
-//        TODO Add on broadcast receive to check if download completed successfully before adding to db
-        dbHandler dbInstance = new dbHandler(mContext, null);
-        dbInstance.setDownloadStatus(selectedItem);
+        mContext.registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.mTextView.setText(mDataSet[position]);
-        if (newNotification[position]) {
-            holder.mTextView.setTextColor(Color.GREEN);
+        holder.mTextView.setText(mTrackList[position]);
+        if (mTrackStatus[position] == 1) {
+            holder.mTextView.setTextColor(Color.parseColor("#009688"));
         }
         MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
-        if (download_status[position]) {
-            mediaMetadataRetriever.setDataSource(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Download/" + mDataSet[position]);
+        if (mTrackStatus[position] == 2) {
+            if (!Objects.equals(mTrackPathList[position], "")) {
+                mediaMetadataRetriever.setDataSource(mTrackPathList[position]);
+            } else {
+                mediaMetadataRetriever.setDataSource(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Download/" + mTrackList[position]);
+            }
             holder.sTextView.setText(mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST));
             holder.mTextView.setText(mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE));
         } else {
@@ -71,7 +85,7 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
 
     @Override
     public int getItemCount() {
-        return mDataSet.length;
+        return mTrackList.length;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

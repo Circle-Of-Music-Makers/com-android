@@ -2,16 +2,21 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?android:attr/selectableItemBackground"
+    android:background="#ffffff"
     android:clickable="true"
+    android:elevation="2dp"
     android:focusable="true"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:paddingBottom="2dp"
+    android:paddingTop="2dp">
 
     <TextView
         android:id="@+id/tvTrackName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
+        android:ellipsize="end"
+        android:maxLines="1"
         android:textAlignment="center"
         android:textColor="@android:color/black" />
 

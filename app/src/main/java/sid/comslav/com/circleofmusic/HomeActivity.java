@@ -33,13 +33,12 @@ import java.util.concurrent.ExecutionException;
 
 import sid.comslav.com.circleofmusic.helpers.apiHelper;
 import sid.comslav.com.circleofmusic.helpers.dbHandler;
+import sid.comslav.com.circleofmusic.helpers.verticalSpaceDecorationHelper;
 
 public class HomeActivity extends AppCompatActivity {
-    int count;
-    String songs[];
-    boolean newUploadIndicator[];
-    boolean download_status[];
-    JSONObject obj;
+    int tracks_count;
+    String track_name[];
+    int track_status[];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,45 +51,42 @@ public class HomeActivity extends AppCompatActivity {
         boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
         UploadService.NAMESPACE = BuildConfig.APPLICATION_ID;
         if (isConnected) {
+            int counter = 0;
             apiHelper api = new apiHelper();
+            JSONObject obj = null;
             try {
                 obj = new JSONObject(api.execute("http://circleofmusic-sidzi.rhcloud.com/getTrackList").get());
-                count = (int) obj.get("count");
+                counter = (int) obj.get("count");
             } catch (JSONException | ExecutionException | InterruptedException e) {
                 e.printStackTrace();
             }
-            songs = new String[count];
-            newUploadIndicator = new boolean[count];
-            for (int i = 0; i < count; i++) {
+            for (int i = 0; i < counter; i++) {
                 try {
-                    songs[i] = obj.get("file" + new DecimalFormat("000").format(i)).toString();
-                    newUploadIndicator[i] = dbInstance.addTrack(obj.get("file" + new DecimalFormat("000").format(i)).toString());
+                    dbInstance.addTrack(obj.get("file" + new DecimalFormat("000").format(i)).toString(), "", 1);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
-        } else {
-            songs = dbInstance.fetchTracks();
-            count = songs.length;
-            if (newUploadIndicator == null) {
-                newUploadIndicator = new boolean[count];
-            }
         }
-        download_status = dbInstance.fetchDownloadStatus();
+        track_name = dbInstance.fetchTracks();
+        tracks_count = track_name.length;
+        track_status = dbInstance.fetchStatus();
+
         RecyclerView mRecyclerView;
         RecyclerView.Adapter mAdapter;
         RecyclerView.LayoutManager mLayoutManager;
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
-            String[] perms = {"android.permission.WRITE_EXTERNAL_STORAGE"};
+            String[] perms = {"android.permission.WRITE_EXTERNAL_STORAGE", "android.permission.READ_EXTERNAL_STORAGE"};
             requestPermissions(perms, 202);
         }
         mRecyclerView = (RecyclerView) findViewById(R.id.rVTrackList);
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setHasFixedSize(true);
-        mAdapter = new TrackListAdapter(songs, newUploadIndicator, download_status, getApplicationContext());
+        mAdapter = new TrackListAdapter(track_name, track_status, dbInstance.fetchTrackPaths(), getApplicationContext());
         mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.addItemDecoration(new verticalSpaceDecorationHelper(1));
     }
 
 

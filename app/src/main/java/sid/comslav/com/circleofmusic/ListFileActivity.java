@@ -2,8 +2,6 @@ package sid.comslav.com.circleofmusic;
 
 import android.app.ListActivity;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -24,13 +22,6 @@ public class ListFileActivity extends ListActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_files);
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
-            if (checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-                String[] perms = {"android.permission.READ_EXTERNAL_STORAGE"};
-                requestPermissions(perms, 200);
-            }
-      }
         path = "/";
         if (getIntent().hasExtra("path")) {
             path = getIntent().getStringExtra("path");
