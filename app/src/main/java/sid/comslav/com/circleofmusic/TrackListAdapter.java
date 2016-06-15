@@ -12,8 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.io.File;
-
 import sid.comslav.com.circleofmusic.helpers.dbHandler;
 
 public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.ViewHolder> {
@@ -63,8 +61,9 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         }
         MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
         if (download_status[position]) {
-            mediaMetadataRetriever.setDataSource(mContext, Uri.fromFile(new File(Environment.DIRECTORY_DOWNLOADS + holder.mTextView.toString())));
+            mediaMetadataRetriever.setDataSource(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Download/" + mDataSet[position]);
             holder.sTextView.setText(mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST));
+            holder.mTextView.setText(mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE));
         } else {
             holder.sTextView.setText("");
         }

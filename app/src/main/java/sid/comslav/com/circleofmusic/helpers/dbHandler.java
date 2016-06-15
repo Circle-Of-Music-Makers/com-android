@@ -144,7 +144,7 @@ public class dbHandler extends SQLiteOpenHelper {
         ContentValues contentValues = new ContentValues();
         contentValues.put(COLUMN_DOWNLOADED, 1);
         try {
-            db.update(TABLE_TRACKS, contentValues, COLUMN_TRACK_NAME + "=", new String[]{selectedItem});
+            db.update(TABLE_TRACKS, contentValues, COLUMN_TRACK_NAME + "='" + selectedItem + "'", null);
         } catch (Exception e) {
             e.printStackTrace();
         }

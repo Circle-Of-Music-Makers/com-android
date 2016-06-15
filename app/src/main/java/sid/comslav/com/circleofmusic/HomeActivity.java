@@ -71,16 +71,20 @@ public class HomeActivity extends AppCompatActivity {
             }
         } else {
             songs = dbInstance.fetchTracks();
-            download_status = dbInstance.fetchDownloadStatus();
             count = songs.length;
             if (newUploadIndicator == null) {
                 newUploadIndicator = new boolean[count];
             }
         }
+        download_status = dbInstance.fetchDownloadStatus();
         RecyclerView mRecyclerView;
         RecyclerView.Adapter mAdapter;
         RecyclerView.LayoutManager mLayoutManager;
 
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
+            String[] perms = {"android.permission.WRITE_EXTERNAL_STORAGE"};
+            requestPermissions(perms, 202);
+        }
         mRecyclerView = (RecyclerView) findViewById(R.id.rVTrackList);
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
