@@ -82,6 +82,7 @@ public class HomeActivity extends AppCompatActivity {
         }
         mRecyclerView = (RecyclerView) findViewById(R.id.rVTrackList);
         mLayoutManager = new LinearLayoutManager(this);
+        assert mRecyclerView != null;
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setHasFixedSize(true);
         mAdapter = new TrackListAdapter(track_name, track_status, dbInstance.fetchTrackPaths(), getApplicationContext());
@@ -130,10 +131,6 @@ public class HomeActivity extends AppCompatActivity {
                     builder.setPositiveButton(R.string.update, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
-                                String[] perms = {"android.permission.WRITE_EXTERNAL_STORAGE"};
-                                requestPermissions(perms, 202);
-                            }
                             BroadcastReceiver onComplete = new BroadcastReceiver() {
                                 @Override
                                 public void onReceive(Context context, Intent intent) {
@@ -149,7 +146,7 @@ public class HomeActivity extends AppCompatActivity {
                             request.setTitle("Circle of Music App");
                             request.setDestinationInExternalPublicDir(Environment.getDownloadCacheDirectory().getAbsolutePath(), "circle-of-music.apk");
                             try {
-                                new File(Environment.getExternalStoragePublicDirectory(Environment.getDownloadCacheDirectory().getAbsolutePath()) + "/circle-of-music.apk").delete();
+                                boolean deleteSuccess = new File(Environment.getExternalStoragePublicDirectory(Environment.getDownloadCacheDirectory().getAbsolutePath()) + "/circle-of-music.apk").delete();
                             } catch (NullPointerException e) {
                                 e.printStackTrace();
                             }

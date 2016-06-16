@@ -36,13 +36,12 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
     @Override
     public TrackListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.track_row_layout, parent, false);
-        TrackListAdapter.ViewHolder vh = new ViewHolder(view, new TrackListAdapter.ViewHolder.ImViewHolderClick() {
+        return new ViewHolder(view, new ViewHolder.ImViewHolderClick() {
             @Override
             public void downTrack(View track) {
                 downloadMusicTrack(((TextView) track).getText().toString());
             }
         });
-        return vh;
     }
 
     void downloadMusicTrack(final String selectedItem) {
@@ -70,7 +69,7 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
             holder.mTextView.setTextColor(Color.parseColor("#009688"));
         }
         MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
-        if (mTrackStatus[position] == 2) {
+        if (mTrackStatus[position] >= 2) {
             if (!Objects.equals(mTrackPathList[position], "")) {
                 mediaMetadataRetriever.setDataSource(mTrackPathList[position]);
             } else {
@@ -78,6 +77,9 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
             }
             holder.sTextView.setText(mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST));
             holder.mTextView.setText(mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE));
+            if (mTrackStatus[position] == 3) {
+                holder.sTextView.setTextColor(Color.parseColor("#149844"));
+            }
         } else {
             holder.sTextView.setText("");
         }
