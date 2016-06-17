@@ -63,11 +63,12 @@ public class dbHandler extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        String[] temp = fetchTrackPaths(db);
-        String[] temp2 = fetchTracks(db);
-        int[] temp3 = fetchStatus(db);
+//        String[] temp = fetchTrackPaths(db);
+//        String[] temp2 = fetchTracks(db);
+//        int[] temp3 = fetchStatus(db);
+//        TODO make entries carry over
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_TRACKS);
-        onCreate(db, temp2, temp, temp3);
+        onCreate(db);
     }
 
     public boolean addTrack(String track_name, String track_path, int status) {
