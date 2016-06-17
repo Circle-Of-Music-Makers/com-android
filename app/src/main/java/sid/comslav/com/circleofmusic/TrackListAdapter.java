@@ -15,8 +15,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.Objects;
-
 import sid.comslav.com.circleofmusic.helpers.dbHandler;
 
 public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.ViewHolder> {
@@ -64,24 +62,22 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.mTextView.setText(mTrackList[position]);
-        if (mTrackStatus[position] == 1) {
-            holder.mTextView.setTextColor(Color.parseColor("#009688"));
-        }
-        MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
-        if (mTrackStatus[position] >= 2) {
-            if (!Objects.equals(mTrackPathList[position], "")) {
+        switch (mTrackStatus[position]) {
+            case 0:
+                holder.mTextView.setText(mTrackList[position]);
+                break;
+            case 1:
+                holder.mTextView.setText(mTrackList[position]);
+                holder.mTextView.setTextColor(Color.parseColor("#FFFFFF"));
+                holder.itemView.setBackgroundColor(Color.parseColor("#009688"));
+                break;
+            case 2:
+            case 3:
+                MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
                 mediaMetadataRetriever.setDataSource(mTrackPathList[position]);
-            } else {
-                mediaMetadataRetriever.setDataSource(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Download/" + mTrackList[position]);
-            }
-            holder.sTextView.setText(mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST));
-            holder.mTextView.setText(mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE));
-            if (mTrackStatus[position] == 3) {
-                holder.sTextView.setTextColor(Color.parseColor("#149844"));
-            }
-        } else {
-            holder.sTextView.setText("");
+                holder.sTextView.setText(mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST));
+                holder.mTextView.setText(mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE));
+                break;
         }
     }
 

@@ -7,8 +7,8 @@
     android:elevation="2dp"
     android:focusable="true"
     android:orientation="vertical"
-    android:paddingBottom="2dp"
-    android:paddingTop="2dp">
+    android:paddingBottom="5dp"
+    android:paddingTop="5dp">
 
     <TextView
         android:id="@+id/tvTrackName"

@@ -57,7 +57,7 @@ public class HomeActivity extends AppCompatActivity {
             try {
                 obj = new JSONObject(api.execute("http://circleofmusic-sidzi.rhcloud.com/getTrackList").get());
                 counter = (int) obj.get("count");
-            } catch (JSONException | ExecutionException | InterruptedException e) {
+            } catch (JSONException | ExecutionException | InterruptedException | NullPointerException e) {
                 e.printStackTrace();
             }
             for (int i = 0; i < counter; i++) {
