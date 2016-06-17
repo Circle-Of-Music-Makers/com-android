@@ -13,12 +13,14 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.rollbar.android.Rollbar;
 
@@ -87,7 +89,17 @@ public class HomeActivity extends AppCompatActivity {
         mRecyclerView.setHasFixedSize(true);
         mAdapter = new TrackListAdapter(track_name, track_status, dbInstance.fetchTrackPaths(), getApplicationContext());
         mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.addItemDecoration(new verticalSpaceDecorationHelper(1));
+        mRecyclerView.addItemDecoration(new verticalSpaceDecorationHelper(this));
+        FloatingActionButton floatingActionUploadButton = (FloatingActionButton) findViewById(R.id.fabUpload);
+        assert floatingActionUploadButton != null;
+        floatingActionUploadButton.setImageResource(R.drawable.ic_upload_track);
+        floatingActionUploadButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), ListFileActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
 
@@ -105,13 +117,6 @@ public class HomeActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.upload) {
-            Intent intent = new Intent(this, ListFileActivity.class);
-            startActivity(intent);
-            return true;
-        }
         if (id == R.id.update) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             ConnectivityManager cm = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);

@@ -6,11 +6,14 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Environment;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class dbHandler extends SQLiteOpenHelper {
-    public static final int DATABASE_VERSION = 5;
+    public static final int DATABASE_VERSION = 6;
     public static final String DATABASE_NAME = "circle_of_music.db";
     //    TABLE 1
     public static final String TABLE_TRACKS = "track_list";
@@ -37,16 +40,34 @@ public class dbHandler extends SQLiteOpenHelper {
         }
     }
 
+    public void onCreate(SQLiteDatabase db, String[] tracks, String[] paths, int[] status) {
+        String query = "CREATE TABLE IF NOT EXISTS " + TABLE_TRACKS + "\n(\n" + COLUMN_TRACK_ID + " " + COLUMN_TRACK_ID_TYPE + " , " + COLUMN_TRACK_NAME + " " + COLUMN_TRACK_NAME_TYPE + " , " + COLUMN_STATUS + " " + COLUMN_STATUS_TYPE + " , " + COLUMN_TRACK_PATH + " " + COLUMN_TRACK_PATH_TYPE + "\n);";
+        try {
+            db.execSQL(query);
+            for (int i = 0; i < tracks.length; i++) {
+                ContentValues cv = new ContentValues();
+                cv.put(COLUMN_TRACK_NAME, tracks[i]);
+                cv.put(COLUMN_STATUS, status[i]);
+                if (Objects.equals(paths[i], "") && new File(Environment.DIRECTORY_DOWNLOADS + tracks[i]).exists()) {
+                    cv.put(COLUMN_TRACK_PATH, Environment.DIRECTORY_DOWNLOADS + tracks[i]);
+                } else {
+                    cv.put(COLUMN_TRACK_PATH, paths[i]);
+                }
+                db.insert(TABLE_TRACKS, null, cv);
+
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         String[] temp = fetchTrackPaths(db);
         String[] temp2 = fetchTracks(db);
         int[] temp3 = fetchStatus(db);
-        for (int i = 0; i < temp.length; i++) {
-            addTrack(temp[i], temp2[i], temp3[i]);
-        }
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_TRACKS);
-        onCreate(db);
+        onCreate(db, temp2, temp, temp3);
     }
 
     public boolean addTrack(String track_name, String track_path, int status) {

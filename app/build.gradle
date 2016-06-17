@@ -32,6 +32,7 @@ android {
 
 dependencies {
     compile 'net.gotev:uploadservice:2.1'
-    compile 'com.android.support:recyclerview-v7:23.3.0'
+    compile 'com.android.support:recyclerview-v7:23.4.0'
+    compile "com.android.support:design:23.4.0"
     compile 'com.rollbar:rollbar-android:0.1.3'
 }

@@ -65,18 +65,28 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         switch (mTrackStatus[position]) {
             case 0:
                 holder.mTextView.setText(mTrackList[position]);
+                holder.sTextView.setVisibility(View.GONE);
                 break;
             case 1:
                 holder.mTextView.setText(mTrackList[position]);
                 holder.mTextView.setTextColor(Color.parseColor("#FFFFFF"));
                 holder.itemView.setBackgroundColor(Color.parseColor("#009688"));
+                holder.sTextView.setVisibility(View.GONE);
                 break;
             case 2:
             case 3:
                 MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
-                mediaMetadataRetriever.setDataSource(mTrackPathList[position]);
-                holder.sTextView.setText(mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST));
-                holder.mTextView.setText(mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE));
+                try {
+                    mediaMetadataRetriever.setDataSource(mTrackPathList[position]);
+                    holder.sTextView.setText(mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST));
+                    holder.mTextView.setText(mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE));
+                } catch (IllegalArgumentException e) {
+                    e.printStackTrace();
+                    holder.mTextView.setText(mTrackList[position]);
+                    holder.sTextView.setVisibility(View.GONE);
+                }
+                break;
+            default:
                 break;
         }
     }
