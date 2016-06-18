@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class dbHandler extends SQLiteOpenHelper {
-    public static final int DATABASE_VERSION = 6;
+    public static final int DATABASE_VERSION = 7;
     public static final String DATABASE_NAME = "circle_of_music.db";
     //    TABLE 1
     public static final String TABLE_TRACKS = "track_list";
@@ -40,6 +40,15 @@ public class dbHandler extends SQLiteOpenHelper {
         }
     }
 
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        String[] temp1 = fetchTrackPaths(db);
+        String[] temp2 = fetchTracks(db);
+        int[] temp3 = fetchStatus(db);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_TRACKS);
+        onCreate(db, temp1, temp2, temp3);
+    }
+
     public void onCreate(SQLiteDatabase db, String[] tracks, String[] paths, int[] status) {
         String query = "CREATE TABLE IF NOT EXISTS " + TABLE_TRACKS + "\n(\n" + COLUMN_TRACK_ID + " " + COLUMN_TRACK_ID_TYPE + " , " + COLUMN_TRACK_NAME + " " + COLUMN_TRACK_NAME_TYPE + " , " + COLUMN_STATUS + " " + COLUMN_STATUS_TYPE + " , " + COLUMN_TRACK_PATH + " " + COLUMN_TRACK_PATH_TYPE + "\n);";
         try {
@@ -61,15 +70,6 @@ public class dbHandler extends SQLiteOpenHelper {
         }
     }
 
-    @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-//        String[] temp = fetchTrackPaths(db);
-//        String[] temp2 = fetchTracks(db);
-//        int[] temp3 = fetchStatus(db);
-//        TODO make entries carry over
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_TRACKS);
-        onCreate(db);
-    }
 
     public boolean addTrack(String track_name, String track_path, int status) {
         SQLiteDatabase db = getWritableDatabase();
@@ -202,6 +202,51 @@ public class dbHandler extends SQLiteOpenHelper {
             e.printStackTrace();
         }
         return paths;
+    }
+
+    public int fetchStatus(String track_name) {
+        SQLiteDatabase db = getWritableDatabase();
+        String query = "SELECT " + COLUMN_STATUS + " FROM " + TABLE_TRACKS + " WHERE " + COLUMN_TRACK_NAME + " like '" + track_name + "';";
+        int tempStatus = 0;
+        try {
+            Cursor c = db.rawQuery(query, null);
+            c.moveToFirst();
+            while (!c.isAfterLast()) {
+                if (c.getString(c.getColumnIndex(COLUMN_STATUS)) != null) {
+                    tempStatus = c.getInt(c.getColumnIndex(COLUMN_STATUS));
+                    break;
+                }
+                c.moveToNext();
+            }
+            c.close();
+            db.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return tempStatus;
+
+    }
+
+    public String fetchTrackPaths(String track_name) {
+        SQLiteDatabase db = getWritableDatabase();
+        String query = "SELECT " + COLUMN_TRACK_PATH + " FROM " + TABLE_TRACKS + " WHERE " + COLUMN_TRACK_NAME + " like '" + track_name + "';";
+        String tempPath = "";
+        try {
+            Cursor c = db.rawQuery(query, null);
+            c.moveToFirst();
+            while (!c.isAfterLast()) {
+                if (c.getString(c.getColumnIndex(COLUMN_TRACK_PATH)) != null) {
+                    tempPath = c.getString(c.getColumnIndex(COLUMN_TRACK_PATH));
+                    break;
+                }
+                c.moveToNext();
+            }
+            c.close();
+            db.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return tempPath;
     }
 
     public int[] fetchStatus(SQLiteDatabase db) {

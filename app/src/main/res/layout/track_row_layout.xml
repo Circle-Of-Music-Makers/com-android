@@ -10,24 +10,41 @@
     android:paddingBottom="5dp"
     android:paddingTop="5dp">
 
-    <TextView
-        android:id="@+id/tvTrackName"
+    <RelativeLayout
+        android:id="@+id/rlImageHolder"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:textAlignment="center"
-        android:textColor="#212121"
-        android:textStyle="bold" />
+        android:paddingEnd="10dp"
+        android:paddingStart="10dp">
 
-    <TextView
-        android:id="@+id/tvTrackInfo"
+        <ImageView
+            android:id="@+id/ivTrackArt"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:contentDescription="@string/app_name" />
+    </RelativeLayout>
+
+    <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/tvTrackName"
-        android:layout_centerHorizontal="true"
-        android:textAlignment="center"
-        android:textColor="#727272" />
+        android:layout_toEndOf="@+id/rlImageHolder">
 
+        <TextView
+            android:id="@+id/tvTrackName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textAlignment="viewEnd"
+            android:textColor="#212121"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvTrackInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tvTrackName"
+            android:textAlignment="viewEnd"
+            android:textColor="#727272" />
+    </RelativeLayout>
 </RelativeLayout>

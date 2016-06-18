@@ -5,15 +5,23 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.media.AudioManager;
 import android.media.MediaMetadataRetriever;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Environment;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Objects;
 
 import sid.comslav.com.circleofmusic.helpers.dbHandler;
 
@@ -37,19 +45,34 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         return new ViewHolder(view, new ViewHolder.ImViewHolderClick() {
             @Override
             public void downTrack(View track) {
-                downloadMusicTrack(((TextView) track).getText().toString());
+                dbHandler dbInstance = new dbHandler(mContext, null);
+                final String tempTrackName = track.getTag().toString();
+                if (dbInstance.fetchStatus(tempTrackName) < 2) {
+                    downloadMusicTrack(tempTrackName);
+                } else {
+                    try {
+                        MediaPlayer mediaPlayer = new MediaPlayer();
+                        mediaPlayer.setDataSource(mContext, Uri.fromFile(new File(dbInstance.fetchTrackPaths(tempTrackName))));
+                        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                        mediaPlayer.prepare();
+                        mediaPlayer.start();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         });
     }
 
     void downloadMusicTrack(final String selectedItem) {
-        BroadcastReceiver onComplete = new BroadcastReceiver() {
+        final BroadcastReceiver onComplete = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 dbHandler dbInstance = new dbHandler(mContext, null);
                 dbInstance.setStatus(selectedItem, Environment.getExternalStorageDirectory().getAbsolutePath() + "/Download/" + selectedItem);
             }
         };
+        mContext.registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
         String url = "http://circleofmusic-sidzi.rhcloud.com/downloadTrack" + selectedItem;
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
         request.setDescription("Downloading");
@@ -57,33 +80,46 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, selectedItem);
         DownloadManager manager = (DownloadManager) mContext.getSystemService(Context.DOWNLOAD_SERVICE);
         manager.enqueue(request);
-        mContext.registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
+        holder.tnTextView.setTag(mTrackList[position]);
         switch (mTrackStatus[position]) {
             case 0:
-                holder.mTextView.setText(mTrackList[position]);
-                holder.sTextView.setVisibility(View.GONE);
+                holder.tnTextView.setText(mTrackList[position]);
+                holder.tdTextView.setVisibility(View.GONE);
+                holder.taImageView.setVisibility(View.GONE);
                 break;
             case 1:
-                holder.mTextView.setText(mTrackList[position]);
-                holder.mTextView.setTextColor(Color.parseColor("#FFFFFF"));
+                holder.tnTextView.setText(mTrackList[position]);
+                holder.tnTextView.setTextColor(Color.parseColor("#FFFFFF"));
                 holder.itemView.setBackgroundColor(Color.parseColor("#009688"));
-                holder.sTextView.setVisibility(View.GONE);
+                holder.tdTextView.setVisibility(View.GONE);
+                holder.taImageView.setVisibility(View.GONE);
                 break;
             case 2:
             case 3:
                 MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
                 try {
                     mediaMetadataRetriever.setDataSource(mTrackPathList[position]);
-                    holder.sTextView.setText(mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST));
-                    holder.mTextView.setText(mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE));
+                    String tempTitle = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+                    if (!Objects.equals(tempTitle, null)) {
+                        holder.tnTextView.setText(tempTitle);
+                    } else {
+                        holder.tnTextView.setText(mTrackList[position]);
+                        holder.tdTextView.setVisibility(View.GONE);
+                    }
+                    holder.tdTextView.setText(mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST));
+                    try {
+                        holder.taImageView.setImageBitmap(BitmapFactory.decodeByteArray(mediaMetadataRetriever.getEmbeddedPicture(), 0, mediaMetadataRetriever.getEmbeddedPicture().length));
+                    } catch (NullPointerException e) {
+                        e.printStackTrace();
+                    }
                 } catch (IllegalArgumentException e) {
-                    e.printStackTrace();
-                    holder.mTextView.setText(mTrackList[position]);
-                    holder.sTextView.setVisibility(View.GONE);
+                    holder.tnTextView.setText(mTrackList[position]);
+                    holder.tdTextView.setVisibility(View.GONE);
+                    holder.taImageView.setVisibility(View.GONE);
                 }
                 break;
             default:
@@ -97,16 +133,18 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        public TextView mTextView;
-        public TextView sTextView;
+        public TextView tnTextView;
+        public TextView tdTextView;
+        public ImageView taImageView;
         public ImViewHolderClick mListener;
 
         public ViewHolder(View view, ImViewHolderClick listener) {
             super(view);
-            this.mTextView = (TextView) view.findViewById(R.id.tvTrackName);
-            this.sTextView = (TextView) view.findViewById(R.id.tvTrackInfo);
+            this.tnTextView = (TextView) view.findViewById(R.id.tvTrackName);
+            this.tdTextView = (TextView) view.findViewById(R.id.tvTrackInfo);
+            this.taImageView = (ImageView) view.findViewById(R.id.ivTrackArt);
             mListener = listener;
-            mTextView.setOnClickListener(this);
+            view.setOnClickListener(this);
         }
 
         @Override
