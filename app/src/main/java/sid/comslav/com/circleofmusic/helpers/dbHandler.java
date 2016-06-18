@@ -100,16 +100,18 @@ public class dbHandler extends SQLiteOpenHelper {
     }
 
     public void setStatus(String selectedItem, String track_path) {
-        SQLiteDatabase db = getWritableDatabase();
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(COLUMN_STATUS, 2);
-        contentValues.put(COLUMN_TRACK_PATH, track_path);
-        try {
-            db.update(TABLE_TRACKS, contentValues, COLUMN_TRACK_NAME + "='" + selectedItem + "'", null);
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (new File(track_path).exists()) {
+            SQLiteDatabase db = getWritableDatabase();
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(COLUMN_STATUS, 2);
+            contentValues.put(COLUMN_TRACK_PATH, track_path);
+            try {
+                db.update(TABLE_TRACKS, contentValues, COLUMN_TRACK_NAME + "='" + selectedItem + "'", null);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            db.close();
         }
-        db.close();
     }
 
     public int[] fetchStatus() {
