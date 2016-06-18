@@ -19,6 +19,6 @@ before_install:
 script: ./gradlew clean assembleRelease
 
 after_success:
-    - VERSIONINFOAPP="$(cat $TRAVIS_BUILD_DIR/app/build.gradle | grep "versionCode" | tr ' ' '\n' | grep -e "\d")"
+    - VERSIONINFOAPP="$(cat $TRAVIS_BUILD_DIR/app/build.gradle | grep "versionCode" | tr ' ' '\n' | grep -e "[0-9]")"
     - curl -i http://circleofmusic-sidzi.rhcloud.com/updateAppVersion$VERSIONINFOAPP
     - curl -i -F file=@$TRAVIS_BUILD_DIR/app/build/outputs/apk/app-release.apk http://circleofmusic-sidzi.rhcloud.com/uploadApk
