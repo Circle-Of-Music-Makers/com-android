@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rlTrackRow"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="?attr/selectableItemBackground"
@@ -25,9 +26,11 @@
     </RelativeLayout>
 
     <RelativeLayout
+        android:id="@+id/rlTrackHolder"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@+id/rlImageHolder">
+        android:layout_toEndOf="@+id/rlImageHolder"
+        android:layout_toStartOf="@+id/rlPlayPause">
 
         <TextView
             android:id="@+id/tvTrackName"
@@ -46,5 +49,18 @@
             android:layout_below="@+id/tvTrackName"
             android:textAlignment="viewEnd"
             android:textColor="#727272" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/rlPlayPause"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true">
+
+        <ImageButton
+            android:id="@+id/ibPlayPause"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/play_pause" />
     </RelativeLayout>
 </RelativeLayout>

@@ -16,6 +16,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -41,7 +42,7 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
 
     @Override
     public TrackListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.track_row_layout, parent, false);
+        final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.track_row_layout, parent, false);
         return new ViewHolder(view, new ViewHolder.ImViewHolderClick() {
             @Override
             public void downTrack(View track) {
@@ -49,16 +50,6 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
                 final String tempTrackName = track.getTag().toString();
                 if (dbInstance.fetchStatus(tempTrackName) < 2) {
                     downloadMusicTrack(tempTrackName);
-                } else {
-                    try {
-                        MediaPlayer mediaPlayer = new MediaPlayer();
-                        mediaPlayer.setDataSource(mContext, Uri.fromFile(new File(dbInstance.fetchTrackPaths(tempTrackName))));
-                        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                        mediaPlayer.prepare();
-                        mediaPlayer.start();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
                 }
             }
         });
@@ -83,41 +74,73 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.itemView.setTag(mTrackList[position]);
-        switch (mTrackStatus[position]) {
+    public void onBindViewHolder(final ViewHolder holder, final int position) {
+        holder.itemView.setTag(mTrackList[holder.getAdapterPosition()]);
+        switch (mTrackStatus[holder.getAdapterPosition()]) {
             case 0:
-                holder.tnTextView.setText(mTrackList[position]);
+                holder.tnTextView.setText(mTrackList[holder.getAdapterPosition()]);
                 holder.tdTextView.setVisibility(View.GONE);
                 holder.taImageView.setVisibility(View.GONE);
+                holder.ppImageButton.setVisibility(View.GONE);
                 break;
             case 1:
-                holder.tnTextView.setText(mTrackList[position]);
+                holder.tnTextView.setText(mTrackList[holder.getAdapterPosition()]);
                 holder.tnTextView.setTextColor(Color.parseColor("#FFFFFF"));
                 holder.itemView.setBackgroundColor(Color.parseColor("#009688"));
                 holder.tdTextView.setVisibility(View.GONE);
                 holder.taImageView.setVisibility(View.GONE);
+                holder.ppImageButton.setVisibility(View.GONE);
                 break;
             case 2:
             case 3:
+                holder.ppImageButton.setImageResource(R.drawable.ic_track_play);
+                holder.ppImageButton.setTag("stopped");
+                holder.ppImageButton.setBackgroundColor(Color.parseColor("#ffffff"));
+                holder.ppImageButton.setOnClickListener(new View.OnClickListener() {
+                    MediaPlayer mediaPlayer = new MediaPlayer();
+                    String trackName = mTrackList[holder.getAdapterPosition()];
+                    dbHandler dbInstance = new dbHandler(mContext, null);
+
+                    @Override
+                    public void onClick(View v) {
+                        if (Objects.equals(v.getTag().toString(), "stopped")) {
+                            try {
+                                mediaPlayer.setDataSource(new File(dbInstance.fetchTrackPath(trackName)).getAbsolutePath());
+                                mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                                mediaPlayer.prepare();
+                                mediaPlayer.start();
+                                ((ImageButton) v).setImageResource(R.drawable.ic_track_stop);
+                                v.setTag("playing");
+                            } catch (IOException | IllegalStateException e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            mediaPlayer.stop();
+                            mediaPlayer.reset();
+                            ((ImageButton) v).setImageResource(R.drawable.ic_track_play);
+                            v.setTag("stopped");
+                        }
+                    }
+                });
                 MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
                 try {
-                    mediaMetadataRetriever.setDataSource(mTrackPathList[position]);
+                    mediaMetadataRetriever.setDataSource(mTrackPathList[holder.getAdapterPosition()]);
                     String tempTitle = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
                     if (!Objects.equals(tempTitle, null)) {
                         holder.tnTextView.setText(tempTitle);
                     } else {
-                        holder.tnTextView.setText(mTrackList[position]);
+                        holder.tnTextView.setText(mTrackList[holder.getAdapterPosition()]);
                         holder.tdTextView.setVisibility(View.GONE);
                     }
                     holder.tdTextView.setText(mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST));
                     try {
                         holder.taImageView.setImageBitmap(BitmapFactory.decodeByteArray(mediaMetadataRetriever.getEmbeddedPicture(), 0, mediaMetadataRetriever.getEmbeddedPicture().length));
                     } catch (NullPointerException e) {
+                        holder.taImageView.setVisibility(View.GONE);
                         e.printStackTrace();
                     }
                 } catch (IllegalArgumentException e) {
-                    holder.tnTextView.setText(mTrackList[position]);
+                    holder.tnTextView.setText(mTrackList[holder.getAdapterPosition()]);
                     holder.tdTextView.setVisibility(View.GONE);
                     holder.taImageView.setVisibility(View.GONE);
                 }
@@ -136,6 +159,7 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         public TextView tnTextView;
         public TextView tdTextView;
         public ImageView taImageView;
+        public ImageButton ppImageButton;
         public ImViewHolderClick mListener;
 
         public ViewHolder(View view, ImViewHolderClick listener) {
@@ -143,6 +167,7 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
             this.tnTextView = (TextView) view.findViewById(R.id.tvTrackName);
             this.tdTextView = (TextView) view.findViewById(R.id.tvTrackInfo);
             this.taImageView = (ImageView) view.findViewById(R.id.ivTrackArt);
+            this.ppImageButton = (ImageButton) view.findViewById(R.id.ibPlayPause);
             mListener = listener;
             view.setOnClickListener(this);
         }

@@ -227,7 +227,7 @@ public class dbHandler extends SQLiteOpenHelper {
 
     }
 
-    public String fetchTrackPaths(String track_name) {
+    public String fetchTrackPath(String track_name) {
         SQLiteDatabase db = getWritableDatabase();
         String query = "SELECT " + COLUMN_TRACK_PATH + " FROM " + TABLE_TRACKS + " WHERE " + COLUMN_TRACK_NAME + " like '" + track_name + "';";
         String tempPath = "";
