@@ -84,7 +84,7 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.tnTextView.setTag(mTrackList[position]);
+        holder.itemView.setTag(mTrackList[position]);
         switch (mTrackStatus[position]) {
             case 0:
                 holder.tnTextView.setText(mTrackList[position]);
