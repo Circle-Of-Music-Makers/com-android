@@ -63,7 +63,7 @@ public class HomeActivity extends AppCompatActivity {
             }
             for (int i = 0; i < counter; i++) {
                 try {
-                    dbInstance.addTrack(obj.get("file" + new DecimalFormat("000").format(i)).toString(), "", 1);
+                    dbInstance.addTrack(obj.get("file" + new DecimalFormat("000").format(i)).toString(), "");
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

@@ -60,7 +60,7 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
             @Override
             public void onReceive(Context context, Intent intent) {
                 dbHandler dbInstance = new dbHandler(mContext, null);
-                dbInstance.setStatus(selectedItem, Environment.getExternalStorageDirectory().getAbsolutePath() + "/Download/" + selectedItem);
+                dbInstance.updateStatusPath(selectedItem, Environment.getExternalStorageDirectory().getAbsolutePath() + "/Download/" + selectedItem);
             }
         };
         mContext.registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
@@ -105,7 +105,8 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
                     public void onClick(View v) {
                         if (Objects.equals(v.getTag().toString(), "stopped")) {
                             try {
-                                mediaPlayer.setDataSource(new File(dbInstance.fetchTrackPath(trackName)).getAbsolutePath());
+                                String temp = new File(dbInstance.fetchTrackPath(trackName)).getAbsolutePath();
+                                mediaPlayer.setDataSource(temp);
                                 mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                                 mediaPlayer.prepare();
                                 mediaPlayer.start();
