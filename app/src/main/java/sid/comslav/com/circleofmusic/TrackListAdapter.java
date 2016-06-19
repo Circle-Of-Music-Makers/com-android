@@ -95,7 +95,7 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
             case 3:
                 holder.ppImageButton.setImageResource(R.drawable.ic_track_play);
                 holder.ppImageButton.setTag("stopped");
-                holder.ppImageButton.setBackgroundColor(Color.parseColor("#ffffff"));
+                holder.ppImageButton.setBackgroundColor(Color.TRANSPARENT);
                 holder.ppImageButton.setOnClickListener(new View.OnClickListener() {
                     MediaPlayer mediaPlayer = new MediaPlayer();
                     String trackName = mTrackList[holder.getAdapterPosition()];
@@ -136,7 +136,7 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
                     try {
                         holder.taImageView.setImageBitmap(BitmapFactory.decodeByteArray(mediaMetadataRetriever.getEmbeddedPicture(), 0, mediaMetadataRetriever.getEmbeddedPicture().length));
                     } catch (NullPointerException e) {
-                        holder.taImageView.setVisibility(View.GONE);
+                        holder.taImageView.setImageResource(R.drawable.ic_blank_artwork);
                         e.printStackTrace();
                     }
                 } catch (IllegalArgumentException e) {
