@@ -43,8 +43,10 @@ public class HomeActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.splashScreen);
         super.onCreate(savedInstanceState);
         Rollbar.init(this, "d3ece0922a4b44718a20f8ea3f3a397b", "production");
+        setTheme(R.style.AppTheme);
         setContentView(R.layout.activity_home);
         dbHandler dbInstance = new dbHandler(this, null);
         ConnectivityManager cm = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
