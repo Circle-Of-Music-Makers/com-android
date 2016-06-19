@@ -53,7 +53,7 @@ public class HomeActivity extends AppCompatActivity {
         UploadService.NAMESPACE = BuildConfig.APPLICATION_ID;
         if (isConnected) {
             int counter = 0;
-            apiHelper api = new apiHelper();
+            apiHelper api = new apiHelper(this);
             JSONObject obj = null;
             try {
                 obj = new JSONObject(api.execute("http://circleofmusic-sidzi.rhcloud.com/getTrackList").get());
@@ -124,7 +124,7 @@ public class HomeActivity extends AppCompatActivity {
             if (isConnected) {
                 boolean updateRequired = false;
                 try {
-                    apiHelper apiHelper = new apiHelper();
+                    apiHelper apiHelper = new apiHelper(this);
                     JSONObject versionInfo = new JSONObject(apiHelper.execute("http://circleofmusic-sidzi.rhcloud.com/updateCheck").get());
                     updateRequired = ((int) versionInfo.get("stable")) > getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
                 } catch (JSONException | InterruptedException | ExecutionException | PackageManager.NameNotFoundException e) {
