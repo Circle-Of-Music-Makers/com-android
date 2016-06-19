@@ -1,4 +1,4 @@
-package sid.comslav.com.circleofmusic;
+package com.sidzi.circleofmusic;
 
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
@@ -23,6 +23,9 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.rollbar.android.Rollbar;
+import com.sidzi.circleofmusic.helpers.apiHelper;
+import com.sidzi.circleofmusic.helpers.dbHandler;
+import com.sidzi.circleofmusic.helpers.verticalSpaceDecorationHelper;
 
 import net.gotev.uploadservice.UploadService;
 
@@ -32,10 +35,6 @@ import org.json.JSONObject;
 import java.io.File;
 import java.text.DecimalFormat;
 import java.util.concurrent.ExecutionException;
-
-import sid.comslav.com.circleofmusic.helpers.apiHelper;
-import sid.comslav.com.circleofmusic.helpers.dbHandler;
-import sid.comslav.com.circleofmusic.helpers.verticalSpaceDecorationHelper;
 
 public class HomeActivity extends AppCompatActivity {
     int tracks_count;

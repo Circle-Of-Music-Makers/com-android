@@ -1,4 +1,4 @@
-package sid.comslav.com.circleofmusic.helpers;
+package com.sidzi.circleofmusic.helpers;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -7,7 +7,7 @@ import android.util.Log;
 import net.gotev.uploadservice.MultipartUploadRequest;
 import net.gotev.uploadservice.UploadNotificationConfig;
 
-public class uploadHelper extends AsyncTask {
+public class uploadHelper extends AsyncTask<Void, Void, Void> {
     private String path;
     private Context mContext;
 
@@ -17,7 +17,7 @@ public class uploadHelper extends AsyncTask {
     }
 
     @Override
-    protected Object doInBackground(Object[] params) {
+    protected Void doInBackground(Void... params) {
         String url = "http://circleofmusic-sidzi.rhcloud.com/upYourTrack";
         try {
             final String uploadIdentity =

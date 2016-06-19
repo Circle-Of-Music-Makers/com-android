@@ -1,4 +1,4 @@
-package sid.comslav.com.circleofmusic;
+package com.sidzi.circleofmusic;
 
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
@@ -20,11 +20,11 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.sidzi.circleofmusic.helpers.dbHandler;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
-
-import sid.comslav.com.circleofmusic.helpers.dbHandler;
 
 public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.ViewHolder> {
     private String[] mTrackList;

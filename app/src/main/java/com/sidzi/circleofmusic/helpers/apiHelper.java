@@ -1,4 +1,4 @@
-package sid.comslav.com.circleofmusic.helpers;
+package com.sidzi.circleofmusic.helpers;
 
 import android.os.AsyncTask;
 

@@ -1,4 +1,4 @@
-package sid.comslav.com.circleofmusic.helpers;
+package com.sidzi.circleofmusic.helpers;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -7,7 +7,7 @@ import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
-import sid.comslav.com.circleofmusic.R;
+import com.sidzi.circleofmusic.R;
 
 public class verticalSpaceDecorationHelper extends RecyclerView.ItemDecoration {
     private Drawable mDivider;
