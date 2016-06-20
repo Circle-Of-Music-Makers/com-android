@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.AudioManager;
@@ -135,9 +136,10 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
                     }
                     holder.tdTextView.setText(mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST));
                     try {
-                        holder.taImageView.setImageBitmap(BitmapFactory.decodeByteArray(mediaMetadataRetriever.getEmbeddedPicture(), 0, mediaMetadataRetriever.getEmbeddedPicture().length));
+                        Bitmap artwork = BitmapFactory.decodeByteArray(mediaMetadataRetriever.getEmbeddedPicture(), 0, mediaMetadataRetriever.getEmbeddedPicture().length);
+                        holder.taImageView.setImageBitmap(artwork);
                     } catch (NullPointerException e) {
-                        holder.taImageView.setImageResource(R.drawable.ic_blank_artwork);
+                        holder.taImageView.setImageResource(R.drawable.splash_screen_logo);
                         e.printStackTrace();
                     }
                 } catch (IllegalArgumentException e) {

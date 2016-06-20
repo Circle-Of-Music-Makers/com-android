@@ -93,7 +93,7 @@ public class HomeActivity extends AppCompatActivity {
         mRecyclerView.addItemDecoration(new verticalSpaceDecorationHelper(this));
         FloatingActionButton floatingActionUploadButton = (FloatingActionButton) findViewById(R.id.fabUpload);
         assert floatingActionUploadButton != null;
-        floatingActionUploadButton.setImageResource(R.drawable.ic_upload_track);
+        floatingActionUploadButton.setImageResource(R.drawable.ic_upload_icon);
         floatingActionUploadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
