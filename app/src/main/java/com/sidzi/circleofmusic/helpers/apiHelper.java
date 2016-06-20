@@ -1,5 +1,7 @@
-package sid.comslav.com.circleofmusic.helpers;
+package com.sidzi.circleofmusic.helpers;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.os.AsyncTask;
 
 import java.io.IOException;
@@ -10,6 +12,26 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class apiHelper extends AsyncTask<String, Void, String> {
+
+    private ProgressDialog progressDialog;
+
+    public apiHelper(Context mContext) {
+        this.progressDialog = new ProgressDialog(mContext);
+    }
+
+    @Override
+    protected void onPreExecute() {
+        this.progressDialog.setMessage("wait");
+        this.progressDialog.show();
+    }
+
+    @Override
+    protected void onPostExecute(String s) {
+        if (this.progressDialog.isShowing()) {
+            this.progressDialog.dismiss();
+        }
+    }
+
     @Override
     protected String doInBackground(String... url) {
         try {

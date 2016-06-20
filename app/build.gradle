@@ -5,11 +5,11 @@ android {
     buildToolsVersion '23.0.3'
 
     defaultConfig {
-        applicationId "sid.comslav.com.circleofmusic"
+        applicationId "com.sidzi.circleofmusic"
         minSdkVersion 21
         targetSdkVersion 23
-        versionCode 4
-        versionName "Drums"
+        versionCode 5
+        versionName "Ektara"
     }
     signingConfigs {
         release {

@@ -1,4 +1,4 @@
-package sid.comslav.com.circleofmusic;
+package com.sidzi.circleofmusic;
 
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
@@ -23,6 +23,9 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.rollbar.android.Rollbar;
+import com.sidzi.circleofmusic.helpers.apiHelper;
+import com.sidzi.circleofmusic.helpers.dbHandler;
+import com.sidzi.circleofmusic.helpers.verticalSpaceDecorationHelper;
 
 import net.gotev.uploadservice.UploadService;
 
@@ -33,10 +36,6 @@ import java.io.File;
 import java.text.DecimalFormat;
 import java.util.concurrent.ExecutionException;
 
-import sid.comslav.com.circleofmusic.helpers.apiHelper;
-import sid.comslav.com.circleofmusic.helpers.dbHandler;
-import sid.comslav.com.circleofmusic.helpers.verticalSpaceDecorationHelper;
-
 public class HomeActivity extends AppCompatActivity {
     int tracks_count;
     String track_name[];
@@ -44,8 +43,10 @@ public class HomeActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.splashScreen);
         super.onCreate(savedInstanceState);
-        Rollbar.init(this, "d3ece0922a4b44718a20f8ea3f3a397b", "production");
+        Rollbar.init(this, "d3ece0922a4b44718a20f8ea3f3a397b", "release");
+        setTheme(R.style.AppTheme);
         setContentView(R.layout.activity_home);
         dbHandler dbInstance = new dbHandler(this, null);
         ConnectivityManager cm = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -54,7 +55,7 @@ public class HomeActivity extends AppCompatActivity {
         UploadService.NAMESPACE = BuildConfig.APPLICATION_ID;
         if (isConnected) {
             int counter = 0;
-            apiHelper api = new apiHelper();
+            apiHelper api = new apiHelper(this);
             JSONObject obj = null;
             try {
                 obj = new JSONObject(api.execute("http://circleofmusic-sidzi.rhcloud.com/getTrackList").get());
@@ -64,7 +65,7 @@ public class HomeActivity extends AppCompatActivity {
             }
             for (int i = 0; i < counter; i++) {
                 try {
-                    dbInstance.addTrack(obj.get("file" + new DecimalFormat("000").format(i)).toString(), "", 1);
+                    dbInstance.addTrack(obj.get("file" + new DecimalFormat("000").format(i)).toString(), "");
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -92,7 +93,7 @@ public class HomeActivity extends AppCompatActivity {
         mRecyclerView.addItemDecoration(new verticalSpaceDecorationHelper(this));
         FloatingActionButton floatingActionUploadButton = (FloatingActionButton) findViewById(R.id.fabUpload);
         assert floatingActionUploadButton != null;
-        floatingActionUploadButton.setImageResource(R.drawable.ic_upload_track);
+        floatingActionUploadButton.setImageResource(R.drawable.ic_upload_icon);
         floatingActionUploadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -125,7 +126,7 @@ public class HomeActivity extends AppCompatActivity {
             if (isConnected) {
                 boolean updateRequired = false;
                 try {
-                    apiHelper apiHelper = new apiHelper();
+                    apiHelper apiHelper = new apiHelper(this);
                     JSONObject versionInfo = new JSONObject(apiHelper.execute("http://circleofmusic-sidzi.rhcloud.com/updateCheck").get());
                     updateRequired = ((int) versionInfo.get("stable")) > getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
                 } catch (JSONException | InterruptedException | ExecutionException | PackageManager.NameNotFoundException e) {

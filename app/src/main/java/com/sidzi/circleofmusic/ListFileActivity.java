@@ -1,4 +1,4 @@
-package sid.comslav.com.circleofmusic;
+package com.sidzi.circleofmusic;
 
 import android.app.ListActivity;
 import android.content.Intent;
@@ -7,12 +7,12 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.sidzi.circleofmusic.helpers.uploadHelper;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import sid.comslav.com.circleofmusic.helpers.uploadHelper;
 
 public class ListFileActivity extends ListActivity {
 
@@ -28,7 +28,7 @@ public class ListFileActivity extends ListActivity {
         }
         setTitle(path);
 
-        List<String> values = new ArrayList<String>();
+        List<String> values = new ArrayList<>();
         File dir = new File(path);
         if (!dir.canRead()) {
             setTitle(getTitle() + " (inaccessible)");
@@ -43,7 +43,7 @@ public class ListFileActivity extends ListActivity {
         }
         Collections.sort(values);
         // Put the data into the list
-        ArrayAdapter adapter = new ArrayAdapter(this,
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_list_item_2, android.R.id.text1, values);
         setListAdapter(adapter);
     }

@@ -1,4 +1,4 @@
-package sid.comslav.com.circleofmusic;
+package com.sidzi.circleofmusic;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

@@ -1,27 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="sid.comslav.com.circleofmusic">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.sidzi.circleofmusic">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
 
     <application
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        tools:ignore="GoogleAppIndexingWarning">
         <activity
-            android:name=".HomeActivity"
-            android:label="@string/app_name">
+            android:name="com.sidzi.circleofmusic.HomeActivity"
+            android:label="@string/app_name"
+            android:theme="@style/splashScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ListFileActivity" />
+        <activity android:name="com.sidzi.circleofmusic.ListFileActivity" />
     </application>
 
 </manifest>
