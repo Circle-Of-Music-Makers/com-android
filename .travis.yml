@@ -14,7 +14,7 @@ before_install:
     - curl -o $TRAVIS_BUILD_DIR/app/myreleasekey.jks http://circleofmusic-sidzi.rhcloud.com/getSigningKey
 
 script:
-    - if [ "$TRAVIS_BRANCH" == "master" ]; then ./gradlew clean assembleRelease;else .gradlew clean assembleDebug; fi
+    - if [ "$TRAVIS_BRANCH" == "master" ]; then ./gradlew clean assembleRelease;else ./gradlew clean assembleDebug; fi
 
 after_success:
     - if [ "$TRAVIS_BRANCH" == "master" ]; then VERSIONINFOAPP="$(cat $TRAVIS_BUILD_DIR/app/build.gradle | grep "versionCode" | tr ' ' '\n' | grep -e "[0-9]")"; fi
