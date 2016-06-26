@@ -1,4 +1,4 @@
--# Circle of Music Android App   [![Build Status](https://travis-ci.org/Circle-Of-Music-Makers/Android-Application.svg?branch=master)](https://travis-ci.org/Circle-Of-Music-Makers/Android-Application)
+# Circle of Music Android App   [![Build Status](https://travis-ci.org/Circle-Of-Music-Makers/Android-Application.svg?branch=master)](https://travis-ci.org/Circle-Of-Music-Makers/Android-Application)
 ___
 Circle of Music or CoM which we like to call it, is a music sharing application developed by Siddhant Gupta(Backend dev and Android dev),Saumil Sachdeva(Android dev), and Sameer Vaze(Graphic Designer). The main purpose of the app is to share music amongst a circle of 4-5 people. 
 
