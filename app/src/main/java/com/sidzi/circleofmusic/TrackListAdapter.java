@@ -49,6 +49,7 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
                 if (dbInstance.fetchStatus(tempTrackName) < 2) {
                     downloadMusicTrack(tempTrackName);
                 }
+//                TODO Add custom iv dialog to show album art
             }
         });
     }

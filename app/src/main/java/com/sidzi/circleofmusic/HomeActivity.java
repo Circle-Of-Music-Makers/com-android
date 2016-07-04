@@ -46,8 +46,6 @@ public class HomeActivity extends AppCompatActivity {
         setTheme(R.style.splashScreen);
         super.onCreate(savedInstanceState);
         Rollbar.init(this, "d3ece0922a4b44718a20f8ea3f3a397b", "release");
-        setTheme(R.style.AppTheme);
-        setContentView(R.layout.activity_home);
         dbHandler dbInstance = new dbHandler(this, null);
         ConnectivityManager cm = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
@@ -78,6 +76,9 @@ public class HomeActivity extends AppCompatActivity {
         RecyclerView mRecyclerView;
         RecyclerView.Adapter mAdapter;
         RecyclerView.LayoutManager mLayoutManager;
+
+        setTheme(R.style.AppTheme);
+        setContentView(R.layout.activity_home);
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
             String[] perms = {"android.permission.WRITE_EXTERNAL_STORAGE", "android.permission.READ_EXTERNAL_STORAGE"};
