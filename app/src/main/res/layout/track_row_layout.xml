@@ -18,17 +18,10 @@
         android:paddingEnd="10dp"
         android:paddingStart="10dp">
 
-        <ImageView
-            android:id="@+id/ivTrackArt"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:contentDescription="@string/app_name" />
-
         <ImageButton
             android:id="@+id/ibPlayPause"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:layout_toEndOf="@+id/ivTrackArt"
             android:contentDescription="@string/play_pause" />
     </RelativeLayout>
 

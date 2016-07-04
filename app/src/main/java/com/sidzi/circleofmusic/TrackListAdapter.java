@@ -5,8 +5,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.AudioManager;
 import android.media.MediaMetadataRetriever;
@@ -18,7 +16,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.sidzi.circleofmusic.helpers.dbHandler;
@@ -78,22 +75,18 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         holder.itemView.setTag(mTrackList[holder.getAdapterPosition()]);
         switch (mTrackStatus[holder.getAdapterPosition()]) {
-            case 0:
-                holder.tnTextView.setText(mTrackList[holder.getAdapterPosition()]);
-                holder.tdTextView.setVisibility(View.GONE);
-                holder.taImageView.setVisibility(View.GONE);
-                holder.ppImageButton.setVisibility(View.GONE);
-                break;
             case 1:
-                holder.tnTextView.setText(mTrackList[holder.getAdapterPosition()]);
                 holder.tnTextView.setTextColor(Color.parseColor("#FFFFFF"));
                 holder.itemView.setBackgroundColor(Color.parseColor("#009688"));
+            case 0:
                 holder.tdTextView.setVisibility(View.GONE);
-                holder.taImageView.setVisibility(View.GONE);
                 holder.ppImageButton.setVisibility(View.GONE);
+                holder.tnTextView.setText(mTrackList[holder.getAdapterPosition()]);
                 break;
             case 2:
             case 3:
+                holder.tdTextView.setVisibility(View.VISIBLE);
+                holder.ppImageButton.setVisibility(View.VISIBLE);
                 holder.ppImageButton.setImageResource(R.drawable.ic_track_play);
                 holder.ppImageButton.setTag("stopped");
                 holder.ppImageButton.setBackgroundColor(Color.TRANSPARENT);
@@ -135,17 +128,9 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
                         holder.tdTextView.setVisibility(View.GONE);
                     }
                     holder.tdTextView.setText(mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST));
-                    try {
-                        Bitmap artwork = BitmapFactory.decodeByteArray(mediaMetadataRetriever.getEmbeddedPicture(), 0, mediaMetadataRetriever.getEmbeddedPicture().length);
-                        holder.taImageView.setImageBitmap(artwork);
-                    } catch (NullPointerException e) {
-                        holder.taImageView.setImageResource(R.drawable.splash_screen_logo);
-                        e.printStackTrace();
-                    }
                 } catch (IllegalArgumentException e) {
                     holder.tnTextView.setText(mTrackList[holder.getAdapterPosition()]);
                     holder.tdTextView.setVisibility(View.GONE);
-                    holder.taImageView.setVisibility(View.GONE);
                 }
                 break;
             default:
@@ -161,7 +146,6 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public TextView tnTextView;
         public TextView tdTextView;
-        public ImageView taImageView;
         public ImageButton ppImageButton;
         public ImViewHolderClick mListener;
 
@@ -169,7 +153,6 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
             super(view);
             this.tnTextView = (TextView) view.findViewById(R.id.tvTrackName);
             this.tdTextView = (TextView) view.findViewById(R.id.tvTrackInfo);
-            this.taImageView = (ImageView) view.findViewById(R.id.ivTrackArt);
             this.ppImageButton = (ImageButton) view.findViewById(R.id.ibPlayPause);
             mListener = listener;
             view.setOnClickListener(this);
