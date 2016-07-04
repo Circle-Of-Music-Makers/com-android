@@ -31,11 +31,12 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
     private Context mContext;
 
 
-    public TrackListAdapter(String[] mTrackList, int[] mTrackStatus, String[] mTrackPathList, Context mContext) {
-        this.mTrackList = mTrackList;
+    public TrackListAdapter(Context mContext) {
         this.mContext = mContext;
-        this.mTrackStatus = mTrackStatus;
-        this.mTrackPathList = mTrackPathList;
+        dbHandler dbInstance = new dbHandler(mContext, null);
+        this.mTrackList = dbInstance.fetchTracks();
+        this.mTrackStatus = dbInstance.fetchStatus();
+        this.mTrackPathList = dbInstance.fetchTrackPaths();
     }
 
     @Override

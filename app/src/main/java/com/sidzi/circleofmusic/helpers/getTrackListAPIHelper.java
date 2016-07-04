@@ -4,18 +4,24 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.DecimalFormat;
 
-public class apiHelper extends AsyncTask<String, Void, String> {
+public class getTrackListAPIHelper extends AsyncTask<String, String, JSONObject> {
 
+    private Context mContext;
     private ProgressDialog progressDialog;
 
-    public apiHelper(Context mContext) {
+    public getTrackListAPIHelper(Context mContext) {
+        this.mContext = mContext;
         this.progressDialog = new ProgressDialog(mContext);
     }
 
@@ -26,20 +32,31 @@ public class apiHelper extends AsyncTask<String, Void, String> {
     }
 
     @Override
-    protected void onPostExecute(String s) {
+    protected void onPostExecute(JSONObject obj) {
         if (this.progressDialog.isShowing()) {
             this.progressDialog.dismiss();
+        }
+        dbHandler dbInstance = new dbHandler(mContext, null);
+        for (int i = 0; i < (obj != null ? obj.length() : 0); i++) {
+            try {
+                dbInstance.addTrack(obj.get("file" + new DecimalFormat("000").format(i)).toString(), "");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 
     @Override
-    protected String doInBackground(String... url) {
+    protected JSONObject doInBackground(String... url) {
+        JSONObject jsonObj;
         try {
-            return loadFromURL(url[0]);
-        } catch (IOException e) {
+            jsonObj = new JSONObject(loadFromURL(url[0]));
+            return jsonObj;
+        } catch (IOException | JSONException e) {
             e.printStackTrace();
+            return null;
+
         }
-        return null;
     }
 
     private String loadFromURL(String url) throws IOException {

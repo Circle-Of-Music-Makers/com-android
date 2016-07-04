@@ -23,8 +23,8 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.rollbar.android.Rollbar;
-import com.sidzi.circleofmusic.helpers.apiHelper;
-import com.sidzi.circleofmusic.helpers.dbHandler;
+import com.sidzi.circleofmusic.helpers.getJSONHelper;
+import com.sidzi.circleofmusic.helpers.getTrackListAPIHelper;
 import com.sidzi.circleofmusic.helpers.verticalSpaceDecorationHelper;
 
 import net.gotev.uploadservice.UploadService;
@@ -33,46 +33,26 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.text.DecimalFormat;
 import java.util.concurrent.ExecutionException;
 
 public class HomeActivity extends AppCompatActivity {
-    int tracks_count;
-    String track_name[];
-    int track_status[];
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.splashScreen);
         super.onCreate(savedInstanceState);
         Rollbar.init(this, "d3ece0922a4b44718a20f8ea3f3a397b", "release");
-        dbHandler dbInstance = new dbHandler(this, null);
         ConnectivityManager cm = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
         UploadService.NAMESPACE = BuildConfig.APPLICATION_ID;
         if (isConnected) {
-            int counter = 0;
-            apiHelper api = new apiHelper(this);
-            JSONObject obj = null;
+            getTrackListAPIHelper api = new getTrackListAPIHelper(this);
             try {
-                obj = new JSONObject(api.execute("http://circleofmusic-sidzi.rhcloud.com/getTrackList").get());
-                counter = (int) obj.get("count");
-            } catch (JSONException | ExecutionException | InterruptedException | NullPointerException e) {
+                api.execute("http://circleofmusic-sidzi.rhcloud.com/getTrackList");
+            } catch (NullPointerException e) {
                 e.printStackTrace();
             }
-            for (int i = 0; i < counter; i++) {
-                try {
-                    dbInstance.addTrack(obj.get("file" + new DecimalFormat("000").format(i)).toString(), "");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
         }
-        track_name = dbInstance.fetchTracks();
-        tracks_count = track_name.length;
-        track_status = dbInstance.fetchStatus();
-
         RecyclerView mRecyclerView;
         RecyclerView.Adapter mAdapter;
         RecyclerView.LayoutManager mLayoutManager;
@@ -86,22 +66,25 @@ public class HomeActivity extends AppCompatActivity {
         }
         mRecyclerView = (RecyclerView) findViewById(R.id.rVTrackList);
         mLayoutManager = new LinearLayoutManager(this);
-        assert mRecyclerView != null;
-        mRecyclerView.setLayoutManager(mLayoutManager);
-        mRecyclerView.setHasFixedSize(true);
-        mAdapter = new TrackListAdapter(track_name, track_status, dbInstance.fetchTrackPaths(), getApplicationContext());
-        mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.addItemDecoration(new verticalSpaceDecorationHelper(this));
+        mAdapter = new TrackListAdapter(getApplicationContext());
         FloatingActionButton floatingActionUploadButton = (FloatingActionButton) findViewById(R.id.fabUpload);
-        assert floatingActionUploadButton != null;
-        floatingActionUploadButton.setImageResource(R.drawable.ic_upload_icon);
-        floatingActionUploadButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), ListFileActivity.class);
-                startActivity(intent);
-            }
-        });
+
+        if (mRecyclerView != null) {
+            mRecyclerView.setLayoutManager(mLayoutManager);
+            mRecyclerView.setHasFixedSize(true);
+            mRecyclerView.setAdapter(mAdapter);
+            mRecyclerView.addItemDecoration(new verticalSpaceDecorationHelper(this));
+        }
+        if (floatingActionUploadButton != null) {
+            floatingActionUploadButton.setImageResource(R.drawable.ic_upload_icon);
+            floatingActionUploadButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(getApplicationContext(), ListFileActivity.class);
+                    startActivity(intent);
+                }
+            });
+        }
     }
 
 
@@ -127,8 +110,7 @@ public class HomeActivity extends AppCompatActivity {
             if (isConnected) {
                 boolean updateRequired = false;
                 try {
-                    apiHelper apiHelper = new apiHelper(this);
-                    JSONObject versionInfo = new JSONObject(apiHelper.execute("http://circleofmusic-sidzi.rhcloud.com/updateCheck").get());
+                    JSONObject versionInfo = new JSONObject(new getJSONHelper().execute("http://circleofmusic-sidzi.rhcloud.com/updateCheck").get());
                     updateRequired = ((int) versionInfo.get("stable")) > getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
                 } catch (JSONException | InterruptedException | ExecutionException | PackageManager.NameNotFoundException e) {
                     e.printStackTrace();
