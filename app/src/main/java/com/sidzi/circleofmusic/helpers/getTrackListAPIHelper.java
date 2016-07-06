@@ -29,6 +29,7 @@ public class getTrackListAPIHelper extends AsyncTask<String, String, JSONObject>
     protected void onPreExecute() {
         this.progressDialog.setMessage("Syncing");
         this.progressDialog.show();
+        this.progressDialog.setCanceledOnTouchOutside(false);
     }
 
     @Override
