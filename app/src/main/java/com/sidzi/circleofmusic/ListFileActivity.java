@@ -1,11 +1,13 @@
 package com.sidzi.circleofmusic;
 
 import android.app.ListActivity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.sidzi.circleofmusic.helpers.uploadHelper;
 
@@ -61,6 +63,12 @@ public class ListFileActivity extends ListActivity {
             intent.putExtra("path", filename);
             startActivity(intent);
         } else {
+            Context context = getApplicationContext();
+            CharSequence text = "Upload Started.Check Notification Bar.";
+            int duration = Toast.LENGTH_SHORT;
+
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
             uploadHelper uploadHelper = new uploadHelper(getApplicationContext(), filename);
             uploadHelper.execute();
             finish();

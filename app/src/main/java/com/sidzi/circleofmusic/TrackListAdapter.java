@@ -20,6 +20,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.sidzi.circleofmusic.helpers.dbHandler;
 
@@ -57,6 +58,10 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
     }
 
     void downloadMusicTrack(final String selectedItem) {
+        CharSequence text = "Download Started.Check Notification Bar.";
+        int duration = Toast.LENGTH_SHORT;
+        Toast toast = Toast.makeText(mContext, text, duration);
+        toast.show();
         final BroadcastReceiver onComplete = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
