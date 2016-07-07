@@ -41,9 +41,7 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
     @Override
     public TrackListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.track_row_layout, parent, false);
-        ViewHolder viewHolder = new ViewHolder(view, mContext, mTrackList);
-        viewHolder.setIsRecyclable(false);
-        return viewHolder;
+        return new ViewHolder(view, mContext, mTrackList);
     }
 
     @Override
@@ -118,6 +116,7 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
                         public void onReceive(Context context, Intent intent) {
                             dbHandler dbInstance = new dbHandler(mContext, null);
                             dbInstance.updateStatusPath(trackName, Environment.getExternalStorageDirectory().getAbsolutePath() + "/Download/" + trackName);
+                            Toast.makeText(mContext, "Song downloaded restart the app to synchronize", Toast.LENGTH_LONG).show();
                         }
                     };
                     mContext.registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
