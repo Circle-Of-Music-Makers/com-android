@@ -3,4 +3,5 @@
     <string name="upload">Upload</string>
     <string name="update">Update</string>
     <string name="play_pause">play/pause</string>
+    <string name="play_and_stop_button">Play and Stop button</string>
 </resources>

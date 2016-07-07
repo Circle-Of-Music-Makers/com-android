@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -21,8 +22,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageButton;
 
-import com.rollbar.android.Rollbar;
+import com.sidzi.circleofmusic.helpers.audioEventHandler;
 import com.sidzi.circleofmusic.helpers.getJSONHelper;
 import com.sidzi.circleofmusic.helpers.getTrackListAPIHelper;
 import com.sidzi.circleofmusic.helpers.verticalSpaceDecorationHelper;
@@ -40,7 +42,6 @@ public class HomeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.splashScreen);
         super.onCreate(savedInstanceState);
-        Rollbar.init(this, "d3ece0922a4b44718a20f8ea3f3a397b", "release");
         ConnectivityManager cm = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
@@ -66,8 +67,12 @@ public class HomeActivity extends AppCompatActivity {
         }
         mRecyclerView = (RecyclerView) findViewById(R.id.rVTrackList);
         mLayoutManager = new LinearLayoutManager(this);
-        mAdapter = new TrackListAdapter(getApplicationContext());
+        mAdapter = new TrackListAdapter(HomeActivity.this);
         FloatingActionButton floatingActionUploadButton = (FloatingActionButton) findViewById(R.id.fabUpload);
+        ImageButton imageButton = (ImageButton) findViewById(R.id.ibPlayPause);
+        assert imageButton != null;
+        imageButton.setBackgroundColor(Color.TRANSPARENT);
+        registerReceiver(new audioEventHandler(), new IntentFilter("com.sidzi.circleofmusic.PLAY_TRACK"));
 
         if (mRecyclerView != null) {
             mRecyclerView.setLayoutManager(mLayoutManager);

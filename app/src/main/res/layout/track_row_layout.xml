@@ -18,8 +18,8 @@
         android:paddingEnd="10dp"
         android:paddingStart="10dp">
 
-        <ImageButton
-            android:id="@+id/ibPlayPause"
+        <ImageView
+            android:id="@+id/ivAlbumArt"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:contentDescription="@string/play_pause" />

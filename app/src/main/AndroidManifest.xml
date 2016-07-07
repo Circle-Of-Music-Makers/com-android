@@ -19,6 +19,7 @@
         <activity
             android:name="com.sidzi.circleofmusic.HomeActivity"
             android:label="@string/app_name"
+            android:screenOrientation="sensorPortrait"
             android:theme="@style/splashScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
