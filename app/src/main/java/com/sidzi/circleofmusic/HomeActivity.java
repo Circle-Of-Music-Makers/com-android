@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.media.MediaMetadataRetriever;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -19,12 +20,17 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.sidzi.circleofmusic.helpers.audioEventHandler;
+import com.sidzi.circleofmusic.helpers.dbHandler;
 import com.sidzi.circleofmusic.helpers.getJSONHelper;
 import com.sidzi.circleofmusic.helpers.getTrackListAPIHelper;
 import com.sidzi.circleofmusic.helpers.verticalSpaceDecorationHelper;
@@ -35,9 +41,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 public class HomeActivity extends AppCompatActivity {
+    BroadcastReceiver audioEventHandler;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.splashScreen);
@@ -47,6 +56,16 @@ public class HomeActivity extends AppCompatActivity {
         boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
         UploadService.NAMESPACE = BuildConfig.APPLICATION_ID;
         if (isConnected) {
+            try {
+                if (((int) new JSONObject(new getJSONHelper().execute("http://circleofmusic-sidzi.rhcloud.com/checkEOSVersion").get()).get("eos_version")) > getPackageManager().getPackageInfo(getPackageName(), 0).versionCode) {
+                    startActivity(new Intent(this, EosActivity.class));
+                    finish();
+                }
+            } catch (JSONException | PackageManager.NameNotFoundException | InterruptedException | ExecutionException | NullPointerException
+                    e) {
+                e.printStackTrace();
+            }
+
             getTrackListAPIHelper api = new getTrackListAPIHelper(this);
             try {
                 api.execute("http://circleofmusic-sidzi.rhcloud.com/getTrackList");
@@ -72,8 +91,8 @@ public class HomeActivity extends AppCompatActivity {
         ImageButton imageButton = (ImageButton) findViewById(R.id.ibPlayPause);
         assert imageButton != null;
         imageButton.setBackgroundColor(Color.TRANSPARENT);
-        registerReceiver(new audioEventHandler(), new IntentFilter("com.sidzi.circleofmusic.PLAY_TRACK"));
-
+        audioEventHandler = new audioEventHandler();
+        registerReceiver(audioEventHandler, new IntentFilter("com.sidzi.circleofmusic.PLAY_TRACK"));
         if (mRecyclerView != null) {
             mRecyclerView.setLayoutManager(mLayoutManager);
             mRecyclerView.setHasFixedSize(true);
@@ -92,6 +111,29 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        unregisterReceiver(audioEventHandler);
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onPause() {
+        unregisterReceiver(audioEventHandler);
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        registerReceiver(audioEventHandler, new IntentFilter("com.sidzi.circleofmusic.PLAY_TRACK"));
+        super.onResume();
+    }
+
+    @Override
+    protected void onStop() {
+        unregisterReceiver(audioEventHandler);
+        super.onStop();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -166,5 +208,122 @@ public class HomeActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.ViewHolder> {
+        private String[] mTrackList;
+        private String[] mTrackPathList;
+        private int[] mTrackStatus;
+        private Context mContext;
+        private MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
+
+
+        public TrackListAdapter(Context mContext) {
+            this.mContext = mContext;
+            dbHandler dbInstance = new dbHandler(mContext, null);
+            this.mTrackList = dbInstance.fetchTracks();
+            this.mTrackStatus = dbInstance.fetchStatus();
+            this.mTrackPathList = dbInstance.fetchTrackPaths();
+        }
+
+        @Override
+        public TrackListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.track_row_layout, parent, false);
+            return new ViewHolder(view, mContext, mTrackList);
+        }
+
+        @Override
+        public void onBindViewHolder(final ViewHolder holder, final int position) {
+            switch (mTrackStatus[position]) {
+
+                case 0:
+                    holder.tdTextView.setVisibility(View.GONE);
+                    holder.tnTextView.setText(mTrackList[position]);
+                    break;
+                case 1:
+                    holder.tdTextView.setVisibility(View.GONE);
+                    holder.tnTextView.setText(mTrackList[position]);
+                    break;
+                case 2:
+                case 3:
+                    holder.tdTextView.setVisibility(View.VISIBLE);
+                    try {
+                        mediaMetadataRetriever.setDataSource(mTrackPathList[position]);
+                        String tempTitle = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+                        if (!Objects.equals(tempTitle, null)) {
+                            holder.tnTextView.setText(tempTitle);
+                        } else {
+                            holder.tnTextView.setText(mTrackList[position]);
+                            holder.tdTextView.setVisibility(View.GONE);
+                        }
+                        holder.tdTextView.setText(mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST));
+                    } catch (IllegalArgumentException e) {
+                        holder.tnTextView.setText(mTrackList[position]);
+                        holder.tdTextView.setVisibility(View.GONE);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        @Override
+        public int getItemCount() {
+            return mTrackList.length;
+        }
+
+        public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+            public TextView tnTextView;
+            public TextView tdTextView;
+            private Context mContext;
+            private String[] mTrackList;
+
+
+            public ViewHolder(View view, Context mContext, String[] mTrackList) {
+                super(view);
+                this.mContext = mContext;
+                this.mTrackList = mTrackList;
+                this.tnTextView = (TextView) view.findViewById(R.id.tvTrackName);
+                this.tdTextView = (TextView) view.findViewById(R.id.tvTrackInfo);
+                view.setOnClickListener(this);
+            }
+
+            @Override
+            public void onClick(View v) {
+                final dbHandler dbInstance = new dbHandler(mContext, null);
+                final String trackName = mTrackList[getAdapterPosition()];
+                if (dbInstance.fetchStatus(trackName) < 2) {
+                    ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+                    NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+                    boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+                    if (!isConnected) {
+                        Toast.makeText(mContext, "Please connect to the internet for downloading", Toast.LENGTH_SHORT).show();
+                    } else {
+                        final BroadcastReceiver onComplete = new BroadcastReceiver() {
+                            @Override
+                            public void onReceive(Context context, Intent intent) {
+                                dbHandler dbInstance = new dbHandler(mContext, null);
+                                dbInstance.updateStatusPath(trackName, Environment.getExternalStorageDirectory().getAbsolutePath() + "/Download/" + trackName);
+                                Toast.makeText(mContext, "Song downloaded restart the app to synchronize", Toast.LENGTH_LONG).show();
+                                unregisterReceiver(this);
+                            }
+                        };
+                        mContext.registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+                        String url = "http://circleofmusic-sidzi.rhcloud.com/downloadTrack" + trackName;
+                        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+                        request.setDescription("Downloading");
+                        request.setTitle(trackName);
+                        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, trackName);
+                        DownloadManager manager = (DownloadManager) mContext.getSystemService(Context.DOWNLOAD_SERVICE);
+                        manager.enqueue(request);
+                    }
+                } else {
+                    Intent ready_track = new Intent("com.sidzi.circleofmusic.PLAY_TRACK");
+                    ready_track.putExtra("track_path", new File(dbInstance.fetchTrackPath(trackName)).getAbsolutePath());
+                    ready_track.putExtra("track_name", trackName);
+                    mContext.sendBroadcast(ready_track);
+                }
+            }
+        }
     }
 }

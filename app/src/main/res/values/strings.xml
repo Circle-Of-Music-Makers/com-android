@@ -4,4 +4,8 @@
     <string name="update">Update</string>
     <string name="play_pause">play/pause</string>
     <string name="play_and_stop_button">Play and Stop button</string>
+
+    <string name="title_activity_eos">Update your app</string>
+    <string name="update_button">Update</string>
+    <string name="update_app">Support for this version of the app has ended\nPlease update</string>
 </resources>

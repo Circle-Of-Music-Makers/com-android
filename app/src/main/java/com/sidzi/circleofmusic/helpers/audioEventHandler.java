@@ -71,7 +71,6 @@ public class audioEventHandler extends BroadcastReceiver {
                         }
                     }
                 }
-
             }
         });
     }
