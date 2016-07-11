@@ -1,5 +1,6 @@
 package com.sidzi.circleofmusic;
 
+import android.Manifest;
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -16,6 +17,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -80,9 +82,14 @@ public class HomeActivity extends AppCompatActivity {
         setTheme(R.style.AppTheme);
         setContentView(R.layout.activity_home);
 
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
-            String[] perms = {"android.permission.WRITE_EXTERNAL_STORAGE", "android.permission.READ_EXTERNAL_STORAGE"};
-            requestPermissions(perms, 202);
+        if (ContextCompat.checkSelfPermission(HomeActivity.this,
+                Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
+                String[] perms = {"android.permission.WRITE_EXTERNAL_STORAGE", "android.permission.READ_EXTERNAL_STORAGE"};
+                requestPermissions(perms, 202);
+            }
         }
         mRecyclerView = (RecyclerView) findViewById(R.id.rVTrackList);
         mLayoutManager = new LinearLayoutManager(this);
@@ -113,26 +120,12 @@ public class HomeActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        unregisterReceiver(audioEventHandler);
         super.onDestroy();
-    }
-
-    @Override
-    protected void onPause() {
-        unregisterReceiver(audioEventHandler);
-        super.onPause();
-    }
-
-    @Override
-    protected void onResume() {
-        registerReceiver(audioEventHandler, new IntentFilter("com.sidzi.circleofmusic.PLAY_TRACK"));
-        super.onResume();
-    }
-
-    @Override
-    protected void onStop() {
-        unregisterReceiver(audioEventHandler);
-        super.onStop();
+        try {
+            unregisterReceiver(audioEventHandler);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -226,6 +219,14 @@ public class HomeActivity extends AppCompatActivity {
             this.mTrackPathList = dbInstance.fetchTrackPaths();
         }
 
+        public void update() {
+            dbHandler dbInstance = new dbHandler(mContext, null);
+            this.mTrackList = dbInstance.fetchTracks();
+            this.mTrackStatus = dbInstance.fetchStatus();
+            this.mTrackPathList = dbInstance.fetchTrackPaths();
+            this.notifyDataSetChanged();
+        }
+
         @Override
         public TrackListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.track_row_layout, parent, false);
@@ -304,7 +305,8 @@ public class HomeActivity extends AppCompatActivity {
                             public void onReceive(Context context, Intent intent) {
                                 dbHandler dbInstance = new dbHandler(mContext, null);
                                 dbInstance.updateStatusPath(trackName, Environment.getExternalStorageDirectory().getAbsolutePath() + "/Download/" + trackName);
-                                Toast.makeText(mContext, "Song downloaded restart the app to synchronize", Toast.LENGTH_LONG).show();
+                                Toast.makeText(mContext, "Song downloaded", Toast.LENGTH_LONG).show();
+                                update();
                                 unregisterReceiver(this);
                             }
                         };
