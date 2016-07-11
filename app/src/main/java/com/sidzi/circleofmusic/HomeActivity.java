@@ -279,6 +279,7 @@ public class HomeActivity extends AppCompatActivity {
             public TextView tdTextView;
             private Context mContext;
             private String[] mTrackList;
+            private boolean isDownloading = false;
 
 
             public ViewHolder(View view, Context mContext, String[] mTrackList) {
@@ -295,31 +296,36 @@ public class HomeActivity extends AppCompatActivity {
                 final dbHandler dbInstance = new dbHandler(mContext, null);
                 final String trackName = mTrackList[getAdapterPosition()];
                 if (dbInstance.fetchStatus(trackName) < 2) {
-                    ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-                    NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-                    boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
-                    if (!isConnected) {
-                        Toast.makeText(mContext, "Please connect to the internet for downloading", Toast.LENGTH_SHORT).show();
+                    if (isDownloading) {
+                        Toast.makeText(mContext, "Already Downloading", Toast.LENGTH_SHORT).show();
                     } else {
-                        final BroadcastReceiver onComplete = new BroadcastReceiver() {
-                            @Override
-                            public void onReceive(Context context, Intent intent) {
-                                dbHandler dbInstance = new dbHandler(mContext, null);
-                                dbInstance.updateStatusPath(trackName, Environment.getExternalStorageDirectory().getAbsolutePath() + "/Download/" + trackName);
-                                Toast.makeText(mContext, "Song downloaded", Toast.LENGTH_LONG).show();
-                                dbInstance.addTrack(trackName, (Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)).toString() + "/" + trackName);
-                                update();
-                                unregisterReceiver(this);
-                            }
-                        };
-                        mContext.registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-                        String url = "http://circleofmusic-sidzi.rhcloud.com/downloadTrack" + trackName;
-                        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
-                        request.setDescription("Downloading");
-                        request.setTitle(trackName);
-                        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, trackName);
-                        DownloadManager manager = (DownloadManager) mContext.getSystemService(Context.DOWNLOAD_SERVICE);
-                        manager.enqueue(request);
+                        ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+                        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+                        boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+                        if (!isConnected) {
+                            Toast.makeText(mContext, "Please connect to the internet for downloading", Toast.LENGTH_SHORT).show();
+                        } else {
+                            final BroadcastReceiver onComplete = new BroadcastReceiver() {
+                                @Override
+                                public void onReceive(Context context, Intent intent) {
+                                    dbHandler dbInstance = new dbHandler(mContext, null);
+                                    dbInstance.updateStatusPath(trackName, Environment.getExternalStorageDirectory().getAbsolutePath() + "/Download/" + trackName);
+                                    Toast.makeText(mContext, "Song downloaded", Toast.LENGTH_LONG).show();
+                                    dbInstance.addTrack(trackName, (Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)).toString() + "/" + trackName);
+                                    update();
+                                    unregisterReceiver(this);
+                                }
+                            };
+                            mContext.registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+                            String url = "http://circleofmusic-sidzi.rhcloud.com/downloadTrack" + trackName;
+                            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+                            request.setDescription("Downloading");
+                            request.setTitle(trackName);
+                            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, trackName);
+                            DownloadManager manager = (DownloadManager) mContext.getSystemService(Context.DOWNLOAD_SERVICE);
+                            manager.enqueue(request);
+                            isDownloading = true;
+                        }
                     }
                 } else {
                     Intent ready_track = new Intent("com.sidzi.circleofmusic.PLAY_TRACK");
