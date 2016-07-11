@@ -204,6 +204,7 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.ViewHolder> {
+        //        TODO implement delete
         private String[] mTrackList;
         private String[] mTrackPathList;
         private int[] mTrackStatus;
