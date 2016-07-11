@@ -307,6 +307,7 @@ public class HomeActivity extends AppCompatActivity {
                                 dbHandler dbInstance = new dbHandler(mContext, null);
                                 dbInstance.updateStatusPath(trackName, Environment.getExternalStorageDirectory().getAbsolutePath() + "/Download/" + trackName);
                                 Toast.makeText(mContext, "Song downloaded", Toast.LENGTH_LONG).show();
+                                dbInstance.addTrack(trackName, (Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)).toString() + "/" + trackName);
                                 update();
                                 unregisterReceiver(this);
                             }
