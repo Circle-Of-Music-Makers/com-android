@@ -26,7 +26,7 @@
     <RelativeLayout
         android:id="@+id/rlPlayer"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:background="@android:color/background_light"
@@ -38,6 +38,7 @@
             android:id="@+id/ibPlayPause"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
             android:contentDescription="@string/play_and_stop_button" />
 
         <TextView
@@ -49,7 +50,7 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:textAlignment="center"
-            android:textColor="#212121"
+            android:textColor="@color/textPrimary"
             android:textStyle="bold" />
     </RelativeLayout>
 </RelativeLayout>

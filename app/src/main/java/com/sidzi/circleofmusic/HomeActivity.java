@@ -8,8 +8,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
+import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -36,7 +38,6 @@ import com.sidzi.circleofmusic.helpers.audioEventHandler;
 import com.sidzi.circleofmusic.helpers.dbHandler;
 import com.sidzi.circleofmusic.helpers.getJSONHelper;
 import com.sidzi.circleofmusic.helpers.getTrackListAPIHelper;
-import com.sidzi.circleofmusic.helpers.verticalSpaceDecorationHelper;
 
 import net.gotev.uploadservice.UploadService;
 
@@ -44,7 +45,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 public class HomeActivity extends AppCompatActivity {
@@ -209,6 +209,8 @@ public class HomeActivity extends AppCompatActivity {
         private String[] mTrackList;
         private String[] mTrackPathList;
         private int[] mTrackStatus;
+        private String[] mTrackTitleList;
+        private String[] mTrackArtistList;
         private Context mContext;
         private MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
 
@@ -219,6 +221,24 @@ public class HomeActivity extends AppCompatActivity {
             this.mTrackList = dbInstance.fetchTracks();
             this.mTrackStatus = dbInstance.fetchStatus();
             this.mTrackPathList = dbInstance.fetchTrackPaths();
+            mTrackTitleList = new String[mTrackList.length];
+            mTrackArtistList = new String[mTrackList.length];
+            for (int i = 0; i < mTrackPathList.length; i++) {
+                if (mTrackPathList[i] != null) {
+                    mediaMetadataRetriever.setDataSource(mTrackPathList[i]);
+                    mTrackTitleList[i] = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+                    mTrackArtistList[i] = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+                    if (mTrackTitleList[i] == null) {
+                        mTrackTitleList[i] = mTrackList[i];
+                    }
+                    if (mTrackArtistList[i] == null) {
+                        mTrackArtistList[i] = "";
+                    }
+                } else {
+                    mTrackTitleList[i] = mTrackList[i];
+                    mTrackArtistList[i] = "";
+                }
+            }
         }
 
         public void update() {
@@ -226,6 +246,16 @@ public class HomeActivity extends AppCompatActivity {
             this.mTrackList = dbInstance.fetchTracks();
             this.mTrackStatus = dbInstance.fetchStatus();
             this.mTrackPathList = dbInstance.fetchTrackPaths();
+            for (int i = 0; i < mTrackPathList.length; i++) {
+                if (mTrackPathList[i] != null) {
+                    mediaMetadataRetriever.setDataSource(mTrackPathList[i]);
+                    mTrackTitleList[i] = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+                    mTrackArtistList[i] = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+                } else {
+                    mTrackTitleList[i] = mTrackList[i];
+                    mTrackArtistList[i] = "";
+                }
+            }
             this.notifyDataSetChanged();
         }
 
@@ -237,37 +267,8 @@ public class HomeActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(final ViewHolder holder, final int position) {
-            switch (mTrackStatus[position]) {
-
-                case 0:
-                    holder.tdTextView.setVisibility(View.GONE);
-                    holder.tnTextView.setText(mTrackList[position]);
-                    break;
-                case 1:
-                    holder.tdTextView.setVisibility(View.GONE);
-                    holder.tnTextView.setText(mTrackList[position]);
-                    break;
-                case 2:
-                case 3:
-                    holder.tdTextView.setVisibility(View.VISIBLE);
-                    try {
-                        mediaMetadataRetriever.setDataSource(mTrackPathList[position]);
-                        String tempTitle = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
-                        if (!Objects.equals(tempTitle, null)) {
-                            holder.tnTextView.setText(tempTitle);
-                        } else {
-                            holder.tnTextView.setText(mTrackList[position]);
-                            holder.tdTextView.setVisibility(View.GONE);
-                        }
-                        holder.tdTextView.setText(mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST));
-                    } catch (IllegalArgumentException e) {
-                        holder.tnTextView.setText(mTrackList[position]);
-                        holder.tdTextView.setVisibility(View.GONE);
-                    }
-                    break;
-                default:
-                    break;
-            }
+            holder.tnTextView.setText(mTrackTitleList[position]);
+            holder.tdTextView.setText(mTrackArtistList[position]);
         }
 
         @Override
@@ -337,4 +338,46 @@ public class HomeActivity extends AppCompatActivity {
             }
         }
     }
+
+    public class verticalSpaceDecorationHelper extends RecyclerView.ItemDecoration {
+        private Drawable mDivider;
+
+        public verticalSpaceDecorationHelper(Context mContext) {
+            mDivider = mContext.getDrawable(R.drawable.line_divider);
+        }
+
+        @Override
+        public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+            super.getItemOffsets(outRect, view, parent, state);
+
+            if (parent.getChildAdapterPosition(view) == 0) {
+                return;
+            }
+            int count = state.getItemCount();
+            if (count > 0 && parent.getChildLayoutPosition(view) == count - 1) {
+                outRect.set(0, 0, 0, 50);
+            }
+            outRect.top = mDivider.getIntrinsicHeight();
+        }
+
+        @Override
+        public void onDraw(Canvas canvas, RecyclerView parent, RecyclerView.State state) {
+            int dividerLeft = parent.getPaddingLeft();
+            int dividerRight = parent.getWidth() - parent.getPaddingRight();
+
+            int childCount = parent.getChildCount();
+            for (int i = 0; i < childCount - 1; i++) {
+                View child = parent.getChildAt(i);
+
+                RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child.getLayoutParams();
+
+                int dividerTop = child.getBottom() + params.bottomMargin;
+                int dividerBottom = dividerTop + mDivider.getIntrinsicHeight();
+
+                mDivider.setBounds(dividerLeft, dividerTop, dividerRight, dividerBottom);
+                mDivider.draw(canvas);
+            }
+        }
+    }
+
 }

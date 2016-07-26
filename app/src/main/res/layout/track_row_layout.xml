@@ -38,7 +38,7 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:textAlignment="viewEnd"
-            android:textColor="#212121"
+            android:textColor="@color/textPrimary"
             android:textStyle="bold" />
 
         <TextView
@@ -47,7 +47,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/tvTrackName"
             android:textAlignment="viewEnd"
-            android:textColor="#727272" />
+            android:textColor="@color/textSecondary" />
     </RelativeLayout>
 
 </RelativeLayout>
