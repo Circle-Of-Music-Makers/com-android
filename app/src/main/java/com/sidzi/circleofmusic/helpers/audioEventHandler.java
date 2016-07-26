@@ -21,9 +21,9 @@ public class audioEventHandler extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        RelativeLayout rlPlayer = (RelativeLayout) ((HomeActivity) context).findViewById(R.id.rlPlayer);
+        final RelativeLayout rlPlayer = (RelativeLayout) ((HomeActivity) context).findViewById(R.id.rlPlayer);
         ImageButton ibPlay = (ImageButton) ((HomeActivity) context).findViewById(R.id.ibPlayPause);
-        FloatingActionButton floatingActionButton = (FloatingActionButton) ((HomeActivity) context).findViewById(R.id.fabUpload);
+        final FloatingActionButton floatingActionButton = (FloatingActionButton) ((HomeActivity) context).findViewById(R.id.fabUpload);
         final TextView tvPlayingTrackName = (TextView) ((HomeActivity) context).findViewById(R.id.tvPlayingTrackName);
         assert rlPlayer != null;
         assert ibPlay != null;
@@ -40,9 +40,16 @@ public class audioEventHandler extends BroadcastReceiver {
         final String track_name = intent.getStringExtra("track_name");
         ibPlay.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(final View v) {
                 if (mediaPlayer == null) {
                     mediaPlayer = new MediaPlayer();
+                    mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                        @Override
+                        public void onCompletion(MediaPlayer mp) {
+                            mp.reset();
+                            ((ImageButton) v).setImageResource(R.drawable.ic_track_play);
+                        }
+                    });
                     try {
                         mediaPlayer.setDataSource(track_path);
                         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -58,6 +65,8 @@ public class audioEventHandler extends BroadcastReceiver {
                         mediaPlayer.stop();
                         mediaPlayer.reset();
                         ((ImageButton) v).setImageResource(R.drawable.ic_track_play);
+                        floatingActionButton.setVisibility(View.VISIBLE);
+                        rlPlayer.setVisibility(View.GONE);
                     } else {
                         try {
                             mediaPlayer.setDataSource(track_path);
