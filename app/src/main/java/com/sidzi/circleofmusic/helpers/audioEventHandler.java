@@ -22,63 +22,69 @@ public class audioEventHandler extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         final RelativeLayout rlPlayer = (RelativeLayout) ((HomeActivity) context).findViewById(R.id.rlPlayer);
-        ImageButton ibPlay = (ImageButton) ((HomeActivity) context).findViewById(R.id.ibPlayPause);
+        final ImageButton ibPlay = (ImageButton) ((HomeActivity) context).findViewById(R.id.ibPlayPause);
         final FloatingActionButton floatingActionButton = (FloatingActionButton) ((HomeActivity) context).findViewById(R.id.fabUpload);
         final TextView tvPlayingTrackName = (TextView) ((HomeActivity) context).findViewById(R.id.tvPlayingTrackName);
         assert rlPlayer != null;
         assert ibPlay != null;
         assert floatingActionButton != null;
         assert tvPlayingTrackName != null;
-        floatingActionButton.setVisibility(View.GONE);
-        rlPlayer.setVisibility(View.VISIBLE);
-        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-            ibPlay.setImageResource(R.drawable.ic_track_stop);
-        } else {
-            ibPlay.setImageResource(R.drawable.ic_track_play);
-        }
         final String track_path = intent.getStringExtra("track_path");
         final String track_name = intent.getStringExtra("track_name");
+        floatingActionButton.setVisibility(View.GONE);
+        rlPlayer.setVisibility(View.VISIBLE);
+        try {
+            if (!mediaPlayer.isPlaying()) {
+                ibPlay.setImageResource(R.drawable.ic_track_play);
+                tvPlayingTrackName.setText(track_name);
+                mediaPlayer.reset();
+                mediaPlayer.setDataSource(track_path);
+                mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                mediaPlayer.prepare();
+            } else {
+                mediaPlayer.stop();
+                mediaPlayer.reset();
+                ibPlay.setImageResource(R.drawable.ic_track_play);
+                tvPlayingTrackName.setText(track_name);
+                mediaPlayer.setDataSource(track_path);
+                mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                mediaPlayer.prepare();
+            }
+        } catch (NullPointerException e) {
+            mediaPlayer = new MediaPlayer();
+            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    mp.reset();
+                    ibPlay.setImageResource(R.drawable.ic_track_play);
+                    floatingActionButton.setVisibility(View.VISIBLE);
+                    rlPlayer.setVisibility(View.GONE);
+                }
+            });
+            ibPlay.setImageResource(R.drawable.ic_track_play);
+            tvPlayingTrackName.setText(track_name);
+            try {
+                mediaPlayer.setDataSource(track_path);
+                mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                mediaPlayer.prepare();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         ibPlay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
-                if (mediaPlayer == null) {
-                    mediaPlayer = new MediaPlayer();
-                    mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                        @Override
-                        public void onCompletion(MediaPlayer mp) {
-                            mp.reset();
-                            ((ImageButton) v).setImageResource(R.drawable.ic_track_play);
-                        }
-                    });
-                    try {
-                        mediaPlayer.setDataSource(track_path);
-                        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                        mediaPlayer.prepare();
-                        mediaPlayer.start();
-                        ((ImageButton) v).setImageResource(R.drawable.ic_track_stop);
-                        tvPlayingTrackName.setText(track_name);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.stop();
+                    mediaPlayer.reset();
+                    ((ImageButton) v).setImageResource(R.drawable.ic_track_play);
+                    floatingActionButton.setVisibility(View.VISIBLE);
+                    rlPlayer.setVisibility(View.GONE);
                 } else {
-                    if (mediaPlayer.isPlaying()) {
-                        mediaPlayer.stop();
-                        mediaPlayer.reset();
-                        ((ImageButton) v).setImageResource(R.drawable.ic_track_play);
-                        floatingActionButton.setVisibility(View.VISIBLE);
-                        rlPlayer.setVisibility(View.GONE);
-                    } else {
-                        try {
-                            mediaPlayer.setDataSource(track_path);
-                            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                            mediaPlayer.prepare();
-                            mediaPlayer.start();
-                            ((ImageButton) v).setImageResource(R.drawable.ic_track_stop);
-                            tvPlayingTrackName.setText(track_name);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
+                    mediaPlayer.start();
+                    ((ImageButton) v).setImageResource(R.drawable.ic_track_stop);
                 }
             }
         });
