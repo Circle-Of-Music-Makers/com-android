@@ -7,7 +7,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.sidzi.circleofmusic.helpers.uploadHelper;
+import com.sidzi.circleofmusic.helpers.UploadHelper;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -61,7 +61,7 @@ public class ListFileActivity extends ListActivity {
             intent.putExtra("path", filename);
             startActivity(intent);
         } else {
-            uploadHelper uploadHelper = new uploadHelper(getApplicationContext(), filename);
+            UploadHelper uploadHelper = new UploadHelper(getApplicationContext(), filename);
             uploadHelper.execute();
             finish();
         }

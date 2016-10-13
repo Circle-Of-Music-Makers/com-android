@@ -7,11 +7,11 @@ import android.util.Log;
 import net.gotev.uploadservice.MultipartUploadRequest;
 import net.gotev.uploadservice.UploadNotificationConfig;
 
-public class uploadHelper extends AsyncTask<Void, Void, Void> {
+public class UploadHelper extends AsyncTask<Void, Void, Void> {
     private String path;
     private Context mContext;
 
-    public uploadHelper(Context context, String filename) {
+    public UploadHelper(Context context, String filename) {
         path = filename;
         mContext = context;
     }

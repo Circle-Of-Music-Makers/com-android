@@ -1,51 +1,49 @@
 package com.sidzi.circleofmusic;
 
 import android.Manifest;
-import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
-import android.media.MediaMetadataRetriever;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.sidzi.circleofmusic.helpers.audioEventHandler;
-import com.sidzi.circleofmusic.helpers.dbHandler;
-import com.sidzi.circleofmusic.helpers.getJSONHelper;
-import com.sidzi.circleofmusic.helpers.getTrackListAPIHelper;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+import com.j256.ormlite.android.apptools.OpenHelperManager;
+import com.j256.ormlite.dao.Dao;
+import com.sidzi.circleofmusic.entities.Track;
+import com.sidzi.circleofmusic.helpers.AudioEventHandler;
+import com.sidzi.circleofmusic.helpers.OrmHandler;
+import com.sidzi.circleofmusic.helpers.VerticalSpaceDecorationHelper;
 
 import net.gotev.uploadservice.UploadService;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.util.concurrent.ExecutionException;
+import java.sql.SQLException;
+import java.util.List;
 
 public class HomeActivity extends AppCompatActivity {
     BroadcastReceiver audioEventHandler;
@@ -59,22 +57,47 @@ public class HomeActivity extends AppCompatActivity {
         boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
         UploadService.NAMESPACE = BuildConfig.APPLICATION_ID;
         if (isConnected) {
-            try {
-                if (((int) new JSONObject(new getJSONHelper().execute("http://circleofmusic-sidzi.rhcloud.com/checkEOSVersion").get()).get("eos_version")) > getPackageManager().getPackageInfo(getPackageName(), 0).versionCode) {
-                    startActivity(new Intent(this, EosActivity.class));
-                    finish();
+            RequestQueue requestQueue = Volley.newRequestQueue(this);
+            JsonObjectRequest eosCheck = new JsonObjectRequest(Request.Method.GET, "http://circleofmusic-sidzi.rhcloud.com/checkEOSVersion", null, new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject response) {
+                    try {
+                        if ((int) response.get("eos_version") > BuildConfig.VERSION_CODE) {
+                            startActivity(new Intent(HomeActivity.this, EosActivity.class));
+                            finish();
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
-            } catch (JSONException | PackageManager.NameNotFoundException | InterruptedException | ExecutionException | NullPointerException
-                    e) {
-                e.printStackTrace();
-            }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
 
-            getTrackListAPIHelper api = new getTrackListAPIHelper(this);
-            try {
-                api.execute("http://circleofmusic-sidzi.rhcloud.com/getTrackList");
-            } catch (NullPointerException e) {
-                e.printStackTrace();
-            }
+                }
+            });
+            requestQueue.add(eosCheck);
+            JsonArrayRequest trackRequest = new JsonArrayRequest(Request.Method.GET, "http://circleofmusic-sidzi.rhcloud.com/getTrackList", null, new Response.Listener<JSONArray>() {
+                @Override
+                public void onResponse(JSONArray response) {
+                    OrmHandler orm = OpenHelperManager.getHelper(HomeActivity.this, OrmHandler.class);
+                    try {
+                        Dao<Track, Integer> mTrack = orm.getDao(Track.class);
+                        for (int i = 0; i < response.length(); i++) {
+                            mTrack.createIfNotExists(new Track(response.get(i).toString(), ""));
+                        }
+                    } catch (SQLException | JSONException e) {
+                        e.printStackTrace();
+                    }
+                    OpenHelperManager.releaseHelper();
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+
+                }
+            });
+            requestQueue.add(trackRequest);
         }
         RecyclerView mRecyclerView;
         RecyclerView.Adapter mAdapter;
@@ -94,18 +117,18 @@ public class HomeActivity extends AppCompatActivity {
         }
         mRecyclerView = (RecyclerView) findViewById(R.id.rVTrackList);
         mLayoutManager = new LinearLayoutManager(this);
-        mAdapter = new TrackListAdapter(HomeActivity.this);
+        mAdapter = new TrackListAdapter();
         FloatingActionButton floatingActionUploadButton = (FloatingActionButton) findViewById(R.id.fabUpload);
         ImageButton imageButton = (ImageButton) findViewById(R.id.ibPlayPause);
         assert imageButton != null;
         imageButton.setBackgroundColor(Color.TRANSPARENT);
-        audioEventHandler = new audioEventHandler();
+        audioEventHandler = new AudioEventHandler();
         registerReceiver(audioEventHandler, new IntentFilter("com.sidzi.circleofmusic.PLAY_TRACK"));
         if (mRecyclerView != null) {
             mRecyclerView.setLayoutManager(mLayoutManager);
             mRecyclerView.setHasFixedSize(true);
             mRecyclerView.setAdapter(mAdapter);
-            mRecyclerView.addItemDecoration(new verticalSpaceDecorationHelper(this));
+            mRecyclerView.addItemDecoration(new VerticalSpaceDecorationHelper(this));
         }
         if (floatingActionUploadButton != null) {
             floatingActionUploadButton.setImageResource(R.drawable.ic_upload_icon);
@@ -129,165 +152,44 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_home, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        if (id == R.id.update) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            ConnectivityManager cm = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-            boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
-            if (isConnected) {
-                boolean updateRequired = false;
-                try {
-                    JSONObject versionInfo = new JSONObject(new getJSONHelper().execute("http://circleofmusic-sidzi.rhcloud.com/updateCheck").get());
-                    updateRequired = ((int) versionInfo.get("stable")) > getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
-                } catch (JSONException | InterruptedException | ExecutionException | PackageManager.NameNotFoundException e) {
-                    e.printStackTrace();
-                }
-                if (updateRequired) {
-                    builder.setTitle("Update Service").setMessage("Would you like to update to the latest version ?");
-                    builder.setPositiveButton(R.string.update, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            BroadcastReceiver onComplete = new BroadcastReceiver() {
-                                @Override
-                                public void onReceive(Context context, Intent intent) {
-                                    Intent promptInstall = new Intent(Intent.ACTION_VIEW)
-                                            .setDataAndType(Uri.fromFile(new File(Environment.getExternalStoragePublicDirectory(Environment.getDownloadCacheDirectory().getAbsolutePath()) + "/circle-of-music.apk")),
-                                                    "application/vnd.android.package-archive");
-                                    startActivity(promptInstall);
-                                }
-                            };
-                            String url = "http://circleofmusic-sidzi.rhcloud.com/circle-of-music.apk";
-                            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
-                            request.setDescription("Downloading");
-                            request.setTitle("Circle of Music App");
-                            request.setDestinationInExternalPublicDir(Environment.getDownloadCacheDirectory().getAbsolutePath(), "circle-of-music.apk");
-                            try {
-                                boolean deleteSuccess = new File(Environment.getExternalStoragePublicDirectory(Environment.getDownloadCacheDirectory().getAbsolutePath()) + "/circle-of-music.apk").delete();
-                            } catch (NullPointerException e) {
-                                e.printStackTrace();
-                            }
-                            DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
-                            manager.enqueue(request);
-                            registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-                        }
-                    });
-                    builder.setNegativeButton("Nope", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-                } else {
-                    builder.setTitle("Update Service").setMessage("You are already using the latest version");
-                }
-            } else {
-                builder.setTitle("No Network Access").setMessage("Please connect to an internet service");
-            }
-            AlertDialog dialog = builder.create();
-            dialog.show();
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
     public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.ViewHolder> {
-        //        TODO implement delete
-        private String[] mTrackList;
-        private String[] mTrackPathList;
-        private int[] mTrackStatus;
-        private String[] mTrackTitleList;
-        private String[] mTrackArtistList;
-        private Context mContext;
-        private MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
 
+        private List<Track> mTrackList;
 
-        public TrackListAdapter(Context mContext) {
-            this.mContext = mContext;
-            dbHandler dbInstance = new dbHandler(mContext, null);
-            this.mTrackList = dbInstance.fetchTracks();
-            this.mTrackStatus = dbInstance.fetchStatus();
-            this.mTrackPathList = dbInstance.fetchTrackPaths();
-            mTrackTitleList = new String[mTrackList.length];
-            mTrackArtistList = new String[mTrackList.length];
-            for (int i = 0; i < mTrackPathList.length; i++) {
-                if (mTrackPathList[i] != null) {
-                    mediaMetadataRetriever.setDataSource(mTrackPathList[i]);
-                    mTrackTitleList[i] = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
-                    mTrackArtistList[i] = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
-                    if (mTrackTitleList[i] == null) {
-                        mTrackTitleList[i] = mTrackList[i];
-                    }
-                    if (mTrackArtistList[i] == null) {
-                        mTrackArtistList[i] = "";
-                    }
-                } else {
-                    mTrackTitleList[i] = mTrackList[i];
-                    mTrackArtistList[i] = "";
-                }
+        TrackListAdapter() {
+            OrmHandler orm = OpenHelperManager.getHelper(HomeActivity.this, OrmHandler.class);
+            try {
+                Dao<Track, Integer> mTrack = orm.getDao(Track.class);
+                mTrackList = mTrack.queryForAll();
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-        }
-
-        public void update() {
-            dbHandler dbInstance = new dbHandler(mContext, null);
-            this.mTrackList = dbInstance.fetchTracks();
-            this.mTrackStatus = dbInstance.fetchStatus();
-            this.mTrackPathList = dbInstance.fetchTrackPaths();
-            for (int i = 0; i < mTrackPathList.length; i++) {
-                if (mTrackPathList[i] != null) {
-                    mediaMetadataRetriever.setDataSource(mTrackPathList[i]);
-                    mTrackTitleList[i] = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
-                    mTrackArtistList[i] = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
-                } else {
-                    mTrackTitleList[i] = mTrackList[i];
-                    mTrackArtistList[i] = "";
-                }
-            }
-            this.notifyDataSetChanged();
+            OpenHelperManager.releaseHelper();
         }
 
         @Override
         public TrackListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.track_row_layout, parent, false);
-            return new ViewHolder(view, mContext, mTrackList);
+            return new ViewHolder(view);
         }
 
         @Override
         public void onBindViewHolder(final ViewHolder holder, final int position) {
-            holder.tnTextView.setText(mTrackTitleList[position]);
-            holder.tdTextView.setText(mTrackArtistList[position]);
+            holder.tnTextView.setText(mTrackList.get(position).getName());
         }
 
         @Override
         public int getItemCount() {
-            return mTrackList.length;
+            return mTrackList.size();
         }
 
-        public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-            public TextView tnTextView;
-            public TextView tdTextView;
-            private Context mContext;
-            private String[] mTrackList;
-            private boolean isDownloading = false;
+        class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+            TextView tnTextView;
+            TextView tdTextView;
 
 
-            public ViewHolder(View view, Context mContext, String[] mTrackList) {
+            ViewHolder(View view) {
                 super(view);
-                this.mContext = mContext;
-                this.mTrackList = mTrackList;
                 this.tnTextView = (TextView) view.findViewById(R.id.tvTrackName);
                 this.tdTextView = (TextView) view.findViewById(R.id.tvTrackInfo);
                 view.setOnClickListener(this);
@@ -295,89 +197,47 @@ public class HomeActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                final dbHandler dbInstance = new dbHandler(mContext, null);
-                final String trackName = mTrackList[getAdapterPosition()];
-                if (dbInstance.fetchStatus(trackName) < 2) {
-                    if (isDownloading) {
-                        Toast.makeText(mContext, "Already Downloading", Toast.LENGTH_SHORT).show();
-                    } else {
-                        ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-                        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-                        boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
-                        if (!isConnected) {
-                            Toast.makeText(mContext, "Please connect to the internet for downloading", Toast.LENGTH_SHORT).show();
-                        } else {
-                            final BroadcastReceiver onComplete = new BroadcastReceiver() {
-                                @Override
-                                public void onReceive(Context context, Intent intent) {
-                                    dbHandler dbInstance = new dbHandler(mContext, null);
-                                    dbInstance.updateStatusPath(trackName, Environment.getExternalStorageDirectory().getAbsolutePath() + "/Download/" + trackName);
-                                    Toast.makeText(mContext, "Song downloaded", Toast.LENGTH_LONG).show();
-                                    dbInstance.addTrack(trackName, (Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)).toString() + "/" + trackName);
-                                    update();
-                                    unregisterReceiver(this);
-                                }
-                            };
-                            mContext.registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-                            String url = "http://circleofmusic-sidzi.rhcloud.com/downloadTrack" + trackName;
-                            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
-                            request.setDescription("Downloading");
-                            request.setTitle(trackName);
-                            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, trackName);
-                            DownloadManager manager = (DownloadManager) mContext.getSystemService(Context.DOWNLOAD_SERVICE);
-                            manager.enqueue(request);
-                            isDownloading = true;
-                        }
-                    }
-                } else {
-                    Intent ready_track = new Intent("com.sidzi.circleofmusic.PLAY_TRACK");
-                    ready_track.putExtra("track_path", new File(dbInstance.fetchTrackPath(trackName)).getAbsolutePath());
-                    ready_track.putExtra("track_name", trackName);
-                    mContext.sendBroadcast(ready_track);
-                }
+//                final dbHandler dbInstance = new dbHandler(mContext, null);
+//                final String trackName = mTrackList[getAdapterPosition()];
+//                if (dbInstance.fetchStatus(trackName) < 2) {
+//                    if (isDownloading) {
+//                        Toast.makeText(mContext, "Already Downloading", Toast.LENGTH_SHORT).show();
+//                    } else {
+//                        ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+//                        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+//                        boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+//                        if (!isConnected) {
+//                            Toast.makeText(mContext, "Please connect to the internet for downloading", Toast.LENGTH_SHORT).show();
+//                        } else {
+//                            final BroadcastReceiver onComplete = new BroadcastReceiver() {
+//                                @Override
+//                                public void onReceive(Context context, Intent intent) {
+//                                    dbHandler dbInstance = new dbHandler(mContext, null);
+//                                    dbInstance.updateStatusPath(trackName, Environment.getExternalStorageDirectory().getAbsolutePath() + "/Download/" + trackName);
+//                                    Toast.makeText(mContext, "Song downloaded", Toast.LENGTH_LONG).show();
+//                                    dbInstance.addTrack(trackName, (Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)).toString() + "/" + trackName);
+//                                    update();
+//                                    unregisterReceiver(this);
+//                                }
+//                            };
+//                            mContext.registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+//                            String url = "http://circleofmusic-sidzi.rhcloud.com/downloadTrack" + trackName;
+//                            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+//                            request.setDescription("Downloading");
+//                            request.setTitle(trackName);
+//                            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, trackName);
+//                            DownloadManager manager = (DownloadManager) mContext.getSystemService(Context.DOWNLOAD_SERVICE);
+//                            manager.enqueue(request);
+//                            isDownloading = true;
+//                        }
+//                    }
+//                } else {
+//                    Intent ready_track = new Intent("com.sidzi.circleofmusic.PLAY_TRACK");
+//                    ready_track.putExtra("track_path", new File(dbInstance.fetchTrackPath(trackName)).getAbsolutePath());
+//                    ready_track.putExtra("track_name", trackName);
+//                    mContext.sendBroadcast(ready_track);
+//                }
             }
         }
     }
-
-    public class verticalSpaceDecorationHelper extends RecyclerView.ItemDecoration {
-        private Drawable mDivider;
-
-        public verticalSpaceDecorationHelper(Context mContext) {
-            mDivider = mContext.getDrawable(R.drawable.line_divider);
-        }
-
-        @Override
-        public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-            super.getItemOffsets(outRect, view, parent, state);
-
-            if (parent.getChildAdapterPosition(view) == 0) {
-                return;
-            }
-            int count = state.getItemCount();
-            if (count > 0 && parent.getChildLayoutPosition(view) == count - 1) {
-                outRect.set(0, 0, 0, 50);
-            }
-            outRect.top = mDivider.getIntrinsicHeight();
-        }
-
-        @Override
-        public void onDraw(Canvas canvas, RecyclerView parent, RecyclerView.State state) {
-            int dividerLeft = parent.getPaddingLeft();
-            int dividerRight = parent.getWidth() - parent.getPaddingRight();
-
-            int childCount = parent.getChildCount();
-            for (int i = 0; i < childCount - 1; i++) {
-                View child = parent.getChildAt(i);
-
-                RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child.getLayoutParams();
-
-                int dividerTop = child.getBottom() + params.bottomMargin;
-                int dividerBottom = dividerTop + mDivider.getIntrinsicHeight();
-
-                mDivider.setBounds(dividerLeft, dividerTop, dividerRight, dividerBottom);
-                mDivider.draw(canvas);
-            }
-        }
-    }
-
 }

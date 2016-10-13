@@ -16,7 +16,7 @@ import com.sidzi.circleofmusic.R;
 
 import java.io.IOException;
 
-public class audioEventHandler extends BroadcastReceiver {
+public class AudioEventHandler extends BroadcastReceiver {
     private MediaPlayer mediaPlayer;
 
     @Override
