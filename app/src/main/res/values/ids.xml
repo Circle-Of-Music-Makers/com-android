@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="tag_track_name" type="id">track_name</item>
+    <item name="tag_track_path" type="id">track_path</item>
+    <item name="tag_track_artist" type="id">track_artist</item>
+</resources>

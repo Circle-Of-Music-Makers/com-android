@@ -6,7 +6,6 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -33,6 +32,7 @@ import com.j256.ormlite.dao.Dao;
 import com.sidzi.circleofmusic.adapters.TrackListAdapter;
 import com.sidzi.circleofmusic.entities.Track;
 import com.sidzi.circleofmusic.helpers.AudioEventHandler;
+import com.sidzi.circleofmusic.helpers.LocalMusicLoader;
 import com.sidzi.circleofmusic.helpers.OrmHandler;
 import com.sidzi.circleofmusic.helpers.VerticalSpaceDecorationHelper;
 
@@ -42,7 +42,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.sql.SQLException;
 
 public class MainActivity extends AppCompatActivity {
@@ -75,65 +74,47 @@ public class MainActivity extends AppCompatActivity {
                 String[] perms = {"android.permission.WRITE_EXTERNAL_STORAGE", "android.permission.READ_EXTERNAL_STORAGE"};
                 requestPermissions(perms, 202);
             }
-        }
+        } else {
 
-        UploadService.NAMESPACE = BuildConfig.APPLICATION_ID;
+            UploadService.NAMESPACE = BuildConfig.APPLICATION_ID;
 
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-        JsonObjectRequest eosCheck = new JsonObjectRequest(Request.Method.GET, com_url + "checkEOSVersion", null, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                try {
-                    if ((int) response.get("eos_version") > BuildConfig.VERSION_CODE) {
-                        startActivity(new Intent(MainActivity.this, EosActivity.class));
-                        finish();
+            RequestQueue requestQueue = Volley.newRequestQueue(this);
+            JsonObjectRequest eosCheck = new JsonObjectRequest(Request.Method.GET, com_url + "checkEOSVersion", null, new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject response) {
+                    try {
+                        if ((int) response.get("eos_version") > BuildConfig.VERSION_CODE) {
+                            startActivity(new Intent(MainActivity.this, EosActivity.class));
+                            finish();
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                } catch (JSONException e) {
-                    e.printStackTrace();
                 }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
 
-            }
-        });
-        requestQueue.add(eosCheck);
-        audioEventHandler = new AudioEventHandler();
-        registerReceiver(audioEventHandler, new IntentFilter("com.sidzi.circleofmusic.PLAY_TRACK"));
-        File music_dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC);
-        File[] list = music_dir.listFiles();
-        String local_path;
-        String local_name;
-        OrmHandler orm = OpenHelperManager.getHelper(MainActivity.this, OrmHandler.class);
-        try {
-            Dao<Track, String> mTrack = orm.getDao(Track.class);
-            for (File aList : list) {
-                if (aList.isFile()) {
-                    local_path = aList.getAbsolutePath();
-                    local_name = local_path.substring(local_path.lastIndexOf("/") + 1);
-                    mTrack.createIfNotExists(new Track(local_name, local_path, "local"));
-                } else {
-//                    TODO implement recursive function
                 }
-            }
-        } catch (SQLException | NullPointerException e) {
-            e.printStackTrace();
+            });
+            requestQueue.add(eosCheck);
+            audioEventHandler = new AudioEventHandler();
+            registerReceiver(audioEventHandler, new IntentFilter("com.sidzi.circleofmusic.PLAY_TRACK"));
+
+
+            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+            setSupportActionBar(toolbar);
+            // Create the adapter that will return a fragment for each of the three
+            // primary sections of the activity.
+            mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+
+            // Set up the ViewPager with the sections adapter.
+            mViewPager = (ViewPager) findViewById(R.id.container);
+            mViewPager.setAdapter(mSectionsPagerAdapter);
+
+            TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+            tabLayout.setupWithViewPager(mViewPager);
         }
-
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        // Create the adapter that will return a fragment for each of the three
-        // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-
-        // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.container);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
-
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(mViewPager);
     }
 
     @Override
@@ -175,27 +156,29 @@ public class MainActivity extends AppCompatActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             RequestQueue requestQueue = Volley.newRequestQueue(getContext());
-            final View homeView = inflater.inflate(R.layout.fragment_home, container, false);
+            final View homeView = inflater.inflate(R.layout.fragment_track_list, container, false);
             final RecyclerView mRecyclerView;
             final RecyclerView.LayoutManager mLayoutManager;
             mRecyclerView = (RecyclerView) homeView.findViewById(R.id.rVTrackList);
             mLayoutManager = new LinearLayoutManager(getContext());
-            if (mRecyclerView != null) {
-                mRecyclerView.setLayoutManager(mLayoutManager);
-                mRecyclerView.setHasFixedSize(true);
-                mRecyclerView.addItemDecoration(new VerticalSpaceDecorationHelper(getContext()));
-            }
+
+            assert mRecyclerView != null;
+            mRecyclerView.setLayoutManager(mLayoutManager);
+            mRecyclerView.setHasFixedSize(true);
+            mRecyclerView.addItemDecoration(new VerticalSpaceDecorationHelper(getContext()));
+
             switch (getArguments().getInt(ARG_SECTION_NUMBER)) {
                 case 1:
-                    TrackListAdapter mAdapter = new TrackListAdapter(getContext(), "local");
-                    if (mRecyclerView != null) {
-                        mRecyclerView.setAdapter(mAdapter);
-                        mAdapter.notifyDataSetChanged();
-                    }
+                    TrackListAdapter trackListAdapter = new TrackListAdapter(getContext());
+                    LocalMusicLoader lml = new LocalMusicLoader(getContext(), trackListAdapter);
+                    lml.execute();
+                    mRecyclerView.setAdapter(trackListAdapter);
                     break;
                 case 2:
                     break;
                 case 3:
+                    final TrackListAdapter mAdapter = new TrackListAdapter(getContext());
+                    mRecyclerView.setAdapter(mAdapter);
                     JsonArrayRequest trackRequest = new JsonArrayRequest(Request.Method.GET, com_url + "getTrackList", null, new Response.Listener<JSONArray>() {
                         @Override
                         public void onResponse(JSONArray response) {
@@ -205,12 +188,7 @@ public class MainActivity extends AppCompatActivity {
                                 for (int i = 0; i < response.length(); i++) {
                                     mTrack.createIfNotExists(new Track(response.get(i).toString(), com_url + "streamTrack" + response.get(i).toString(), "remote"));
                                 }
-                                TrackListAdapter mAdapter = new TrackListAdapter(getContext(), "remote");
-
-                                if (mRecyclerView != null) {
-                                    mRecyclerView.setAdapter(mAdapter);
-                                    mAdapter.notifyDataSetChanged();
-                                }
+                                mAdapter.updateTracks();
                             } catch (SQLException | JSONException e) {
                                 e.printStackTrace();
                             }
@@ -219,15 +197,12 @@ public class MainActivity extends AppCompatActivity {
                     }, new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            TrackListAdapter mAdapter = new TrackListAdapter(getContext(), "remote");
-
-                            if (mRecyclerView != null) {
-                                mRecyclerView.setAdapter(mAdapter);
-                                mAdapter.notifyDataSetChanged();
-                            }
+                            mAdapter.updateTracks();
                         }
                     });
                     requestQueue.add(trackRequest);
+                    break;
+                case 4:
                     break;
             }
             return homeView;
@@ -253,8 +228,8 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public int getCount() {
-            // Show 3 total pages.
-            return 3;
+            // Show 4 total pages.
+            return 4;
         }
 
         @Override
@@ -266,6 +241,8 @@ public class MainActivity extends AppCompatActivity {
                     return "Bucket";
                 case 2:
                     return "Remote";
+                case 3:
+                    return "Trebie";
             }
             return null;
         }

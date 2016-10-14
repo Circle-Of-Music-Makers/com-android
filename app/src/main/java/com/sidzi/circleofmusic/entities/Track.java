@@ -15,15 +15,15 @@ public class Track {
     @DatabaseField
     private Boolean bucket;
     @DatabaseField
-    private String type;
+    private String artist;
 
     public Track() {
     }
 
-    public Track(String name, String path, String type) {
+    public Track(String name, String path, String artist) {
         this.name = name;
         this.path = path;
-        this.type = type;
+        this.artist = artist;
     }
 
     public String getName() {
@@ -56,5 +56,9 @@ public class Track {
 
     public void setBucket(Boolean bucket) {
         this.bucket = bucket;
+    }
+
+    public String getArtist() {
+        return artist;
     }
 }

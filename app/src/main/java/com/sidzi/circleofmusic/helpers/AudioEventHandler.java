@@ -22,16 +22,20 @@ public class AudioEventHandler extends BroadcastReceiver {
         final ImageButton ibPlay = (ImageButton) ((MainActivity) context).findViewById(R.id.ibPlayPause);
 
         final TextView tvPlayingTrackName = (TextView) ((MainActivity) context).findViewById(R.id.tvPlayingTrackName);
+        final TextView tdPlayingArtistName = (TextView) ((MainActivity) context).findViewById(R.id.tvPlayingTrackArtist);
         assert ibPlay != null;
+
 
         assert tvPlayingTrackName != null;
         final String track_path = intent.getStringExtra("track_path");
         final String track_name = intent.getStringExtra("track_name");
+        final String track_artist = intent.getStringExtra("track_artist");
 
         try {
             if (!mediaPlayer.isPlaying()) {
                 ibPlay.setImageResource(R.drawable.ic_track_play);
                 tvPlayingTrackName.setText(track_name);
+                tdPlayingArtistName.setText(track_artist);
                 mediaPlayer.reset();
                 mediaPlayer.setDataSource(track_path);
                 mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -41,6 +45,7 @@ public class AudioEventHandler extends BroadcastReceiver {
                 mediaPlayer.reset();
                 ibPlay.setImageResource(R.drawable.ic_track_play);
                 tvPlayingTrackName.setText(track_name);
+                tdPlayingArtistName.setText(track_artist);
                 mediaPlayer.setDataSource(track_path);
                 mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                 mediaPlayer.prepare();
@@ -56,6 +61,7 @@ public class AudioEventHandler extends BroadcastReceiver {
             });
             ibPlay.setImageResource(R.drawable.ic_track_play);
             tvPlayingTrackName.setText(track_name);
+            tdPlayingArtistName.setText(track_artist);
             try {
                 mediaPlayer.setDataSource(track_path);
                 mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);

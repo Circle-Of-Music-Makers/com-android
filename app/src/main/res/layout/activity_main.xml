@@ -63,20 +63,39 @@
                 android:paddingTop="@dimen/activity_vertical_margin"
                 android:src="@drawable/ic_track_play" />
 
-            <TextView
-                android:id="@+id/tvPlayingTrackName"
+            <RelativeLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:layout_gravity="end"
                 android:layout_toEndOf="@+id/ibPlayPause"
-                android:ellipsize="end"
-                android:maxLines="1"
                 android:paddingBottom="@dimen/activity_vertical_margin"
                 android:paddingLeft="@dimen/activity_horizontal_margin"
                 android:paddingRight="@dimen/activity_horizontal_margin"
-                android:paddingTop="@dimen/activity_vertical_margin"
-                android:textColor="@color/textInverted" />
+                android:paddingTop="@dimen/activity_vertical_margin">
+
+                <TextView
+                    android:id="@+id/tvPlayingTrackName"
+                    style="@style/TextAppearance.AppCompat.Medium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textColor="@color/textInverted" />
+
+                <TextView
+                    android:id="@+id/tvPlayingTrackArtist"
+                    style="@style/TextAppearance.AppCompat.Small"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/tvPlayingTrackName"
+                    android:layout_gravity="end"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textColor="@color/textInverted" />
+
+            </RelativeLayout>
+
         </RelativeLayout>
     </FrameLayout>
 </android.support.design.widget.CoordinatorLayout>

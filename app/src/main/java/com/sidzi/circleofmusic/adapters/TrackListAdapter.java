@@ -15,6 +15,7 @@ import com.sidzi.circleofmusic.entities.Track;
 import com.sidzi.circleofmusic.helpers.OrmHandler;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.ViewHolder> {
@@ -22,18 +23,29 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
     private List<Track> mTrackList;
     private Context mContext;
 
-    public TrackListAdapter(Context mContext, String type) {
+    public TrackListAdapter(Context mContext) {
+        super();
         this.mContext = mContext;
+        mTrackList = new ArrayList<>();
+    }
+
+    public void updateTracks(ArrayList<Track> mTrackList) {
+        this.mTrackList = mTrackList;
+        notifyDataSetChanged();
+    }
+
+    public void updateTracks() {
         OrmHandler orm = OpenHelperManager.getHelper(mContext, OrmHandler.class);
         try {
-
             Dao<Track, String> mTrack = orm.getDao(Track.class);
-            mTrackList = mTrack.queryForEq("type", type);
+            mTrackList = mTrack.queryForAll();
         } catch (SQLException e) {
             e.printStackTrace();
         }
         OpenHelperManager.releaseHelper();
+        notifyDataSetChanged();
     }
+
 
     @Override
     public TrackListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -44,7 +56,10 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         holder.tnTextView.setText(mTrackList.get(position).getName());
-        holder.itemView.setTag(mTrackList.get(position).getPath());
+        holder.tdTextView.setText(mTrackList.get(position).getArtist());
+        holder.itemView.setTag(R.id.tag_track_path, mTrackList.get(position).getPath());
+        holder.itemView.setTag(R.id.tag_track_name, mTrackList.get(position).getName());
+        holder.itemView.setTag(R.id.tag_track_artist, mTrackList.get(position).getArtist());
     }
 
     @Override
@@ -67,10 +82,10 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         @Override
         public void onClick(View v) {
             Intent ready_track = new Intent("com.sidzi.circleofmusic.PLAY_TRACK");
-            ready_track.putExtra("track_path", v.getTag().toString());
-            ready_track.putExtra("track_name", v.getTag().toString());
+            ready_track.putExtra("track_path", v.getTag(R.id.tag_track_path).toString());
+            ready_track.putExtra("track_name", v.getTag(R.id.tag_track_name).toString());
+            ready_track.putExtra("track_artist", v.getTag(R.id.tag_track_artist).toString());
             mContext.sendBroadcast(ready_track);
         }
-
     }
 }
