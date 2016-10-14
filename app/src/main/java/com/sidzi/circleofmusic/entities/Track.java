@@ -6,31 +6,24 @@ import com.j256.ormlite.table.DatabaseTable;
 
 @DatabaseTable(tableName = "table_tracks")
 public class Track {
-    @DatabaseField(generatedId = true)
-    private Integer id;
+    @DatabaseField(id = true)
+    private String path;
     @DatabaseField
     private String name;
-    @DatabaseField
-    private String path;
     @DatabaseField
     private String emotion;
     @DatabaseField
     private Boolean bucket;
+    @DatabaseField
+    private String type;
 
     public Track() {
     }
 
-    public Track(String name, String path) {
+    public Track(String name, String path, String type) {
         this.name = name;
         this.path = path;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
+        this.type = type;
     }
 
     public String getName() {
