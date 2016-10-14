@@ -9,14 +9,14 @@ android:
     - extra-google-m2repository
     - extra-android-m2repository
 
-before_install:
-    - curl -i http://circleofmusic-sidzi.rhcloud.com
-    - curl -o $TRAVIS_BUILD_DIR/app/myreleasekey.jks http://circleofmusic-sidzi.rhcloud.com/getSigningKey
-
-script:
-    - if [ "$TRAVIS_BRANCH" == "master" ]; then ./gradlew clean assembleRelease;else ./gradlew clean assembleDebug; fi
-
-after_success:
-    - if [ "$TRAVIS_BRANCH" == "master" ]; then VERSIONINFOAPP="$(cat $TRAVIS_BUILD_DIR/app/build.gradle | grep "versionCode" | tr ' ' '\n' | grep -e "[0-9]")"; fi
-    - if [ "$TRAVIS_BRANCH" == "master" ]; then curl -i http://circleofmusic-sidzi.rhcloud.com/updateAppVersion$VERSIONINFOAPP; fi
-    - if [ "$TRAVIS_BRANCH" == "master" ]; then curl -i -F file=@$TRAVIS_BUILD_DIR/app/build/outputs/apk/app-release.apk http://circleofmusic-sidzi.rhcloud.com/uploadApk; fi    
+#before_install:
+#    - curl -i http://circleofmusic-sidzi.rhcloud.com
+#    - curl -o $TRAVIS_BUILD_DIR/app/myreleasekey.jks http://circleofmusic-sidzi.rhcloud.com/getSigningKey
+#
+#script:
+#    - if [ "$TRAVIS_BRANCH" == "master" ]; then ./gradlew clean assembleRelease;else ./gradlew clean assembleDebug; fi
+#
+#after_success:
+#    - if [ "$TRAVIS_BRANCH" == "master" ]; then VERSIONINFOAPP="$(cat $TRAVIS_BUILD_DIR/app/build.gradle | grep "versionCode" | tr ' ' '\n' | grep -e "[0-9]")"; fi
+#    - if [ "$TRAVIS_BRANCH" == "master" ]; then curl -i http://circleofmusic-sidzi.rhcloud.com/updateAppVersion$VERSIONINFOAPP; fi
+#    - if [ "$TRAVIS_BRANCH" == "master" ]; then curl -i -F file=@$TRAVIS_BUILD_DIR/app/build/outputs/apk/app-release.apk http://circleofmusic-sidzi.rhcloud.com/uploadApk; fi
