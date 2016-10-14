@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="primaryLight">#00a393</color>
     <color name="primary">#009688</color>
-    <color name="primaryDark">#00796B</color>
+    <color name="primaryDark">#008a7c</color>
     <color name="textPrimary">#212121</color>
     <color name="textSecondary">#727272</color>
+    <color name="textInverted">#f2f2f2</color>
     <color name="black_overlay">#66000000</color>
 </resources>
