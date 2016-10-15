@@ -19,6 +19,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -29,6 +32,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.Dao;
+import com.sidzi.circleofmusic.adapters.ChatAdapter;
 import com.sidzi.circleofmusic.adapters.TrackListAdapter;
 import com.sidzi.circleofmusic.entities.Track;
 import com.sidzi.circleofmusic.helpers.AudioEventHandler;
@@ -114,6 +118,26 @@ public class MainActivity extends AppCompatActivity {
 
             TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
             tabLayout.setupWithViewPager(mViewPager);
+            final FrameLayout fl = (FrameLayout) findViewById(R.id.flPlayer);
+            mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                @Override
+                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+                }
+
+                @Override
+                public void onPageSelected(int position) {
+                    if (position == 3) {
+                        fl.setVisibility(View.GONE);
+                    }
+
+                }
+
+                @Override
+                public void onPageScrollStateChanged(int state) {
+
+                }
+            });
         }
     }
 
@@ -156,9 +180,9 @@ public class MainActivity extends AppCompatActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             RequestQueue requestQueue = Volley.newRequestQueue(getContext());
-            final View homeView = inflater.inflate(R.layout.fragment_track_list, container, false);
-            final RecyclerView mRecyclerView;
-            final RecyclerView.LayoutManager mLayoutManager;
+            RecyclerView mRecyclerView;
+            RecyclerView.LayoutManager mLayoutManager;
+            View homeView = inflater.inflate(R.layout.fragment_track_list, container, false);
             mRecyclerView = (RecyclerView) homeView.findViewById(R.id.rVTrackList);
             mLayoutManager = new LinearLayoutManager(getContext());
 
@@ -203,6 +227,23 @@ public class MainActivity extends AppCompatActivity {
                     requestQueue.add(trackRequest);
                     break;
                 case 4:
+                    homeView = inflater.inflate(R.layout.fragment_chat_bot, container, false);
+                    final RecyclerView nmRecyclerView = (RecyclerView) homeView.findViewById(R.id.rvChatConsole);
+                    final ChatAdapter chatAdapter = new ChatAdapter(getContext());
+                    RecyclerView.LayoutManager nmLayoutManager = new LinearLayoutManager(getContext());
+                    nmRecyclerView.setAdapter(chatAdapter);
+                    nmRecyclerView.setLayoutManager(nmLayoutManager);
+                    ImageButton ibSend = (ImageButton) homeView.findViewById(R.id.ibSendMessage);
+                    final EditText etChatMessage = (EditText) homeView.findViewById(R.id.etChatMessage);
+                    ibSend.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            String message = etChatMessage.getText().toString();
+                            chatAdapter.addMessage(message, true);
+                            nmRecyclerView.smoothScrollToPosition(chatAdapter.getItemCount());
+                            etChatMessage.setText("");
+                        }
+                    });
                     break;
             }
             return homeView;
