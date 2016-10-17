@@ -33,6 +33,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <receiver android:name="com.sidzi.circleofmusic.helpers.HeadphoneButtonHandler">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
         <activity android:name=".ListFileActivity" />
         <activity
             android:name=".EosActivity"

@@ -11,19 +11,29 @@ public class Track {
     @DatabaseField
     private String name;
     @DatabaseField
+    private String artist;
+    @DatabaseField
     private String emotion;
     @DatabaseField
     private Boolean bucket;
     @DatabaseField
-    private String artist;
+    private Boolean local;
 
     public Track() {
     }
 
-    public Track(String name, String path, String artist) {
+    public Track(Boolean local, String name, String path, String artist) {
+        this.local = local;
+        this.artist = artist;
         this.name = name;
         this.path = path;
+    }
+
+    public Track(String name, String path, String artist, Boolean bucket) {
+        this.path = path;
+        this.name = name;
         this.artist = artist;
+        this.bucket = bucket;
     }
 
     public String getName() {

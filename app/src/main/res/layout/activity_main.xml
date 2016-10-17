@@ -66,8 +66,8 @@
             <RelativeLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
                 android:layout_toEndOf="@+id/ibPlayPause"
+                android:layout_toStartOf="@+id/ibAddToBucket"
                 android:paddingBottom="@dimen/activity_vertical_margin"
                 android:paddingLeft="@dimen/activity_horizontal_margin"
                 android:paddingRight="@dimen/activity_horizontal_margin"
@@ -75,27 +75,35 @@
 
                 <TextView
                     android:id="@+id/tvPlayingTrackName"
-                    style="@style/TextAppearance.AppCompat.Medium"
+                    style="@style/TextAppearance.AppCompat.Medium.Inverse"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="end"
                     android:ellipsize="end"
-                    android:maxLines="1"
-                    android:textColor="@color/textInverted" />
+                    android:maxLines="1" />
 
                 <TextView
                     android:id="@+id/tvPlayingTrackArtist"
-                    style="@style/TextAppearance.AppCompat.Small"
+                    style="@style/TextAppearance.AppCompat.Small.Inverse"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/tvPlayingTrackName"
-                    android:layout_gravity="end"
                     android:ellipsize="end"
-                    android:maxLines="1"
-                    android:textColor="@color/textInverted" />
+                    android:maxLines="1" />
 
             </RelativeLayout>
 
+            <ImageButton
+                android:id="@+id/ibAddToBucket"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:background="@android:color/transparent"
+                android:contentDescription="@string/add_to_bucket"
+                android:paddingBottom="@dimen/activity_vertical_margin"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingTop="@dimen/activity_vertical_margin"
+                android:src="@drawable/ic_track_bucket_add" />
         </RelativeLayout>
     </FrameLayout>
 </android.support.design.widget.CoordinatorLayout>

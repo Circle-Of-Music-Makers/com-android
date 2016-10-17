@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
 
+import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.sidzi.circleofmusic.adapters.TrackListAdapter;
 import com.sidzi.circleofmusic.entities.Track;
 
@@ -12,7 +13,6 @@ import java.util.ArrayList;
 
 public class LocalMusicLoader extends AsyncTask<Void, Void, ArrayList<Track>> {
     private final ArrayList<Track> mTrackList = new ArrayList<>();
-    private Cursor mCursor;
     private Context mContext;
     private TrackListAdapter trackListAdapter;
 
@@ -39,7 +39,7 @@ public class LocalMusicLoader extends AsyncTask<Void, Void, ArrayList<Track>> {
 
     @Override
     protected ArrayList<Track> doInBackground(Void... voids) {
-        mCursor = makeSongCursor(mContext);
+        Cursor mCursor = makeSongCursor(mContext);
         // Gather the data
         if (mCursor != null && mCursor.moveToFirst()) {
             do {
@@ -54,23 +54,25 @@ public class LocalMusicLoader extends AsyncTask<Void, Void, ArrayList<Track>> {
                 final String artist = mCursor.getString(2);
 
                 // Create a new song
-                final Track track = new Track(songName, data, artist);
+                final Track track = new Track(true, songName, data, artist);
 
                 // Add everything up
                 mTrackList.add(track);
+
             } while (mCursor.moveToNext());
         }
         // Close the cursor
         if (mCursor != null) {
             mCursor.close();
-            mCursor = null;
         }
+        OpenHelperManager.releaseHelper();
         return mTrackList;
     }
 
     @Override
-    protected void onPostExecute(ArrayList<Track> tracks) {
+    protected void onPostExecute(final ArrayList<Track> tracks) {
         super.onPostExecute(tracks);
         trackListAdapter.updateTracks(tracks);
+        new DatabaseSynchronization(mContext, tracks).execute();
     }
 }

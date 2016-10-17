@@ -34,11 +34,11 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         notifyDataSetChanged();
     }
 
-    public void updateTracks() {
+    public void updateTracks(String field, Boolean fieldValue) {
         OrmHandler orm = OpenHelperManager.getHelper(mContext, OrmHandler.class);
         try {
             Dao<Track, String> mTrack = orm.getDao(Track.class);
-            mTrackList = mTrack.queryForAll();
+            mTrackList = mTrack.queryForEq(field, fieldValue);
         } catch (SQLException e) {
             e.printStackTrace();
         }

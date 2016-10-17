@@ -1,9 +1,12 @@
 package com.sidzi.circleofmusic;
 
 import android.Manifest;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -37,6 +40,7 @@ import com.sidzi.circleofmusic.adapters.TrackListAdapter;
 import com.sidzi.circleofmusic.ai.Trebie;
 import com.sidzi.circleofmusic.entities.Track;
 import com.sidzi.circleofmusic.helpers.AudioEventHandler;
+import com.sidzi.circleofmusic.helpers.HeadphoneButtonHandler;
 import com.sidzi.circleofmusic.helpers.LocalMusicLoader;
 import com.sidzi.circleofmusic.helpers.OrmHandler;
 import com.sidzi.circleofmusic.helpers.VerticalSpaceDecorationHelper;
@@ -50,8 +54,8 @@ import org.json.JSONObject;
 import java.sql.SQLException;
 
 public class MainActivity extends AppCompatActivity {
-    private static String com_url = "http://circleofmusic-sidzi.rhcloud.com/";
-    private AudioEventHandler audioEventHandler;
+    public static String com_url = "http://circleofmusic-sidzi.rhcloud.com/";
+    private AudioEventHandler mAudioEventHandler;
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -103,10 +107,11 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
             requestQueue.add(eosCheck);
-            audioEventHandler = new AudioEventHandler();
-            registerReceiver(audioEventHandler, new IntentFilter("com.sidzi.circleofmusic.PLAY_TRACK"));
-
-
+            mAudioEventHandler = new AudioEventHandler();
+            registerReceiver(mAudioEventHandler, new IntentFilter("com.sidzi.circleofmusic.PLAY_TRACK"));
+            AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+            ComponentName componentName = new ComponentName(getPackageName(), HeadphoneButtonHandler.class.getName());
+            audioManager.registerMediaButtonEventReceiver(componentName);
             Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
             setSupportActionBar(toolbar);
             // Create the adapter that will return a fragment for each of the three
@@ -149,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         try {
-            unregisterReceiver(audioEventHandler);
+            unregisterReceiver(mAudioEventHandler);
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }
@@ -197,16 +202,19 @@ public class MainActivity extends AppCompatActivity {
 
             switch (getArguments().getInt(ARG_SECTION_NUMBER)) {
                 case 1:
-                    TrackListAdapter trackListAdapter = new TrackListAdapter(getContext());
-                    LocalMusicLoader lml = new LocalMusicLoader(getContext(), trackListAdapter);
+                    TrackListAdapter trackListAdapter1 = new TrackListAdapter(getContext());
+                    LocalMusicLoader lml = new LocalMusicLoader(getContext(), trackListAdapter1);
                     lml.execute();
-                    mRecyclerView.setAdapter(trackListAdapter);
+                    mRecyclerView.setAdapter(trackListAdapter1);
                     break;
                 case 2:
+                    TrackListAdapter trackListAdapter2 = new TrackListAdapter(getContext());
+                    trackListAdapter2.updateTracks("bucket", true);
+                    mRecyclerView.setAdapter(trackListAdapter2);
                     break;
                 case 3:
-                    final TrackListAdapter mAdapter = new TrackListAdapter(getContext());
-                    mRecyclerView.setAdapter(mAdapter);
+                    final TrackListAdapter trackListAdapter3 = new TrackListAdapter(getContext());
+                    mRecyclerView.setAdapter(trackListAdapter3);
                     JsonArrayRequest trackRequest = new JsonArrayRequest(Request.Method.GET, com_url + "getTrackList", null, new Response.Listener<JSONArray>() {
                         @Override
                         public void onResponse(JSONArray response) {
@@ -214,9 +222,9 @@ public class MainActivity extends AppCompatActivity {
                             try {
                                 Dao<Track, String> mTrack = orm.getDao(Track.class);
                                 for (int i = 0; i < response.length(); i++) {
-                                    mTrack.createIfNotExists(new Track(response.get(i).toString(), com_url + "streamTrack" + response.get(i).toString(), "remote"));
+                                    mTrack.createIfNotExists(new Track(false, response.get(i).toString(), com_url + "streamTrack" + response.get(i).toString(), ""));
                                 }
-                                mAdapter.updateTracks();
+                                trackListAdapter3.updateTracks("local", false);
                             } catch (SQLException | JSONException e) {
                                 e.printStackTrace();
                             }
@@ -225,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
                     }, new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            mAdapter.updateTracks();
+                            trackListAdapter3.updateTracks("local", false);
                         }
                     });
                     requestQueue.add(trackRequest);
@@ -243,9 +251,11 @@ public class MainActivity extends AppCompatActivity {
                     chatRecyclerView.setLayoutManager(chatLayoutManager);
                     ImageButton ibSend = (ImageButton) homeView.findViewById(R.id.ibSendMessage);
                     final EditText etChatMessage = (EditText) homeView.findViewById(R.id.etChatMessage);
+                    etChatMessage.setHint("Say \"Hi\" to Trebie");
                     ibSend.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
+                            etChatMessage.setHint("");
                             String message = etChatMessage.getText().toString();
                             if (!message.equals("")) {
                                 chatAdapter.addMessage(message, true);
