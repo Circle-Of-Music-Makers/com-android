@@ -13,7 +13,7 @@ import java.sql.SQLException;
 
 public class OrmHandler extends OrmLiteSqliteOpenHelper {
 
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "circle_of_music.db";
 
     public OrmHandler(Context context) {

@@ -1,6 +1,5 @@
 package com.sidzi.circleofmusic.adapters;
 
-import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,36 +15,15 @@ import java.util.List;
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
     private List<ChatMessage> chatEntries = new ArrayList<>();
-    //    private Dao<ChatMessage, Integer> chatMessages;
-    private Context mContext;
 
-    public ChatAdapter(Context mContext) {
+    public ChatAdapter() {
         super();
-        this.mContext = mContext;
-//        updateAdapter();
     }
-
-
-//    private void updateAdapter() {
-//        OrmHandler ormHelper = OpenHelperManager.getHelper(mContext, OrmHandler.class);
-//        try {
-//            chatMessages = ormHelper.getDao(ChatMessage.class);
-//            chatEntries = chatMessages.queryForAll();
-//            notifyDataSetChanged();
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//    }
 
     public void addMessage(String messageString, boolean chatMe) {
         if (!messageString.equals("")) {
             ChatMessage chatMessage = new ChatMessage(messageString, chatMe);
             chatEntries.add(chatMessage);
-//            try {
-//                chatMessages.create(chatMessage);
-//            } catch (SQLException e) {
-//                e.printStackTrace();
-//            }
             notifyItemInserted(getItemCount());
         }
     }

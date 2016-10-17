@@ -232,19 +232,19 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case 4:
                     homeView = inflater.inflate(R.layout.fragment_chat_bot, container, false);
-                    final RecyclerView nmRecyclerView = (RecyclerView) homeView.findViewById(R.id.rvChatConsole);
-                    final ChatAdapter chatAdapter = new ChatAdapter(getContext());
-                    RecyclerView.LayoutManager nmLayoutManager = new LinearLayoutManager(getContext());
-                    nmRecyclerView.setAdapter(chatAdapter);
-                    nmRecyclerView.setLayoutManager(nmLayoutManager);
+                    final RecyclerView chatRecyclerView = (RecyclerView) homeView.findViewById(R.id.rvChatConsole);
                     final Trebie mTrebie = new Trebie(getContext());
+                    final ChatAdapter chatAdapter = new ChatAdapter();
+                    final LinearLayoutManager chatLayoutManager = new LinearLayoutManager(getContext());
                     mTrebie.setmChatAdapter(chatAdapter);
+                    chatLayoutManager.setStackFromEnd(true);
+                    chatRecyclerView.setAdapter(chatAdapter);
+                    chatRecyclerView.setLayoutManager(chatLayoutManager);
                     ImageButton ibSend = (ImageButton) homeView.findViewById(R.id.ibSendMessage);
                     final EditText etChatMessage = (EditText) homeView.findViewById(R.id.etChatMessage);
                     ibSend.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-
                             String message = etChatMessage.getText().toString();
                             chatAdapter.addMessage(message, true);
                             etChatMessage.setText("");
