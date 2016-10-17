@@ -237,6 +237,7 @@ public class MainActivity extends AppCompatActivity {
                     final ChatAdapter chatAdapter = new ChatAdapter();
                     final LinearLayoutManager chatLayoutManager = new LinearLayoutManager(getContext());
                     mTrebie.setmChatAdapter(chatAdapter);
+                    mTrebie.setmRecyclerView(chatRecyclerView);
                     chatLayoutManager.setStackFromEnd(true);
                     chatRecyclerView.setAdapter(chatAdapter);
                     chatRecyclerView.setLayoutManager(chatLayoutManager);
@@ -246,9 +247,12 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onClick(View view) {
                             String message = etChatMessage.getText().toString();
-                            chatAdapter.addMessage(message, true);
-                            etChatMessage.setText("");
-                            mTrebie.converse(message, null);
+                            if (!message.equals("")) {
+                                chatAdapter.addMessage(message, true);
+                                chatRecyclerView.smoothScrollToPosition(chatAdapter.getItemCount());
+                                etChatMessage.setText("");
+                                mTrebie.converse(message, null);
+                            }
                         }
                     });
                     break;

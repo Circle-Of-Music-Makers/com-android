@@ -1,6 +1,7 @@
 package com.sidzi.circleofmusic.ai;
 
 import android.content.Context;
+import android.support.v7.widget.RecyclerView;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -21,13 +22,19 @@ import java.util.Map;
 
 public class Trebie {
     private String converse_url = null;
-    private RequestQueue botChatQueue = null;
+    private RequestQueue trebieQueue = null;
     private ChatAdapter mChatAdapter = null;
+    private RecyclerView mRecyclerView = null;
+
 
     public Trebie(Context mContext) {
         super();
         converse_url = "https://api.wit.ai/" + "converse?session_id=" + new BigInteger(16, new SecureRandom()).toString();
-        botChatQueue = Volley.newRequestQueue(mContext);
+        trebieQueue = Volley.newRequestQueue(mContext);
+    }
+
+    public void setmRecyclerView(RecyclerView mRecyclerView) {
+        this.mRecyclerView = mRecyclerView;
     }
 
     public void setmChatAdapter(ChatAdapter mChatAdapter) {
@@ -48,6 +55,7 @@ public class Trebie {
                         case "msg":
                             //                        update message to adapter
                             mChatAdapter.addMessage(response.get("msg").toString(), false);
+                            mRecyclerView.smoothScrollToPosition(mChatAdapter.getItemCount());
                             break;
                         case "action":
                             executeAction(response.get("action").toString(), response.getJSONObject("entities"));
@@ -67,16 +75,29 @@ public class Trebie {
                 error.printStackTrace();
             }
         });
-        botChatQueue.add(botChatRequest);
+        trebieQueue.add(botChatRequest);
     }
 
     private void executeAction(String action, JSONObject entities) throws JSONException {
         switch (TrebieActions.valueOf(action)) {
             case get_music:
                 String emotion = entities.getJSONArray("emotion").getJSONObject(0).get("value").toString();
-//                get emotion specific request
-                String song = "Hailey Bailey!!!";
-                converse(null, new JSONObject().put("song", song));
+                JsonObjectRequest recommendationRequest = new JsonObjectRequest(Request.Method.GET, "http://circleofmusic-sidzi.rhcloud.com/recommend" + emotion, null, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            converse(null, new JSONObject().put("song", response.get("song").toString()));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                });
+                trebieQueue.add(recommendationRequest);
         }
     }
 

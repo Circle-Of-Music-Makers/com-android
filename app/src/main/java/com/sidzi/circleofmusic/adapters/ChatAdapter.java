@@ -38,10 +38,12 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(ChatAdapter.ViewHolder holder, int position) {
         if (chatEntries.get(holder.getAdapterPosition()).isSelf_flag()) {
+            holder.tvChatMessageLocal.setVisibility(View.VISIBLE);
             holder.tvChatMessageLocal.setText(chatEntries.get(holder.getAdapterPosition()).getBody());
             holder.tvChatMessageRemote.setVisibility(View.GONE);
 
         } else {
+            holder.tvChatMessageRemote.setVisibility(View.VISIBLE);
             holder.tvChatMessageRemote.setText(chatEntries.get(holder.getAdapterPosition()).getBody());
             holder.tvChatMessageLocal.setVisibility(View.GONE);
         }
