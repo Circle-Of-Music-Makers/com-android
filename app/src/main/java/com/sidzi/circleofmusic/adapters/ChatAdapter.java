@@ -7,49 +7,45 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.j256.ormlite.android.apptools.OpenHelperManager;
-import com.j256.ormlite.dao.Dao;
 import com.sidzi.circleofmusic.R;
 import com.sidzi.circleofmusic.entities.ChatMessage;
-import com.sidzi.circleofmusic.helpers.OrmHandler;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
     private List<ChatMessage> chatEntries = new ArrayList<>();
-    private Dao<ChatMessage, Integer> chatMessages;
+    //    private Dao<ChatMessage, Integer> chatMessages;
     private Context mContext;
 
     public ChatAdapter(Context mContext) {
         super();
         this.mContext = mContext;
-        updateAdapter();
+//        updateAdapter();
     }
 
 
-    private void updateAdapter() {
-        OrmHandler ormHelper = OpenHelperManager.getHelper(mContext, OrmHandler.class);
-        try {
-            chatMessages = ormHelper.getDao(ChatMessage.class);
-            chatEntries = chatMessages.queryForAll();
-            notifyDataSetChanged();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
+//    private void updateAdapter() {
+//        OrmHandler ormHelper = OpenHelperManager.getHelper(mContext, OrmHandler.class);
+//        try {
+//            chatMessages = ormHelper.getDao(ChatMessage.class);
+//            chatEntries = chatMessages.queryForAll();
+//            notifyDataSetChanged();
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     public void addMessage(String messageString, boolean chatMe) {
         if (!messageString.equals("")) {
             ChatMessage chatMessage = new ChatMessage(messageString, chatMe);
             chatEntries.add(chatMessage);
-            try {
-                chatMessages.create(chatMessage);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                chatMessages.create(chatMessage);
+//            } catch (SQLException e) {
+//                e.printStackTrace();
+//            }
             notifyItemInserted(getItemCount());
         }
     }
@@ -65,10 +61,11 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     public void onBindViewHolder(ChatAdapter.ViewHolder holder, int position) {
         if (chatEntries.get(holder.getAdapterPosition()).isSelf_flag()) {
             holder.tvChatMessageLocal.setText(chatEntries.get(holder.getAdapterPosition()).getBody());
-            holder.tvChatMessageRemote.setText("");
+            holder.tvChatMessageRemote.setVisibility(View.GONE);
+
         } else {
             holder.tvChatMessageRemote.setText(chatEntries.get(holder.getAdapterPosition()).getBody());
-            holder.tvChatMessageLocal.setText("");
+            holder.tvChatMessageLocal.setVisibility(View.GONE);
         }
     }
 
