@@ -5,7 +5,6 @@ import android.database.Cursor;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
 
-import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.sidzi.circleofmusic.adapters.TrackListAdapter;
 import com.sidzi.circleofmusic.entities.Track;
 
@@ -65,7 +64,6 @@ public class LocalMusicLoader extends AsyncTask<Void, Void, ArrayList<Track>> {
         if (mCursor != null) {
             mCursor.close();
         }
-        OpenHelperManager.releaseHelper();
         return mTrackList;
     }
 
@@ -73,6 +71,5 @@ public class LocalMusicLoader extends AsyncTask<Void, Void, ArrayList<Track>> {
     protected void onPostExecute(final ArrayList<Track> tracks) {
         super.onPostExecute(tracks);
         trackListAdapter.updateTracks(tracks);
-        new DatabaseSynchronization(mContext, tracks).execute();
     }
 }

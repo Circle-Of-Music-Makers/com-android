@@ -23,14 +23,19 @@ import java.util.List;
 public class AudioEventHandler extends BroadcastReceiver {
     private MediaPlayer mediaPlayer;
 
+    public AudioEventHandler() {
+        super();
+        mediaPlayer = new MediaPlayer();
+    }
+
     @Override
     public void onReceive(final Context context, Intent intent) {
+
         final ImageButton ibPlay = (ImageButton) ((MainActivity) context).findViewById(R.id.ibPlayPause);
+        final ImageButton ibAddToBucket = (ImageButton) ((MainActivity) context).findViewById(R.id.ibAddToBucket);
 
         final TextView tvPlayingTrackName = (TextView) ((MainActivity) context).findViewById(R.id.tvPlayingTrackName);
         final TextView tvPlayingArtistName = (TextView) ((MainActivity) context).findViewById(R.id.tvPlayingTrackArtist);
-
-        final ImageButton ibAddToBucket = (ImageButton) ((MainActivity) context).findViewById(R.id.ibAddToBucket);
 
 
         final String track_path = intent.getStringExtra("track_path");
@@ -75,30 +80,23 @@ public class AudioEventHandler extends BroadcastReceiver {
         try {
             final Dao<Track, String> dbTrack = ormHandler.getDao(Track.class);
             final List<Track> lister = dbTrack.queryForEq("path", track_path);
-            final Track temp_track = lister.get(0);
+            ibPlay.setImageResource(R.drawable.ic_track_stop);
+            tvPlayingTrackName.setText(track_name);
+            tvPlayingArtistName.setText(track_artist);
+            if (mediaPlayer.isPlaying()) {
+                mediaPlayer.stop();
+            }
+            mediaPlayer.reset();
+            mediaPlayer.setDataSource(track_path);
+            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mediaPlayer) {
+                    mediaPlayer.start();
+                }
+            });
             try {
-                try {
-                    if (temp_track.getBucket() == null || !temp_track.getBucket()) {
-                        ibAddToBucket.setImageResource(R.drawable.ic_track_bucket_add);
-                    } else {
-                        ibAddToBucket.setImageResource(R.drawable.ic_track_bucket_added);
-                    }
-                } catch (IndexOutOfBoundsException e) {
-                    ibAddToBucket.setVisibility(View.INVISIBLE);
-                }
-                if (mediaPlayer.isPlaying()) {
-                    mediaPlayer.stop();
-                }
-                ibPlay.setImageResource(R.drawable.ic_track_stop);
-                tvPlayingTrackName.setText(track_name);
-                tvPlayingArtistName.setText(track_artist);
-                mediaPlayer.reset();
-                mediaPlayer.setDataSource(track_path);
-                mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                mediaPlayer.prepare();
-                mediaPlayer.start();
-            } catch (NullPointerException e) {
-                mediaPlayer = new MediaPlayer();
+                final Track temp_track = lister.get(0);
                 mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                     @Override
                     public void onCompletion(MediaPlayer mp) {
@@ -112,17 +110,15 @@ public class AudioEventHandler extends BroadcastReceiver {
                         ibPlay.setImageResource(R.drawable.ic_track_play);
                     }
                 });
-                ibPlay.setImageResource(R.drawable.ic_track_stop);
-                tvPlayingTrackName.setText(track_name);
-                tvPlayingArtistName.setText(track_artist);
-                try {
-                    mediaPlayer.setDataSource(track_path);
-                    mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                    mediaPlayer.prepare();
-                    mediaPlayer.start();
-                } catch (IOException e1) {
-                    e1.printStackTrace();
+                if (temp_track.getBucket() == null || !temp_track.getBucket()) {
+                    ibAddToBucket.setImageResource(R.drawable.ic_track_bucket_add);
+                } else {
+                    ibAddToBucket.setImageResource(R.drawable.ic_track_bucket_added);
                 }
+                mediaPlayer.prepare();
+            } catch (IndexOutOfBoundsException e) {
+                ibAddToBucket.setVisibility(View.INVISIBLE);
+                mediaPlayer.prepareAsync();
             }
         } catch (IOException | SQLException e) {
             e.printStackTrace();

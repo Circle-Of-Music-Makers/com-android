@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -40,6 +41,7 @@ import com.sidzi.circleofmusic.adapters.TrackListAdapter;
 import com.sidzi.circleofmusic.ai.Trebie;
 import com.sidzi.circleofmusic.entities.Track;
 import com.sidzi.circleofmusic.helpers.AudioEventHandler;
+import com.sidzi.circleofmusic.helpers.DatabaseSynchronization;
 import com.sidzi.circleofmusic.helpers.HeadphoneButtonHandler;
 import com.sidzi.circleofmusic.helpers.LocalMusicLoader;
 import com.sidzi.circleofmusic.helpers.OrmHandler;
@@ -121,7 +123,6 @@ public class MainActivity extends AppCompatActivity {
             // Set up the ViewPager with the sections adapter.
             mViewPager = (ViewPager) findViewById(R.id.container);
             mViewPager.setAdapter(mSectionsPagerAdapter);
-            mViewPager.setOffscreenPageLimit(4);
 
             TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
             tabLayout.setupWithViewPager(mViewPager);
@@ -134,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public void onPageSelected(int position) {
-                    if (position == 3) {
+                    if (position == 2) {
                         fl.setVisibility(View.GONE);
                     } else {
                         if (fl.getVisibility() != View.VISIBLE) {
@@ -151,7 +152,14 @@ public class MainActivity extends AppCompatActivity {
 
                 }
             });
+            new DatabaseSynchronization(MainActivity.this).execute();
         }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        finish();
     }
 
     @Override
@@ -215,11 +223,6 @@ public class MainActivity extends AppCompatActivity {
                     mRecyclerView.setAdapter(trackListAdapter1);
                     break;
                 case 2:
-                    TrackListAdapter trackListAdapter2 = new TrackListAdapter(getContext());
-                    trackListAdapter2.updateTracks("bucket", true);
-                    mRecyclerView.setAdapter(trackListAdapter2);
-                    break;
-                case 3:
                     final TrackListAdapter trackListAdapter3 = new TrackListAdapter(getContext());
                     mRecyclerView.setAdapter(trackListAdapter3);
                     JsonArrayRequest trackRequest = new JsonArrayRequest(Request.Method.GET, com_url + "getTrackList", null, new Response.Listener<JSONArray>() {
@@ -245,7 +248,7 @@ public class MainActivity extends AppCompatActivity {
                     });
                     requestQueue.add(trackRequest);
                     break;
-                case 4:
+                case 3:
                     homeView = inflater.inflate(R.layout.fragment_chat_bot, container, false);
                     final RecyclerView chatRecyclerView = (RecyclerView) homeView.findViewById(R.id.rvChatConsole);
                     final Trebie mTrebie = new Trebie(getContext());
@@ -272,6 +275,11 @@ public class MainActivity extends AppCompatActivity {
                             }
                         }
                     });
+                    break;
+                case 4:
+                    TrackListAdapter trackListAdapter2 = new TrackListAdapter(getContext());
+                    trackListAdapter2.updateTracks("bucket", true);
+                    mRecyclerView.setAdapter(trackListAdapter2);
                     break;
             }
             return homeView;
@@ -307,11 +315,11 @@ public class MainActivity extends AppCompatActivity {
                 case 0:
                     return "Local";
                 case 1:
-                    return "Bucket";
-                case 2:
                     return "Remote";
-                case 3:
+                case 2:
                     return "Trebie";
+                case 3:
+                    return "Bucket";
             }
             return null;
         }
