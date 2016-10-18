@@ -8,6 +8,7 @@ import android.media.MediaPlayer;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.Dao;
@@ -56,8 +57,15 @@ public class AudioEventHandler extends BroadcastReceiver {
                 if (mediaPlayer != null) {
                     try {
                         final Dao<Track, String> dbTrack = ormHandler.getDao(Track.class);
-                        dbTrack.createOrUpdate(new Track(track_name, track_path, track_artist, true));
-                        ibAddToBucket.setImageResource(R.drawable.ic_track_bucket_added);
+                        List<Track> lister = dbTrack.queryForEq("path", track_path);
+                        if (lister.get(0).getBucket() == null || !lister.get(0).getBucket()) {
+                            dbTrack.createOrUpdate(new Track(track_name, track_path, track_artist, true));
+                            ibAddToBucket.setImageResource(R.drawable.ic_track_bucket_added);
+                            Toast.makeText(context, "Added to bucket", Toast.LENGTH_SHORT).show();
+                        } else {
+                            dbTrack.createOrUpdate(new Track(track_name, track_path, track_artist, false));
+                            ibAddToBucket.setImageResource(R.drawable.ic_track_bucket_add);
+                        }
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
@@ -66,46 +74,55 @@ public class AudioEventHandler extends BroadcastReceiver {
         });
         try {
             final Dao<Track, String> dbTrack = ormHandler.getDao(Track.class);
-            List<Track> lister = dbTrack.queryForEq("path", track_path);
+            final List<Track> lister = dbTrack.queryForEq("path", track_path);
+            final Track temp_track = lister.get(0);
             try {
-                if (lister.get(0).getBucket() == null || !lister.get(0).getBucket()) {
-                    ibAddToBucket.setImageResource(R.drawable.ic_track_bucket_add);
-                } else {
-                    ibAddToBucket.setImageResource(R.drawable.ic_track_bucket_added);
+                try {
+                    if (temp_track.getBucket() == null || !temp_track.getBucket()) {
+                        ibAddToBucket.setImageResource(R.drawable.ic_track_bucket_add);
+                    } else {
+                        ibAddToBucket.setImageResource(R.drawable.ic_track_bucket_added);
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                    ibAddToBucket.setVisibility(View.INVISIBLE);
                 }
-            } catch (IndexOutOfBoundsException e) {
-                ibAddToBucket.setVisibility(View.INVISIBLE);
-            }
-            if (mediaPlayer.isPlaying()) {
-                mediaPlayer.stop();
-            }
-            ibPlay.setImageResource(R.drawable.ic_track_stop);
-            tvPlayingTrackName.setText(track_name);
-            tvPlayingArtistName.setText(track_artist);
-            mediaPlayer.reset();
-            mediaPlayer.setDataSource(track_path);
-            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            mediaPlayer.prepare();
-            mediaPlayer.start();
-        } catch (NullPointerException e) {
-            mediaPlayer = new MediaPlayer();
-            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mp) {
-                    mp.reset();
-                    ibPlay.setImageResource(R.drawable.ic_track_play);
+                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.stop();
                 }
-            });
-            ibPlay.setImageResource(R.drawable.ic_track_stop);
-            tvPlayingTrackName.setText(track_name);
-            tvPlayingArtistName.setText(track_artist);
-            try {
+                ibPlay.setImageResource(R.drawable.ic_track_stop);
+                tvPlayingTrackName.setText(track_name);
+                tvPlayingArtistName.setText(track_artist);
+                mediaPlayer.reset();
                 mediaPlayer.setDataSource(track_path);
                 mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                 mediaPlayer.prepare();
                 mediaPlayer.start();
-            } catch (IOException e1) {
-                e1.printStackTrace();
+            } catch (NullPointerException e) {
+                mediaPlayer = new MediaPlayer();
+                mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                    @Override
+                    public void onCompletion(MediaPlayer mp) {
+                        temp_track.setPlay_count(temp_track.getPlay_count() + 1);
+                        try {
+                            dbTrack.update(temp_track);
+                        } catch (SQLException e1) {
+                            e1.printStackTrace();
+                        }
+                        mp.reset();
+                        ibPlay.setImageResource(R.drawable.ic_track_play);
+                    }
+                });
+                ibPlay.setImageResource(R.drawable.ic_track_stop);
+                tvPlayingTrackName.setText(track_name);
+                tvPlayingArtistName.setText(track_artist);
+                try {
+                    mediaPlayer.setDataSource(track_path);
+                    mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                    mediaPlayer.prepare();
+                    mediaPlayer.start();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
             }
         } catch (IOException | SQLException e) {
             e.printStackTrace();

@@ -114,13 +114,14 @@ public class MainActivity extends AppCompatActivity {
             audioManager.registerMediaButtonEventReceiver(componentName);
             Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
             setSupportActionBar(toolbar);
-            // Create the adapter that will return a fragment for each of the three
+            // Create the adapter that will return a fragment for each of the four
             // primary sections of the activity.
             mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
             // Set up the ViewPager with the sections adapter.
             mViewPager = (ViewPager) findViewById(R.id.container);
             mViewPager.setAdapter(mSectionsPagerAdapter);
+            mViewPager.setOffscreenPageLimit(4);
 
             TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
             tabLayout.setupWithViewPager(mViewPager);
@@ -138,6 +139,9 @@ public class MainActivity extends AppCompatActivity {
                     } else {
                         if (fl.getVisibility() != View.VISIBLE) {
                             fl.setVisibility(View.VISIBLE);
+                        }
+                        if (position == 1) {
+                            mSectionsPagerAdapter.notifyDataSetChanged();
                         }
                     }
                 }
@@ -171,6 +175,7 @@ public class MainActivity extends AppCompatActivity {
         private static final String ARG_SECTION_NUMBER = "section_number";
 
         public PlaceholderFragment() {
+
         }
 
         /**

@@ -18,6 +18,8 @@ public class Track {
     private Boolean bucket;
     @DatabaseField
     private Boolean local;
+    @DatabaseField(defaultValue = "0")
+    private Integer play_count;
 
     public Track() {
     }
@@ -70,5 +72,17 @@ public class Track {
 
     public String getArtist() {
         return artist;
+    }
+
+    public Integer getPlay_count() {
+        return play_count;
+    }
+
+    public void setPlay_count(Integer play_count) {
+        this.play_count = play_count;
+    }
+
+    public Boolean getLocal() {
+        return local;
     }
 }
