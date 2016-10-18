@@ -1,6 +1,7 @@
 package com.sidzi.circleofmusic.ai;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 
 import com.android.volley.AuthFailureError;
@@ -10,12 +11,16 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.sidzi.circleofmusic.MainActivity;
 import com.sidzi.circleofmusic.adapters.ChatAdapter;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.net.URLEncoder;
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,10 +30,12 @@ public class Trebie {
     private RequestQueue trebieQueue = null;
     private ChatAdapter mChatAdapter = null;
     private RecyclerView mRecyclerView = null;
+    private Context mContext = null;
 
 
     public Trebie(Context mContext) {
         super();
+        this.mContext = mContext;
         converse_url = "https://api.wit.ai/" + "converse?session_id=" + new BigInteger(16, new SecureRandom()).toString();
         trebieQueue = Volley.newRequestQueue(mContext);
     }
@@ -45,7 +52,11 @@ public class Trebie {
         JsonObjectRequest botChatRequest;
         String temp_url = converse_url;
         if (message != null) {
-            temp_url += "&q=" + message;
+            try {
+                temp_url += "&q=" + URLEncoder.encode(message, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
         }
         botChatRequest = new JsonObjectAuthRequest(Request.Method.POST, temp_url, conversation_context, new Response.Listener<JSONObject>() {
             @Override
@@ -53,7 +64,7 @@ public class Trebie {
                 try {
                     switch (response.get("type").toString()) {
                         case "msg":
-                            //                        update message to adapter
+                            //      update message to adapter
                             mChatAdapter.addMessage(response.get("msg").toString(), false);
                             mRecyclerView.smoothScrollToPosition(mChatAdapter.getItemCount());
                             break;
@@ -65,7 +76,7 @@ public class Trebie {
                         default:
                             break;
                     }
-                } catch (JSONException e) {
+                } catch (JSONException | IOException e) {
                     e.printStackTrace();
                 }
             }
@@ -78,7 +89,7 @@ public class Trebie {
         trebieQueue.add(botChatRequest);
     }
 
-    private void executeAction(String action, JSONObject entities) throws JSONException {
+    private void executeAction(String action, JSONObject entities) throws JSONException, IOException {
         switch (TrebieActions.valueOf(action)) {
             case get_music:
                 String emotion = entities.getJSONArray("emotion").getJSONObject(0).get("value").toString();
@@ -98,16 +109,40 @@ public class Trebie {
                     }
                 });
                 trebieQueue.add(recommendationRequest);
+                break;
+            case play_music:
+                String genre = entities.getJSONArray("genre").getJSONObject(0).get("value").toString();
+                converse(null, new JSONObject().put("link", ""));
+                Intent ready_track = new Intent("com.sidzi.circleofmusic.PLAY_TRACK");
+                ready_track.putExtra("track_path", MainActivity.com_url + "stream" + genre);
+                ready_track.putExtra("track_name", genre);
+                ready_track.putExtra("track_artist", "some " + genre + " artist");
+                mContext.sendBroadcast(ready_track);
+                break;
+            case stop_music:
         }
     }
 
     private enum TrebieActions {
-        get_music("get_music");
+        play_music("play_music"),
+        get_music("get_music"),
+        stop_music("stop_music");
 
         public final String action_name;
 
         TrebieActions(String action_name) {
             this.action_name = action_name;
+        }
+    }
+
+    private enum TrebieEmotions {
+        anger(""),
+        joy(""),
+        sadness("");
+        public final String emotion_name;
+
+        TrebieEmotions(String emotion_name) {
+            this.emotion_name = emotion_name;
         }
     }
 

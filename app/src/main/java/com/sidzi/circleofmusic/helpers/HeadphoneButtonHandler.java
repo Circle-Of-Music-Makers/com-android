@@ -8,5 +8,6 @@ public class HeadphoneButtonHandler extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 //        TODO implement adding to bucket here
+        System.out.print("");
     }
 }

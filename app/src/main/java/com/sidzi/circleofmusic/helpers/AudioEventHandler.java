@@ -31,10 +31,6 @@ public class AudioEventHandler extends BroadcastReceiver {
 
         final ImageButton ibAddToBucket = (ImageButton) ((MainActivity) context).findViewById(R.id.ibAddToBucket);
 
-//        assert ibPlay != null;
-//        assert ibAddToBucket != null;
-//        assert tvPlayingTrackName != null;
-//        assert tvPlayingArtistName != null;
 
         final String track_path = intent.getStringExtra("track_path");
         final String track_name = intent.getStringExtra("track_name");
@@ -46,8 +42,7 @@ public class AudioEventHandler extends BroadcastReceiver {
             @Override
             public void onClick(final View v) {
                 if (mediaPlayer.isPlaying()) {
-                    mediaPlayer.stop();
-                    mediaPlayer.reset();
+                    mediaPlayer.pause();
                     ((ImageButton) v).setImageResource(R.drawable.ic_track_play);
                 } else {
                     mediaPlayer.start();
@@ -69,33 +64,29 @@ public class AudioEventHandler extends BroadcastReceiver {
                 }
             }
         });
-
         try {
             final Dao<Track, String> dbTrack = ormHandler.getDao(Track.class);
             List<Track> lister = dbTrack.queryForEq("path", track_path);
-            if (lister.get(0).getBucket() == null || !lister.get(0).getBucket()) {
-                ibAddToBucket.setImageResource(R.drawable.ic_track_bucket_add);
-            } else {
-                ibAddToBucket.setImageResource(R.drawable.ic_track_bucket_added);
+            try {
+                if (lister.get(0).getBucket() == null || !lister.get(0).getBucket()) {
+                    ibAddToBucket.setImageResource(R.drawable.ic_track_bucket_add);
+                } else {
+                    ibAddToBucket.setImageResource(R.drawable.ic_track_bucket_added);
+                }
+            } catch (IndexOutOfBoundsException e) {
+                ibAddToBucket.setVisibility(View.INVISIBLE);
             }
-            if (!mediaPlayer.isPlaying()) {
-                ibPlay.setImageResource(R.drawable.ic_track_play);
-                tvPlayingTrackName.setText(track_name);
-                tvPlayingArtistName.setText(track_artist);
-                mediaPlayer.reset();
-                mediaPlayer.setDataSource(track_path);
-                mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                mediaPlayer.prepare();
-            } else {
+            if (mediaPlayer.isPlaying()) {
                 mediaPlayer.stop();
-                mediaPlayer.reset();
-                ibPlay.setImageResource(R.drawable.ic_track_play);
-                tvPlayingTrackName.setText(track_name);
-                tvPlayingArtistName.setText(track_artist);
-                mediaPlayer.setDataSource(track_path);
-                mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                mediaPlayer.prepare();
             }
+            ibPlay.setImageResource(R.drawable.ic_track_stop);
+            tvPlayingTrackName.setText(track_name);
+            tvPlayingArtistName.setText(track_artist);
+            mediaPlayer.reset();
+            mediaPlayer.setDataSource(track_path);
+            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            mediaPlayer.prepare();
+            mediaPlayer.start();
         } catch (NullPointerException e) {
             mediaPlayer = new MediaPlayer();
             mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
@@ -105,13 +96,14 @@ public class AudioEventHandler extends BroadcastReceiver {
                     ibPlay.setImageResource(R.drawable.ic_track_play);
                 }
             });
-            ibPlay.setImageResource(R.drawable.ic_track_play);
+            ibPlay.setImageResource(R.drawable.ic_track_stop);
             tvPlayingTrackName.setText(track_name);
             tvPlayingArtistName.setText(track_artist);
             try {
                 mediaPlayer.setDataSource(track_path);
                 mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                 mediaPlayer.prepare();
+                mediaPlayer.start();
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
