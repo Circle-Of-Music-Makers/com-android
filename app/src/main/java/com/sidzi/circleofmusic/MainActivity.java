@@ -198,7 +198,9 @@ public class MainActivity extends AppCompatActivity {
             assert mRecyclerView != null;
             mRecyclerView.setLayoutManager(mLayoutManager);
             mRecyclerView.setHasFixedSize(true);
-            mRecyclerView.addItemDecoration(new VerticalSpaceDecorationHelper(getContext()));
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
+                mRecyclerView.addItemDecoration(new VerticalSpaceDecorationHelper(getContext()));
+            }
 
             switch (getArguments().getInt(ARG_SECTION_NUMBER)) {
                 case 1:
