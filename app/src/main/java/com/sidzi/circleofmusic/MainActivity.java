@@ -42,7 +42,6 @@ import com.sidzi.circleofmusic.ai.Trebie;
 import com.sidzi.circleofmusic.entities.Track;
 import com.sidzi.circleofmusic.helpers.AudioEventHandler;
 import com.sidzi.circleofmusic.helpers.DatabaseSynchronization;
-import com.sidzi.circleofmusic.helpers.HeadphoneButtonHandler;
 import com.sidzi.circleofmusic.helpers.LocalMusicLoader;
 import com.sidzi.circleofmusic.helpers.OrmHandler;
 import com.sidzi.circleofmusic.helpers.VerticalSpaceDecorationHelper;
@@ -86,7 +85,6 @@ public class MainActivity extends AppCompatActivity {
                 requestPermissions(perms, 202);
             }
         } else {
-
             UploadService.NAMESPACE = BuildConfig.APPLICATION_ID;
 
             RequestQueue requestQueue = Volley.newRequestQueue(this);
@@ -112,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
             mAudioEventHandler = new AudioEventHandler();
             registerReceiver(mAudioEventHandler, new IntentFilter("com.sidzi.circleofmusic.PLAY_TRACK"));
             AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-            ComponentName componentName = new ComponentName(getPackageName(), HeadphoneButtonHandler.class.getName());
+            ComponentName componentName = new ComponentName(getPackageName(), AudioEventHandler.class.getName());
             audioManager.registerMediaButtonEventReceiver(componentName);
             Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
             setSupportActionBar(toolbar);
