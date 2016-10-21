@@ -5,6 +5,7 @@
     android:id="@+id/main_content"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
     android:fitsSystemWindows="true"
     tools:context="com.sidzi.circleofmusic.MainActivity">
 
@@ -43,18 +44,19 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:background="@color/primary"
-        android:elevation="15dp">
+        android:background="@color/primary">
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:weightSum="3">
 
             <ImageButton
                 android:id="@+id/ibPlayPause"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="start"
+                android:layout_gravity="center"
+                android:layout_weight=".5"
                 android:background="@android:color/transparent"
                 android:contentDescription="@string/play_and_stop_button"
                 android:paddingBottom="@dimen/activity_vertical_margin"
@@ -66,8 +68,8 @@
             <RelativeLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toEndOf="@+id/ibPlayPause"
-                android:layout_toStartOf="@+id/ibAddToBucket"
+                android:layout_weight="2"
+                android:gravity="center"
                 android:paddingBottom="@dimen/activity_vertical_margin"
                 android:paddingLeft="@dimen/activity_horizontal_margin"
                 android:paddingRight="@dimen/activity_horizontal_margin"
@@ -81,12 +83,19 @@
                     android:ellipsize="end"
                     android:maxLines="1" />
 
+                <ProgressBar
+                    android:id="@+id/pbTrackPlay"
+                    style="@style/Base.Widget.AppCompat.ProgressBar.Horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/tvPlayingTrackName" />
+
                 <TextView
                     android:id="@+id/tvPlayingTrackArtist"
                     style="@style/TextAppearance.AppCompat.Small.Inverse"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/tvPlayingTrackName"
+                    android:layout_below="@+id/pbTrackPlay"
                     android:ellipsize="end"
                     android:maxLines="1" />
 
@@ -96,7 +105,8 @@
                 android:id="@+id/ibAddToBucket"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
+                android:layout_gravity="center"
+                android:layout_weight=".5"
                 android:background="@android:color/transparent"
                 android:contentDescription="@string/add_to_bucket"
                 android:paddingBottom="@dimen/activity_vertical_margin"
@@ -104,6 +114,6 @@
                 android:paddingRight="@dimen/activity_horizontal_margin"
                 android:paddingTop="@dimen/activity_vertical_margin"
                 android:src="@drawable/ic_track_bucket_add" />
-        </RelativeLayout>
+        </LinearLayout>
     </FrameLayout>
 </android.support.design.widget.CoordinatorLayout>

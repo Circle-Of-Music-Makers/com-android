@@ -7,7 +7,7 @@
         <item name="colorPrimary">@color/primary</item>
     </style>
 
-    <style name="splashScreen" parent="@android:style/Theme.DeviceDefault.Light.NoActionBar">
+    <style name="splashScreen" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:windowBackground">@drawable/splash</item>
     </style>
 

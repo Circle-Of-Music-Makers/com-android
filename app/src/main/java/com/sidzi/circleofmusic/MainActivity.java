@@ -52,6 +52,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.sql.SQLException;
 
 public class MainActivity extends AppCompatActivity {
@@ -75,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setTheme(R.style.AppTheme_NoActionBar);
         setContentView(R.layout.activity_main);
 
         if (ContextCompat.checkSelfPermission(MainActivity.this,
@@ -230,10 +233,10 @@ public class MainActivity extends AppCompatActivity {
                             try {
                                 Dao<Track, String> mTrack = orm.getDao(Track.class);
                                 for (int i = 0; i < response.length(); i++) {
-                                    mTrack.createIfNotExists(new Track(false, response.get(i).toString(), com_url + "streamTrack" + response.get(i).toString(), ""));
+                                    mTrack.createIfNotExists(new Track(false, response.get(i).toString(), com_url + "streamTrack" + URLEncoder.encode(response.get(i).toString(), "UTF-8"), ""));
                                 }
                                 trackListAdapter3.updateTracks("local", false);
-                            } catch (SQLException | JSONException e) {
+                            } catch (SQLException | JSONException | UnsupportedEncodingException e) {
                                 e.printStackTrace();
                             }
                             OpenHelperManager.releaseHelper();
@@ -259,7 +262,7 @@ public class MainActivity extends AppCompatActivity {
                     chatRecyclerView.setLayoutManager(chatLayoutManager);
                     ImageButton ibSend = (ImageButton) homeView.findViewById(R.id.ibSendMessage);
                     final EditText etChatMessage = (EditText) homeView.findViewById(R.id.etChatMessage);
-                    etChatMessage.setHint("Say \"Hi\" to Trebie");
+                    etChatMessage.setHint("Say \"help me\" to Trebie to get started");
                     ibSend.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {

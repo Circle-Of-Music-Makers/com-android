@@ -3,10 +3,12 @@ package com.sidzi.circleofmusic.helpers;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.PorterDuff;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,6 +21,7 @@ import com.sidzi.circleofmusic.entities.Track;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AudioEventHandler extends BroadcastReceiver {
     static private String mRunningTrackPath = null;
@@ -29,6 +32,8 @@ public class AudioEventHandler extends BroadcastReceiver {
     private TextView tvPlayingArtistName = null;
     private ImageButton ibPlay = null;
     private ImageButton ibAddToBucket = null;
+    private ProgressBar pbTrackPlay = null;
+    private TrackProgressObserver mTrackProgressObserver = null;
 
     public AudioEventHandler() {
         super();
@@ -38,6 +43,8 @@ public class AudioEventHandler extends BroadcastReceiver {
             @Override
             public void onPrepared(MediaPlayer mediaPlayer) {
                 mediaPlayer.start();
+                mTrackProgressObserver = new TrackProgressObserver();
+                new Thread(mTrackProgressObserver).start();
             }
         });
     }
@@ -47,10 +54,14 @@ public class AudioEventHandler extends BroadcastReceiver {
 
         if (intent.getAction().equals("com.sidzi.circleofmusic.PLAY_TRACK")) {
 
+
             tvPlayingTrackName = (TextView) ((MainActivity) context).findViewById(R.id.tvPlayingTrackName);
             tvPlayingArtistName = (TextView) ((MainActivity) context).findViewById(R.id.tvPlayingTrackArtist);
             ibPlay = (ImageButton) ((MainActivity) context).findViewById(R.id.ibPlayPause);
             ibAddToBucket = (ImageButton) ((MainActivity) context).findViewById(R.id.ibAddToBucket);
+            pbTrackPlay = (ProgressBar) ((MainActivity) context).findViewById(R.id.pbTrackPlay);
+
+            pbTrackPlay.getProgressDrawable().setColorFilter(context.getResources().getColor(R.color.textInverted), PorterDuff.Mode.SRC_IN);
 
             final String track_path = intent.getStringExtra("track_path");
             final String track_name = intent.getStringExtra("track_name");
@@ -174,10 +185,38 @@ public class AudioEventHandler extends BroadcastReceiver {
             mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mediaPlayer) {
+                    pbTrackPlay.setProgress(0);
+                    mTrackProgressObserver.stop();
                     playNext();
                 }
             });
             mediaPlayer.prepare();
+        }
+    }
+
+    private class TrackProgressObserver implements Runnable {
+        private AtomicBoolean stop = new AtomicBoolean(false);
+        private int totalDuration;
+
+        TrackProgressObserver() {
+            super();
+            totalDuration = mediaPlayer.getDuration();
+        }
+
+        void stop() {
+            stop.set(true);
+        }
+
+        @Override
+        public void run() {
+            while (!stop.get()) {
+                pbTrackPlay.setProgress((int) (((float) mediaPlayer.getCurrentPosition() / (float) totalDuration) * 100));
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 }

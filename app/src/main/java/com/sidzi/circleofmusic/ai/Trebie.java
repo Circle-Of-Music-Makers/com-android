@@ -67,6 +67,7 @@ public class Trebie {
                             //      update message to adapter
                             mChatAdapter.addMessage(response.get("msg").toString(), false);
                             mRecyclerView.smoothScrollToPosition(mChatAdapter.getItemCount());
+                            converse(null, null);
                             break;
                         case "action":
                             executeAction(response.get("action").toString(), response.getJSONObject("entities"));
@@ -112,21 +113,40 @@ public class Trebie {
                 break;
             case play_music:
                 String genre = entities.getJSONArray("genre").getJSONObject(0).get("value").toString();
-                converse(null, new JSONObject().put("link", ""));
                 Intent ready_track = new Intent("com.sidzi.circleofmusic.PLAY_TRACK");
                 ready_track.putExtra("track_path", MainActivity.com_url + "stream" + genre);
                 ready_track.putExtra("track_name", genre);
                 ready_track.putExtra("track_artist", "some " + genre + " artist");
                 mContext.sendBroadcast(ready_track);
+                converse(null, null);
                 break;
-            case stop_music:
+            case get_random:
+                JsonObjectRequest randomRequest = new JsonObjectRequest(Request.Method.GET, "http://circleofmusic-sidzi.rhcloud.com/random", null, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            converse(null, new JSONObject().put("random_song", response.get("song").toString()));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                });
+                trebieQueue.add(randomRequest);
+            case workout_emotion:
+                converse(null, null);
         }
     }
 
     private enum TrebieActions {
         play_music("play_music"),
         get_music("get_music"),
-        stop_music("stop_music");
+        workout_emotion("workout_emotion"),
+        get_random("get_random");
 
         public final String action_name;
 
