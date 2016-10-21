@@ -11,21 +11,12 @@ android {
         versionCode 6
         versionName "Flute"
     }
-    signingConfigs {
-        release {
-            storeFile file("myreleasekey.jks")
-            storePassword "password"
-            keyAlias "MyReleaseKey"
-            keyPassword "password"
-        }
-    }
 
     buildTypes {
         release {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
         }
     }
 }
@@ -38,4 +29,5 @@ dependencies {
     compile 'com.android.volley:volley:1.0.0'
     compile 'com.j256.ormlite:ormlite-android:5.0'
     compile 'com.j256.ormlite:ormlite-core:5.0'
+    compile 'com.rollbar:rollbar-android:0.1.3'
 }

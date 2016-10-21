@@ -61,7 +61,7 @@ public class AudioEventHandler extends BroadcastReceiver {
             ibAddToBucket = (ImageButton) ((MainActivity) context).findViewById(R.id.ibAddToBucket);
             pbTrackPlay = (ProgressBar) ((MainActivity) context).findViewById(R.id.pbTrackPlay);
 
-            pbTrackPlay.getProgressDrawable().setColorFilter(context.getResources().getColor(R.color.textInverted), PorterDuff.Mode.SRC_IN);
+            pbTrackPlay.getProgressDrawable().setColorFilter(context.getResources().getColor(R.color.primaryInverted), PorterDuff.Mode.SRC_IN);
 
             final String track_path = intent.getStringExtra("track_path");
             final String track_name = intent.getStringExtra("track_name");
@@ -107,18 +107,17 @@ public class AudioEventHandler extends BroadcastReceiver {
                     }
                 }
             });
+            boolean bucket = false;
             try {
-                boolean bucket = false;
                 try {
                     Dao<Track, String> dbTrack = ormHandler.getDao(Track.class);
-                    List<Track> lister = dbTrack.queryForEq("path", track_path);
                     mTracksList = dbTrack.queryForAll();
                     for (playing_position = 0; playing_position < mTracksList.size(); playing_position++) {
                         if (mTracksList.get(playing_position).getPath().equals(mRunningTrackPath)) {
                             break;
                         }
                     }
-                    Track temp_track = lister.get(0);
+                    Track temp_track = dbTrack.queryForEq("path", track_path).get(0);
                     temp_track.setPlay_count(temp_track.getPlay_count() + 1);
                     try {
                         dbTrack.update(temp_track);
@@ -129,8 +128,12 @@ public class AudioEventHandler extends BroadcastReceiver {
                 } catch (IndexOutOfBoundsException e) {
                     ibAddToBucket.setVisibility(View.INVISIBLE);
                 }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            try {
                 playSong(track_path, track_name, track_artist, bucket);
-            } catch (IOException | SQLException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         } else {
@@ -201,6 +204,12 @@ public class AudioEventHandler extends BroadcastReceiver {
         TrackProgressObserver() {
             super();
             totalDuration = mediaPlayer.getDuration();
+            if (totalDuration == -1)
+                pbTrackPlay.setIndeterminate(true);
+            else {
+                pbTrackPlay.setIndeterminate(false);
+                pbTrackPlay.setMax(totalDuration / 1000);
+            }
         }
 
         void stop() {
@@ -210,9 +219,9 @@ public class AudioEventHandler extends BroadcastReceiver {
         @Override
         public void run() {
             while (!stop.get()) {
-                pbTrackPlay.setProgress((int) (((float) mediaPlayer.getCurrentPosition() / (float) totalDuration) * 100));
+                pbTrackPlay.setProgress(mediaPlayer.getCurrentPosition() / 1000);
                 try {
-                    Thread.sleep(200);
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

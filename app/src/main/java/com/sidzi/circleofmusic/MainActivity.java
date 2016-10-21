@@ -36,6 +36,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.Dao;
+import com.rollbar.android.Rollbar;
 import com.sidzi.circleofmusic.adapters.ChatAdapter;
 import com.sidzi.circleofmusic.adapters.TrackListAdapter;
 import com.sidzi.circleofmusic.ai.Trebie;
@@ -77,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Rollbar.init(this, "", "production");
         setTheme(R.style.AppTheme_NoActionBar);
         setContentView(R.layout.activity_main);
 

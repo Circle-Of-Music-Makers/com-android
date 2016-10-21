@@ -4,7 +4,7 @@
         android:width="1dp"
         android:color="@color/primary" />
 
-    <solid android:color="@color/textInverted" />
+    <solid android:color="@color/primaryInverted" />
 
     <padding
         android:bottom="@dimen/activity_vertical_margin"
