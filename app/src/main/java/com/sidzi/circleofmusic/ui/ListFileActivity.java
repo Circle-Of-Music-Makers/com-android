@@ -1,4 +1,4 @@
-package com.sidzi.circleofmusic;
+package com.sidzi.circleofmusic.ui;
 
 import android.app.ListActivity;
 import android.content.Intent;
@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.sidzi.circleofmusic.R;
 import com.sidzi.circleofmusic.helpers.UploadHelper;
 
 import java.io.File;

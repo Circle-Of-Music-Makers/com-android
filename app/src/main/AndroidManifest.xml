@@ -20,11 +20,10 @@
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:launchMode="singleInstance"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.MainActivity"
             android:label="@string/title_activity_main"
             android:theme="@style/splashScreen"
             android:windowSoftInputMode="adjustPan">
@@ -43,9 +42,9 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".ListFileActivity" />
+        <activity android:name=".ui.ListFileActivity" />
         <activity
-            android:name=".EosActivity"
+            android:name=".ui.EosActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_eos"
             android:theme="@style/FullscreenTheme" />

@@ -14,9 +14,12 @@ import android.widget.Toast;
 
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.Dao;
-import com.sidzi.circleofmusic.MainActivity;
+import com.j256.ormlite.stmt.PreparedQuery;
+import com.j256.ormlite.stmt.QueryBuilder;
+import com.j256.ormlite.stmt.SelectArg;
 import com.sidzi.circleofmusic.R;
 import com.sidzi.circleofmusic.entities.Track;
+import com.sidzi.circleofmusic.ui.MainActivity;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -24,10 +27,10 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AudioEventHandler extends BroadcastReceiver {
+    static public MediaPlayer mediaPlayer;
     static private String mRunningTrackPath = null;
     static private List<Track> mTracksList = null;
     static private int playing_position = 0;
-    private MediaPlayer mediaPlayer;
     private TextView tvPlayingTrackName = null;
     private TextView tvPlayingArtistName = null;
     private ImageButton ibPlay = null;
@@ -89,7 +92,12 @@ public class AudioEventHandler extends BroadcastReceiver {
                     if (mediaPlayer != null) {
                         try {
                             final Dao<Track, String> dbTrack = ormHandler.getDao(Track.class);
-                            List<Track> lister = dbTrack.queryForEq("path", mRunningTrackPath);
+                            QueryBuilder<Track, String> queryBuilder = dbTrack.queryBuilder();
+                            SelectArg selectArg = new SelectArg();
+                            queryBuilder.where().eq("path", selectArg);
+                            PreparedQuery<Track> preparedQuery = queryBuilder.prepare();
+                            selectArg.setValue(mRunningTrackPath);
+                            List<Track> lister = dbTrack.query(preparedQuery);
                             Track temp_track = lister.get(0);
                             boolean bucket;
                             if (temp_track.getBucket() == null || !temp_track.getBucket()) {
@@ -117,7 +125,12 @@ public class AudioEventHandler extends BroadcastReceiver {
                             break;
                         }
                     }
-                    Track temp_track = dbTrack.queryForEq("path", track_path).get(0);
+                    QueryBuilder<Track, String> queryBuilder = dbTrack.queryBuilder();
+                    SelectArg selectArg = new SelectArg();
+                    queryBuilder.where().eq("path", selectArg);
+                    PreparedQuery<Track> preparedQuery = queryBuilder.prepare();
+                    selectArg.setValue(mRunningTrackPath);
+                    Track temp_track = dbTrack.query(preparedQuery).get(0);
                     temp_track.setPlay_count(temp_track.getPlay_count() + 1);
                     try {
                         dbTrack.update(temp_track);
@@ -141,7 +154,12 @@ public class AudioEventHandler extends BroadcastReceiver {
                 final OrmHandler ormHandler = OpenHelperManager.getHelper(context, OrmHandler.class);
                 try {
                     Dao<Track, String> dbTrack = ormHandler.getDao(Track.class);
-                    List<Track> lister = dbTrack.queryForEq("path", mRunningTrackPath);
+                    QueryBuilder<Track, String> queryBuilder = dbTrack.queryBuilder();
+                    SelectArg selectArg = new SelectArg();
+                    queryBuilder.where().eq("path", selectArg);
+                    PreparedQuery<Track> preparedQuery = queryBuilder.prepare();
+                    selectArg.setValue(mRunningTrackPath);
+                    List<Track> lister = dbTrack.query(preparedQuery);
                     Track temp_track = lister.get(0);
                     temp_track.setBucket(true);
                     dbTrack.update(temp_track);
@@ -182,6 +200,7 @@ public class AudioEventHandler extends BroadcastReceiver {
         }
         mediaPlayer.reset();
         mediaPlayer.setDataSource(track_path);
+        mRunningTrackPath = track_path;
         if (track_path.startsWith("http://")) {
             mediaPlayer.prepareAsync();
         } else {
@@ -197,7 +216,7 @@ public class AudioEventHandler extends BroadcastReceiver {
         }
     }
 
-    private class TrackProgressObserver implements Runnable {
+    public class TrackProgressObserver implements Runnable {
         private AtomicBoolean stop = new AtomicBoolean(false);
         private int totalDuration;
 
@@ -219,11 +238,13 @@ public class AudioEventHandler extends BroadcastReceiver {
         @Override
         public void run() {
             while (!stop.get()) {
-                pbTrackPlay.setProgress(mediaPlayer.getCurrentPosition() / 1000);
                 try {
+                    pbTrackPlay.setProgress(mediaPlayer.getCurrentPosition() / 1000);
                     Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
+                } catch (IllegalStateException e) {
+                    this.stop();
                 }
             }
         }

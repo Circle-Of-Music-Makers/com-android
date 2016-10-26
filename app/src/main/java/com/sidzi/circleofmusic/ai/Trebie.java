@@ -11,8 +11,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.sidzi.circleofmusic.MainActivity;
 import com.sidzi.circleofmusic.adapters.ChatAdapter;
+import com.sidzi.circleofmusic.ui.MainActivity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -174,7 +174,7 @@ public class Trebie {
         @Override
         public Map<String, String> getHeaders() throws AuthFailureError {
             Map<String, String> params = new HashMap<>();
-//            TODO remove this before committing
+//        TODO remove key before commit
             String auth = "Bearer " + "";
             params.put("Content-Type", "application/json");
             params.put("Accept", "application/json");

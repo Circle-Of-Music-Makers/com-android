@@ -1,4 +1,4 @@
-package com.sidzi.circleofmusic;
+package com.sidzi.circleofmusic.ui;
 
 import android.Manifest;
 import android.content.ComponentName;
@@ -37,6 +37,8 @@ import com.android.volley.toolbox.Volley;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.Dao;
 import com.rollbar.android.Rollbar;
+import com.sidzi.circleofmusic.BuildConfig;
+import com.sidzi.circleofmusic.R;
 import com.sidzi.circleofmusic.adapters.ChatAdapter;
 import com.sidzi.circleofmusic.adapters.TrackListAdapter;
 import com.sidzi.circleofmusic.ai.Trebie;
@@ -78,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+//        TODO remove key before commit
         Rollbar.init(this, "", "production");
         setTheme(R.style.AppTheme_NoActionBar);
         setContentView(R.layout.activity_main);
@@ -162,17 +165,21 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        finish();
+        recreate();
     }
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         try {
+            if (AudioEventHandler.mediaPlayer.isPlaying())
+                AudioEventHandler.mediaPlayer.stop();
+            AudioEventHandler.mediaPlayer.reset();
+            AudioEventHandler.mediaPlayer.release();
             unregisterReceiver(mAudioEventHandler);
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | NullPointerException e) {
             e.printStackTrace();
         }
+        super.onDestroy();
     }
 
     /**
