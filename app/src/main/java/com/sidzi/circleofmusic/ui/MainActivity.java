@@ -171,10 +171,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         try {
-            if (AudioEventHandler.mediaPlayer.isPlaying())
-                AudioEventHandler.mediaPlayer.stop();
-            AudioEventHandler.mediaPlayer.reset();
-            AudioEventHandler.mediaPlayer.release();
+            if (AudioEventHandler.mMediaPlayer.isPlaying())
+                AudioEventHandler.mMediaPlayer.stop();
+            AudioEventHandler.mMediaPlayer.reset();
+            AudioEventHandler.mMediaPlayer.release();
+            AudioEventHandler.mNotificationManager.cancelAll();
             unregisterReceiver(mAudioEventHandler);
         } catch (IllegalArgumentException | NullPointerException e) {
             e.printStackTrace();

@@ -1,11 +1,14 @@
 package com.sidzi.circleofmusic.helpers;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.support.v4.app.NotificationCompat;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
@@ -26,23 +29,28 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static android.content.Context.NOTIFICATION_SERVICE;
+
 public class AudioEventHandler extends BroadcastReceiver {
-    static public MediaPlayer mediaPlayer;
+    static public MediaPlayer mMediaPlayer;
+    static public NotificationManager mNotificationManager = null;
     static private String mRunningTrackPath = null;
     static private List<Track> mTracksList = null;
-    static private int playing_position = 0;
+    static private int mPlayingPosition = 0;
+    NotificationCompat.Builder mBuilder = null;
+    int notifyId = 1;
+    private TrackProgressObserver mTrackProgressObserver = null;
     private TextView tvPlayingTrackName = null;
     private TextView tvPlayingArtistName = null;
     private ImageButton ibPlay = null;
     private ImageButton ibAddToBucket = null;
     private ProgressBar pbTrackPlay = null;
-    private TrackProgressObserver mTrackProgressObserver = null;
 
     public AudioEventHandler() {
         super();
-        mediaPlayer = new MediaPlayer();
-        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+        mMediaPlayer = new MediaPlayer();
+        mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mediaPlayer) {
                 mediaPlayer.start();
@@ -70,18 +78,30 @@ public class AudioEventHandler extends BroadcastReceiver {
             final String track_name = intent.getStringExtra("track_name");
             final String track_artist = intent.getStringExtra("track_artist");
 
-            mRunningTrackPath = track_path;
+
+            //            Music Notification
+
+            mNotificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
+            PendingIntent mainActivity = PendingIntent.getActivity(context, 101, new Intent(context, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+
+            mBuilder = new NotificationCompat.Builder(context)
+                    .setSmallIcon(R.drawable.ic_statusbar)
+                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                    .setOngoing(true)
+                    .setContentIntent(mainActivity)
+                    .setPriority(NotificationCompat.PRIORITY_HIGH);
+
             final OrmHandler ormHandler = OpenHelperManager.getHelper(context, OrmHandler.class);
 
 
             ibPlay.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(final View v) {
-                    if (mediaPlayer.isPlaying()) {
-                        mediaPlayer.pause();
+                    if (mMediaPlayer.isPlaying()) {
+                        mMediaPlayer.pause();
                         ((ImageButton) v).setImageResource(R.drawable.ic_track_play);
                     } else {
-                        mediaPlayer.start();
+                        mMediaPlayer.start();
                         ((ImageButton) v).setImageResource(R.drawable.ic_track_stop);
                     }
                 }
@@ -89,7 +109,7 @@ public class AudioEventHandler extends BroadcastReceiver {
             ibAddToBucket.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (mediaPlayer != null) {
+                    if (mMediaPlayer != null) {
                         try {
                             final Dao<Track, String> dbTrack = ormHandler.getDao(Track.class);
                             QueryBuilder<Track, String> queryBuilder = dbTrack.queryBuilder();
@@ -120,8 +140,8 @@ public class AudioEventHandler extends BroadcastReceiver {
                 try {
                     Dao<Track, String> dbTrack = ormHandler.getDao(Track.class);
                     mTracksList = dbTrack.queryForAll();
-                    for (playing_position = 0; playing_position < mTracksList.size(); playing_position++) {
-                        if (mTracksList.get(playing_position).getPath().equals(mRunningTrackPath)) {
+                    for (mPlayingPosition = 0; mPlayingPosition < mTracksList.size(); mPlayingPosition++) {
+                        if (mTracksList.get(mPlayingPosition).getPath().equals(mRunningTrackPath)) {
                             break;
                         }
                     }
@@ -129,7 +149,7 @@ public class AudioEventHandler extends BroadcastReceiver {
                     SelectArg selectArg = new SelectArg();
                     queryBuilder.where().eq("path", selectArg);
                     PreparedQuery<Track> preparedQuery = queryBuilder.prepare();
-                    selectArg.setValue(mRunningTrackPath);
+                    selectArg.setValue(track_path);
                     Track temp_track = dbTrack.query(preparedQuery).get(0);
                     temp_track.setPlay_count(temp_track.getPlay_count() + 1);
                     try {
@@ -172,8 +192,8 @@ public class AudioEventHandler extends BroadcastReceiver {
 
     void playNext() {
         try {
-            Track temp_track = mTracksList.get(playing_position + 1);
-            playing_position += 1;
+            Track temp_track = mTracksList.get(mPlayingPosition + 1);
+            mPlayingPosition += 1;
             if (temp_track.getBucket() == null) {
                 temp_track.setBucket(false);
             }
@@ -181,14 +201,14 @@ public class AudioEventHandler extends BroadcastReceiver {
         } catch (IOException e) {
             e.printStackTrace();
         } catch (IndexOutOfBoundsException e) {
-            playing_position = -1;
+            mPlayingPosition = -1;
             playNext();
         }
     }
 
     void playSong(String track_path, String track_name, String track_artist, boolean bucket) throws IOException {
-        if (mediaPlayer.isPlaying()) {
-            mediaPlayer.stop();
+        if (mMediaPlayer.isPlaying()) {
+            mMediaPlayer.stop();
         }
         ibPlay.setImageResource(R.drawable.ic_track_stop);
         tvPlayingTrackName.setText(track_name);
@@ -198,13 +218,13 @@ public class AudioEventHandler extends BroadcastReceiver {
         } else {
             ibAddToBucket.setImageResource(R.drawable.ic_track_bucket_added);
         }
-        mediaPlayer.reset();
-        mediaPlayer.setDataSource(track_path);
+        mMediaPlayer.reset();
+        mMediaPlayer.setDataSource(track_path);
         mRunningTrackPath = track_path;
         if (track_path.startsWith("http://")) {
-            mediaPlayer.prepareAsync();
+            mMediaPlayer.prepareAsync();
         } else {
-            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mediaPlayer) {
                     pbTrackPlay.setProgress(0);
@@ -212,8 +232,11 @@ public class AudioEventHandler extends BroadcastReceiver {
                     playNext();
                 }
             });
-            mediaPlayer.prepare();
+            mMediaPlayer.prepare();
         }
+        mBuilder.setContentTitle(track_name)
+                .setContentText(track_artist);
+        mNotificationManager.notify(notifyId, mBuilder.build());
     }
 
     public class TrackProgressObserver implements Runnable {
@@ -222,7 +245,7 @@ public class AudioEventHandler extends BroadcastReceiver {
 
         TrackProgressObserver() {
             super();
-            totalDuration = mediaPlayer.getDuration();
+            totalDuration = mMediaPlayer.getDuration();
             if (totalDuration == -1)
                 pbTrackPlay.setIndeterminate(true);
             else {
@@ -239,7 +262,7 @@ public class AudioEventHandler extends BroadcastReceiver {
         public void run() {
             while (!stop.get()) {
                 try {
-                    pbTrackPlay.setProgress(mediaPlayer.getCurrentPosition() / 1000);
+                    pbTrackPlay.setProgress(mMediaPlayer.getCurrentPosition() / 1000);
                     Thread.sleep(1000);
                 } catch (InterruptedException e1) {
                     e1.printStackTrace();

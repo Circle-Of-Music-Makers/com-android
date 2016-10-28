@@ -175,7 +175,7 @@ public class Trebie {
         public Map<String, String> getHeaders() throws AuthFailureError {
             Map<String, String> params = new HashMap<>();
 //        TODO remove key before commit
-            String auth = "Bearer " + "";
+            String auth = "Bearer " + "Q2Q7VCC3ICNWSL5HQGP4ALAUYFISFPIZ";
             params.put("Content-Type", "application/json");
             params.put("Accept", "application/json");
             params.put("Authorization", auth);
