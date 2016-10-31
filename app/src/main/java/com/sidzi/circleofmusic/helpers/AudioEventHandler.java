@@ -5,11 +5,13 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.graphics.PorterDuff;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.support.v4.app.NotificationCompat;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -44,6 +46,7 @@ public class AudioEventHandler extends BroadcastReceiver {
     private TextView tvPlayingArtistName = null;
     private ImageButton ibPlay = null;
     private ImageButton ibAddToBucket = null;
+    private ImageButton ibPlayNext = null;
     private ProgressBar pbTrackPlay = null;
 
     public AudioEventHandler() {
@@ -65,11 +68,15 @@ public class AudioEventHandler extends BroadcastReceiver {
 
         if (intent.getAction().equals("com.sidzi.circleofmusic.PLAY_TRACK")) {
 
+            FrameLayout flPlayer = (FrameLayout) ((MainActivity) context).findViewById(R.id.flPlayer);
+
+            flPlayer.setVisibility(View.VISIBLE);
 
             tvPlayingTrackName = (TextView) ((MainActivity) context).findViewById(R.id.tvPlayingTrackName);
             tvPlayingArtistName = (TextView) ((MainActivity) context).findViewById(R.id.tvPlayingTrackArtist);
             ibPlay = (ImageButton) ((MainActivity) context).findViewById(R.id.ibPlayPause);
             ibAddToBucket = (ImageButton) ((MainActivity) context).findViewById(R.id.ibAddToBucket);
+            ibPlayNext = (ImageButton) ((MainActivity) context).findViewById(R.id.ibPlayNext);
             pbTrackPlay = (ProgressBar) ((MainActivity) context).findViewById(R.id.pbTrackPlay);
 
             pbTrackPlay.getProgressDrawable().setColorFilter(context.getResources().getColor(R.color.primaryInverted), PorterDuff.Mode.SRC_IN);
@@ -77,6 +84,8 @@ public class AudioEventHandler extends BroadcastReceiver {
             final String track_path = intent.getStringExtra("track_path");
             final String track_name = intent.getStringExtra("track_name");
             final String track_artist = intent.getStringExtra("track_artist");
+            final boolean bucketBoolean = intent.getBooleanExtra("bucket", false);
+            mRunningTrackPath = track_path;
 
 
             //            Music Notification
@@ -88,7 +97,9 @@ public class AudioEventHandler extends BroadcastReceiver {
                     .setSmallIcon(R.drawable.ic_statusbar)
                     .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                     .setOngoing(true)
+                    .setAutoCancel(true)
                     .setContentIntent(mainActivity)
+                    .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
                     .setPriority(NotificationCompat.PRIORITY_HIGH);
 
             final OrmHandler ormHandler = OpenHelperManager.getHelper(context, OrmHandler.class);
@@ -135,11 +146,20 @@ public class AudioEventHandler extends BroadcastReceiver {
                     }
                 }
             });
+            ibPlayNext.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    playNext();
+                }
+            });
             boolean bucket = false;
             try {
                 try {
                     Dao<Track, String> dbTrack = ormHandler.getDao(Track.class);
-                    mTracksList = dbTrack.queryForAll();
+                    if (bucketBoolean)
+                        mTracksList = dbTrack.queryForEq("bucket", true);
+                    else
+                        mTracksList = dbTrack.queryForAll();
                     for (mPlayingPosition = 0; mPlayingPosition < mTracksList.size(); mPlayingPosition++) {
                         if (mTracksList.get(mPlayingPosition).getPath().equals(mRunningTrackPath)) {
                             break;

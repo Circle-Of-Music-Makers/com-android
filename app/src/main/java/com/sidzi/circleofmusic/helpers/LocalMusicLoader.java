@@ -5,7 +5,7 @@ import android.database.Cursor;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
 
-import com.sidzi.circleofmusic.adapters.TrackListAdapter;
+import com.sidzi.circleofmusic.adapters.TracksAdapter;
 import com.sidzi.circleofmusic.entities.Track;
 
 import java.util.ArrayList;
@@ -13,12 +13,12 @@ import java.util.ArrayList;
 public class LocalMusicLoader extends AsyncTask<Void, Void, ArrayList<Track>> {
     private final ArrayList<Track> mTrackList = new ArrayList<>();
     private Context mContext;
-    private TrackListAdapter trackListAdapter;
+    private TracksAdapter tracksAdapter;
 
-    public LocalMusicLoader(Context mContext, TrackListAdapter trackListAdapter) {
+    public LocalMusicLoader(Context mContext, TracksAdapter tracksAdapter) {
         super();
         this.mContext = mContext;
-        this.trackListAdapter = trackListAdapter;
+        this.tracksAdapter = tracksAdapter;
     }
 
     private static Cursor makeSongCursor(final Context context) {
@@ -70,6 +70,6 @@ public class LocalMusicLoader extends AsyncTask<Void, Void, ArrayList<Track>> {
     @Override
     protected void onPostExecute(final ArrayList<Track> tracks) {
         super.onPostExecute(tracks);
-        trackListAdapter.updateTracks(tracks);
+        tracksAdapter.updateTracks(tracks);
     }
 }

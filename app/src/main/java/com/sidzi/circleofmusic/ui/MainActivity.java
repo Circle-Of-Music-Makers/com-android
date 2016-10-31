@@ -31,33 +31,24 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.j256.ormlite.android.apptools.OpenHelperManager;
-import com.j256.ormlite.dao.Dao;
 import com.rollbar.android.Rollbar;
 import com.sidzi.circleofmusic.BuildConfig;
 import com.sidzi.circleofmusic.R;
 import com.sidzi.circleofmusic.adapters.ChatAdapter;
-import com.sidzi.circleofmusic.adapters.TrackListAdapter;
+import com.sidzi.circleofmusic.adapters.PotmAdapter;
+import com.sidzi.circleofmusic.adapters.TracksAdapter;
 import com.sidzi.circleofmusic.ai.Trebie;
-import com.sidzi.circleofmusic.entities.Track;
 import com.sidzi.circleofmusic.helpers.AudioEventHandler;
 import com.sidzi.circleofmusic.helpers.DatabaseSynchronization;
 import com.sidzi.circleofmusic.helpers.LocalMusicLoader;
-import com.sidzi.circleofmusic.helpers.OrmHandler;
 import com.sidzi.circleofmusic.helpers.VerticalSpaceDecorationHelper;
 
 import net.gotev.uploadservice.UploadService;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.sql.SQLException;
 
 public class MainActivity extends AppCompatActivity {
     public static String com_url = "http://circleofmusic-sidzi.rhcloud.com/";
@@ -171,12 +162,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         try {
-            if (AudioEventHandler.mMediaPlayer.isPlaying())
-                AudioEventHandler.mMediaPlayer.stop();
-            AudioEventHandler.mMediaPlayer.reset();
-            AudioEventHandler.mMediaPlayer.release();
-            AudioEventHandler.mNotificationManager.cancelAll();
-            unregisterReceiver(mAudioEventHandler);
+            if (AudioEventHandler.mMediaPlayer.isPlaying()) {
+//                Add background service here
+            } else {
+                AudioEventHandler.mMediaPlayer.reset();
+                AudioEventHandler.mMediaPlayer.release();
+                AudioEventHandler.mNotificationManager.cancelAll();
+                unregisterReceiver(mAudioEventHandler);
+            }
         } catch (IllegalArgumentException | NullPointerException e) {
             e.printStackTrace();
         }
@@ -212,7 +205,6 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            RequestQueue requestQueue = Volley.newRequestQueue(getContext());
             RecyclerView mRecyclerView;
             RecyclerView.LayoutManager mLayoutManager;
             View homeView = inflater.inflate(R.layout.fragment_track_list, container, false);
@@ -228,36 +220,14 @@ public class MainActivity extends AppCompatActivity {
 
             switch (getArguments().getInt(ARG_SECTION_NUMBER)) {
                 case 1:
-                    TrackListAdapter trackListAdapter1 = new TrackListAdapter(getContext());
-                    LocalMusicLoader lml = new LocalMusicLoader(getContext(), trackListAdapter1);
+                    TracksAdapter tracksAdapter1 = new TracksAdapter(getContext());
+                    LocalMusicLoader lml = new LocalMusicLoader(getContext(), tracksAdapter1);
                     lml.execute();
-                    mRecyclerView.setAdapter(trackListAdapter1);
+                    mRecyclerView.setAdapter(tracksAdapter1);
                     break;
                 case 2:
-                    final TrackListAdapter trackListAdapter3 = new TrackListAdapter(getContext());
-                    mRecyclerView.setAdapter(trackListAdapter3);
-                    JsonArrayRequest trackRequest = new JsonArrayRequest(Request.Method.GET, com_url + "getTrackList", null, new Response.Listener<JSONArray>() {
-                        @Override
-                        public void onResponse(JSONArray response) {
-                            OrmHandler orm = OpenHelperManager.getHelper(getContext(), OrmHandler.class);
-                            try {
-                                Dao<Track, String> mTrack = orm.getDao(Track.class);
-                                for (int i = 0; i < response.length(); i++) {
-                                    mTrack.createIfNotExists(new Track(false, response.get(i).toString(), com_url + "streamTrack" + URLEncoder.encode(response.get(i).toString(), "UTF-8"), ""));
-                                }
-                                trackListAdapter3.updateTracks("local", false);
-                            } catch (SQLException | JSONException | UnsupportedEncodingException e) {
-                                e.printStackTrace();
-                            }
-                            OpenHelperManager.releaseHelper();
-                        }
-                    }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            trackListAdapter3.updateTracks("local", false);
-                        }
-                    });
-                    requestQueue.add(trackRequest);
+                    final PotmAdapter potmAdapter = new PotmAdapter(getContext());
+                    mRecyclerView.setAdapter(potmAdapter);
                     break;
                 case 3:
                     homeView = inflater.inflate(R.layout.fragment_chat_bot, container, false);
@@ -288,9 +258,9 @@ public class MainActivity extends AppCompatActivity {
                     });
                     break;
                 case 4:
-                    TrackListAdapter trackListAdapter2 = new TrackListAdapter(getContext());
-                    trackListAdapter2.updateTracks("bucket", true);
-                    mRecyclerView.setAdapter(trackListAdapter2);
+                    TracksAdapter tracksAdapter2 = new TracksAdapter(getContext());
+                    tracksAdapter2.getBucketedTracks();
+                    mRecyclerView.setAdapter(tracksAdapter2);
                     break;
             }
             return homeView;
@@ -326,7 +296,7 @@ public class MainActivity extends AppCompatActivity {
                 case 0:
                     return "Local";
                 case 1:
-                    return "Remote";
+                    return "POTM";
                 case 2:
                     return "Trebie";
                 case 3:

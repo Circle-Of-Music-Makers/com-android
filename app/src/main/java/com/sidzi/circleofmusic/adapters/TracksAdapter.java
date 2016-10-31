@@ -18,12 +18,13 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.ViewHolder> {
+public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.ViewHolder> {
 
     private List<Track> mTrackList;
     private Context mContext;
+    private boolean bucketBool = false;
 
-    public TrackListAdapter(Context mContext) {
+    public TracksAdapter(Context mContext) {
         super();
         this.mContext = mContext;
         mTrackList = new ArrayList<>();
@@ -34,11 +35,12 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         notifyDataSetChanged();
     }
 
-    public void updateTracks(String field, Boolean fieldValue) {
+    public void getBucketedTracks() {
+        bucketBool = true;
         OrmHandler orm = OpenHelperManager.getHelper(mContext, OrmHandler.class);
         try {
             Dao<Track, String> mTrack = orm.getDao(Track.class);
-            mTrackList = mTrack.queryForEq(field, fieldValue);
+            mTrackList = mTrack.queryForEq("bucket", true);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -48,7 +50,7 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
 
 
     @Override
-    public TrackListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public TracksAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_row_track, parent, false);
         return new ViewHolder(view);
     }
@@ -85,6 +87,7 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
             ready_track.putExtra("track_path", v.getTag(R.id.tag_track_path).toString());
             ready_track.putExtra("track_name", v.getTag(R.id.tag_track_name).toString());
             ready_track.putExtra("track_artist", v.getTag(R.id.tag_track_artist).toString());
+            ready_track.putExtra("bucket", bucketBool);
             mContext.sendBroadcast(ready_track);
         }
     }
