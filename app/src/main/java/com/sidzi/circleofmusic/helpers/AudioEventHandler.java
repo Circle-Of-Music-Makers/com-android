@@ -39,9 +39,9 @@ public class AudioEventHandler extends BroadcastReceiver {
     static private String mRunningTrackPath = null;
     static private List<Track> mTracksList = null;
     static private int mPlayingPosition = 0;
+    static private TrackProgressObserver mTrackProgressObserver = null;
     NotificationCompat.Builder mBuilder = null;
     int notifyId = 1;
-    private TrackProgressObserver mTrackProgressObserver = null;
     private TextView tvPlayingTrackName = null;
     private TextView tvPlayingArtistName = null;
     private ImageButton ibPlay = null;
@@ -57,8 +57,6 @@ public class AudioEventHandler extends BroadcastReceiver {
             @Override
             public void onPrepared(MediaPlayer mediaPlayer) {
                 mediaPlayer.start();
-                mTrackProgressObserver = new TrackProgressObserver();
-                new Thread(mTrackProgressObserver).start();
             }
         });
     }
@@ -97,7 +95,6 @@ public class AudioEventHandler extends BroadcastReceiver {
                     .setSmallIcon(R.drawable.ic_statusbar)
                     .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                     .setOngoing(true)
-                    .setAutoCancel(true)
                     .setContentIntent(mainActivity)
                     .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
                     .setPriority(NotificationCompat.PRIORITY_HIGH);
@@ -243,6 +240,7 @@ public class AudioEventHandler extends BroadcastReceiver {
         mRunningTrackPath = track_path;
         if (track_path.startsWith("http://")) {
             mMediaPlayer.prepareAsync();
+            pbTrackPlay.setIndeterminate(true);
         } else {
             mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
@@ -253,6 +251,8 @@ public class AudioEventHandler extends BroadcastReceiver {
                 }
             });
             mMediaPlayer.prepare();
+            mTrackProgressObserver = new TrackProgressObserver();
+            new Thread(mTrackProgressObserver).start();
         }
         mBuilder.setContentTitle(track_name)
                 .setContentText(track_artist);

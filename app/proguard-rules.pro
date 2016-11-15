@@ -1,6 +1,6 @@
 # Add project specific ProGuard rules here.
 # By default, the flags in this file are appended to flags specified
-# in /home/sidzi/Developement/android-studio/android-sdk-linux/tools/proguard/proguard-android.txt
+# in C:\Users\IGM\AppData\Local\Android\sdk/tools/proguard/proguard-android.txt
 # You can edit the include path and order by changing the proguardFiles
 # directive in build.gradle.
 #
@@ -15,17 +15,14 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
-
--keep class com.j256.** { *; }
 -keep class com.j256.**
--keepclassmembers class com.j256.**
+-keepclassmembers class com.j256.** { *; }
 -keep enum com.j256.**
--keepclassmembers enum com.j256.**
+-keepclassmembers enum com.j256.** { *; }
 -keep interface com.j256.**
--keepclassmembers interface com.j256.**
-
--keepclassmembers class * {
-  public <init>(android.content.Context);
-}
-
--keepattributes *Annotation*
+-keepclassmembers interface com.j256.** { *; }
+-dontwarn javax.**
+-dontwarn org.apache.**
+-dontwarn org.slf4j.**
+-dontwarn java.lang.invoke.**
+-dontwarn sun.misc.**

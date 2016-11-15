@@ -2,6 +2,7 @@ package com.sidzi.circleofmusic.adapters;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,19 +17,23 @@ import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 import com.sidzi.circleofmusic.R;
 import com.sidzi.circleofmusic.entities.Potm;
+import com.sidzi.circleofmusic.ui.MainActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.text.DateFormatSymbols;
 import java.util.ArrayList;
 
 import static com.sidzi.circleofmusic.ui.MainActivity.com_url;
 
 public class PotmAdapter extends RecyclerView.Adapter<PotmAdapter.ViewHolder> {
     private ArrayList<Potm> potms = new ArrayList<>();
+    private Context mContext;
 
     public PotmAdapter(Context mContext) {
         super();
+        this.mContext = mContext;
         RequestQueue requestQueue = Volley.newRequestQueue(mContext);
         JsonArrayRequest trackRequest = new JsonArrayRequest(Request.Method.GET, com_url + "getPOTMs", null, new Response.Listener<JSONArray>() {
             @Override
@@ -37,6 +42,7 @@ public class PotmAdapter extends RecyclerView.Adapter<PotmAdapter.ViewHolder> {
                     for (int i = 0; i < response.length(); i++) {
                         potms.add(new Potm(response.getJSONObject(i)));
                     }
+                    notifyDataSetChanged();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -58,10 +64,13 @@ public class PotmAdapter extends RecyclerView.Adapter<PotmAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(PotmAdapter.ViewHolder holder, int position) {
-        holder.tvPotmMonth.setText(potms.get(position).getMonth());
+        holder.tvPotmMonth.setText(new DateFormatSymbols().getMonths()[potms.get(position).getMonth() - 1]);
         holder.tvPotmTitle.setText(potms.get(position).getTitle());
         holder.tvPotmDescription.setText(potms.get(position).getDescription());
         holder.itemView.setTag(potms.get(position).getPath());
+        holder.itemView.setTag(R.id.tag_track_path, potms.get(position).getPath());
+        holder.itemView.setTag(R.id.tag_track_name, potms.get(position).getTitle());
+        holder.itemView.setTag(R.id.tag_track_artist, potms.get(position).getDescription());
     }
 
     @Override
@@ -83,7 +92,13 @@ public class PotmAdapter extends RecyclerView.Adapter<PotmAdapter.ViewHolder> {
         }
 
         @Override
-        public void onClick(View view) {
+        public void onClick(View v) {
+            Intent ready_track = new Intent("com.sidzi.circleofmusic.PLAY_TRACK");
+            ready_track.putExtra("track_path", MainActivity.com_url + v.getTag(R.id.tag_track_path).toString());
+            ready_track.putExtra("track_name", v.getTag(R.id.tag_track_name).toString());
+            ready_track.putExtra("track_artist", v.getTag(R.id.tag_track_artist).toString());
+            ready_track.putExtra("bucket", false);
+            mContext.sendBroadcast(ready_track);
         }
     }
 }

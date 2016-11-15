@@ -155,17 +155,6 @@ public class Trebie {
         }
     }
 
-    private enum TrebieEmotions {
-        anger(""),
-        joy(""),
-        sadness("");
-        public final String emotion_name;
-
-        TrebieEmotions(String emotion_name) {
-            this.emotion_name = emotion_name;
-        }
-    }
-
     private class JsonObjectAuthRequest extends JsonObjectRequest {
         JsonObjectAuthRequest(int method, String url, JSONObject jsonRequest, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
             super(method, url, jsonRequest, listener, errorListener);

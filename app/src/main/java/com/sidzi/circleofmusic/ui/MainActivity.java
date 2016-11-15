@@ -164,12 +164,12 @@ public class MainActivity extends AppCompatActivity {
         try {
             if (AudioEventHandler.mMediaPlayer.isPlaying()) {
 //                Add background service here
-            } else {
-                AudioEventHandler.mMediaPlayer.reset();
-                AudioEventHandler.mMediaPlayer.release();
-                AudioEventHandler.mNotificationManager.cancelAll();
-                unregisterReceiver(mAudioEventHandler);
+                AudioEventHandler.mMediaPlayer.stop();
             }
+            AudioEventHandler.mMediaPlayer.reset();
+            AudioEventHandler.mMediaPlayer.release();
+            AudioEventHandler.mNotificationManager.cancelAll();
+            unregisterReceiver(mAudioEventHandler);
         } catch (IllegalArgumentException | NullPointerException e) {
             e.printStackTrace();
         }
