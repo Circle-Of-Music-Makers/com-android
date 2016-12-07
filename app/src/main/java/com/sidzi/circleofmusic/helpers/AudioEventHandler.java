@@ -94,7 +94,6 @@ public class AudioEventHandler extends BroadcastReceiver {
             mBuilder = new NotificationCompat.Builder(context)
                     .setSmallIcon(R.drawable.ic_statusbar)
                     .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                    .setOngoing(true)
                     .setContentIntent(mainActivity)
                     .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
                     .setPriority(NotificationCompat.PRIORITY_HIGH);

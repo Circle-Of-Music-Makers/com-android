@@ -52,6 +52,8 @@ import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
     public static String com_url = "http://circleofmusic-sidzi.rhcloud.com/";
+    public static String rollbar_key = "";
+    public static String wit_ai_key = "";
     private AudioEventHandler mAudioEventHandler;
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -72,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 //        TODO remove key before commit
-        Rollbar.init(this, "", "production");
+        Rollbar.init(this, rollbar_key, "production");
         setTheme(R.style.AppTheme_NoActionBar);
         setContentView(R.layout.activity_main);
 

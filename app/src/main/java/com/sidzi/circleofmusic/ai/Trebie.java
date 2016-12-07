@@ -164,7 +164,7 @@ public class Trebie {
         public Map<String, String> getHeaders() throws AuthFailureError {
             Map<String, String> params = new HashMap<>();
 //        TODO remove key before commit
-            String auth = "Bearer " + "";
+            String auth = "Bearer " + MainActivity.wit_ai_key;
             params.put("Content-Type", "application/json");
             params.put("Accept", "application/json");
             params.put("Authorization", auth);
