@@ -1,4 +1,4 @@
-Want to contribute? Great! First, read this page.
+# Want to contribute? Great! First, read this page.
 
 ### Before you contribute
 
@@ -7,3 +7,5 @@ For a list of features already pending use the Issue tracker and start work on a
 ### Code reviews
 All submissions, including submissions by project members, require review. I
 use Github pull requests for this purpose.
+
+## Always push to the development branch when resolving an issue or completing an enhancement.
