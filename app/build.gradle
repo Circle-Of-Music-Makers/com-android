@@ -8,8 +8,8 @@ android {
         applicationId "com.sidzi.circleofmusic"
         minSdkVersion 17
         targetSdkVersion 25
-        versionCode 7
-        versionName "Flute.BugFix"
+        versionCode 8
+        versionName "Guitar"
     }
 
     buildTypes {

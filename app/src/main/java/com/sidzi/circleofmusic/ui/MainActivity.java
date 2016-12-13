@@ -5,6 +5,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.os.Build;
@@ -41,6 +42,7 @@ import com.sidzi.circleofmusic.adapters.PotmAdapter;
 import com.sidzi.circleofmusic.adapters.TracksAdapter;
 import com.sidzi.circleofmusic.ai.Trebie;
 import com.sidzi.circleofmusic.helpers.AudioEventHandler;
+import com.sidzi.circleofmusic.helpers.BucketSaver;
 import com.sidzi.circleofmusic.helpers.DatabaseSynchronization;
 import com.sidzi.circleofmusic.helpers.LocalMusicLoader;
 import com.sidzi.circleofmusic.helpers.VerticalSpaceDecorationHelper;
@@ -151,6 +153,12 @@ public class MainActivity extends AppCompatActivity {
 
                 }
             });
+            SharedPreferences settings = getSharedPreferences("com_prefs", 0);
+            if (settings.getBoolean("init", true)) {
+                BucketSaver bucketSaver = new BucketSaver(this);
+                if (bucketSaver.importFile())
+                    settings.edit().putBoolean("init", false).apply();
+            }
             new DatabaseSynchronization(MainActivity.this).execute();
         }
     }
@@ -164,6 +172,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         try {
+            BucketSaver bucketSaver = new BucketSaver(this);
+            bucketSaver.saveFile();
             if (AudioEventHandler.mMediaPlayer.isPlaying()) {
 //                Add background service here
                 AudioEventHandler.mMediaPlayer.stop();

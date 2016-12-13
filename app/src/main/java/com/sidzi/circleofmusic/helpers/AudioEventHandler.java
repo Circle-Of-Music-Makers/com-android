@@ -187,21 +187,7 @@ public class AudioEventHandler extends BroadcastReceiver {
             }
         } else {
             if (mRunningTrackPath != null) {
-                final OrmHandler ormHandler = OpenHelperManager.getHelper(context, OrmHandler.class);
-                try {
-                    Dao<Track, String> dbTrack = ormHandler.getDao(Track.class);
-                    QueryBuilder<Track, String> queryBuilder = dbTrack.queryBuilder();
-                    SelectArg selectArg = new SelectArg();
-                    queryBuilder.where().eq("path", selectArg);
-                    PreparedQuery<Track> preparedQuery = queryBuilder.prepare();
-                    selectArg.setValue(mRunningTrackPath);
-                    List<Track> lister = dbTrack.query(preparedQuery);
-                    Track temp_track = lister.get(0);
-                    temp_track.setBucket(true);
-                    dbTrack.update(temp_track);
-                } catch (SQLException | IndexOutOfBoundsException e) {
-                    e.printStackTrace();
-                }
+                Utils.saveToBucket(mRunningTrackPath, context);
             }
         }
     }
