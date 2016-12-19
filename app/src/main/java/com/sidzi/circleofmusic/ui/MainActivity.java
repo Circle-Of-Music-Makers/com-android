@@ -44,6 +44,7 @@ import com.sidzi.circleofmusic.adapters.ChatAdapter;
 import com.sidzi.circleofmusic.adapters.PotmAdapter;
 import com.sidzi.circleofmusic.adapters.TracksAdapter;
 import com.sidzi.circleofmusic.ai.Trebie;
+import com.sidzi.circleofmusic.config;
 import com.sidzi.circleofmusic.helpers.AudioEventHandler;
 import com.sidzi.circleofmusic.helpers.BucketSaver;
 import com.sidzi.circleofmusic.helpers.DatabaseSynchronization;
@@ -56,9 +57,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
-    public static String com_url = "http://circleofmusic-sidzi.rhcloud.com/";
-    public static String rollbar_key = "";
-    public static String wit_ai_key = "";
     private AudioEventHandler mAudioEventHandler;
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -80,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 //        TODO remove key before commit
-        Rollbar.init(this, rollbar_key, "production");
+        Rollbar.init(this, config.rollbar_key, "production");
         setTheme(R.style.AppTheme_NoActionBar);
         setContentView(R.layout.activity_main);
 
@@ -95,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
             UploadService.NAMESPACE = BuildConfig.APPLICATION_ID;
 
             RequestQueue requestQueue = Volley.newRequestQueue(this);
-            JsonObjectRequest eosCheck = new JsonObjectRequest(Request.Method.GET, com_url + "checkEOSVersion", null, new Response.Listener<JSONObject>() {
+            JsonObjectRequest eosCheck = new JsonObjectRequest(Request.Method.GET, config.com_url + "checkEOSVersion", null, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject response) {
                     try {
