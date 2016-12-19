@@ -20,8 +20,11 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -71,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
+    private SearchView mSearchView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -160,7 +164,46 @@ public class MainActivity extends AppCompatActivity {
                     settings.edit().putBoolean("init", false).apply();
             }
             new DatabaseSynchronization(MainActivity.this).execute();
+            mSearchView = (SearchView) findViewById(R.id.svTrackSearch);
+            mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    Intent intent = new Intent(getApplicationContext(), SearchActivity.class);
+                    intent.putExtra("query", query);
+                    startActivity(intent);
+                    return false;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    return false;
+                }
+            });
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(final Menu menu) {
+
+        getMenuInflater().inflate(R.menu.menu_home, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.search:
+                TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+                if (mSearchView.getVisibility() == View.VISIBLE) {
+                    mSearchView.setVisibility(View.GONE);
+                    tabLayout.setVisibility(View.VISIBLE);
+                } else {
+                    mSearchView.setVisibility(View.VISIBLE);
+                    tabLayout.setVisibility(View.INVISIBLE);
+                }
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

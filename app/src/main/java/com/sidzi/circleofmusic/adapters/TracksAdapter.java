@@ -13,6 +13,8 @@ import android.widget.Toast;
 
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.Dao;
+import com.j256.ormlite.stmt.PreparedQuery;
+import com.j256.ormlite.stmt.QueryBuilder;
 import com.sidzi.circleofmusic.R;
 import com.sidzi.circleofmusic.entities.Track;
 import com.sidzi.circleofmusic.helpers.OrmHandler;
@@ -39,6 +41,21 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.ViewHolder
 
     public void updateTracks(ArrayList<Track> mTrackList) {
         this.mTrackList = mTrackList;
+        notifyDataSetChanged();
+    }
+
+    public void queriedTracks(String query) {
+        OrmHandler orm = OpenHelperManager.getHelper(mContext, OrmHandler.class);
+        try {
+            Dao<Track, String> mTrack = orm.getDao(Track.class);
+            QueryBuilder<Track, String> queryBuilder = mTrack.queryBuilder();
+            queryBuilder.where().like("name", "%" + query + "%");
+            PreparedQuery<Track> preparedQuery = queryBuilder.prepare();
+            mTrackList = mTrack.query(preparedQuery);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        OpenHelperManager.releaseHelper();
         notifyDataSetChanged();
     }
 
