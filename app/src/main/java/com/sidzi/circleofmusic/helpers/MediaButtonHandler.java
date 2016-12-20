@@ -7,7 +7,6 @@ import android.content.Intent;
 public class MediaButtonHandler extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-
-//        Utils.bucketOps(mRunningTrackPath, true, context);
+        Utils.bucketOps(AudioEventHandler.mRunningTrackPath, true, context);
     }
 }

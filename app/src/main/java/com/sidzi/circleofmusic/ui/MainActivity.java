@@ -49,9 +49,8 @@ import com.sidzi.circleofmusic.helpers.AudioEventHandler;
 import com.sidzi.circleofmusic.helpers.BucketSaver;
 import com.sidzi.circleofmusic.helpers.DatabaseSynchronization;
 import com.sidzi.circleofmusic.helpers.LocalMusicLoader;
+import com.sidzi.circleofmusic.helpers.MediaButtonHandler;
 import com.sidzi.circleofmusic.helpers.VerticalSpaceDecorationHelper;
-
-import net.gotev.uploadservice.UploadService;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -90,7 +89,6 @@ public class MainActivity extends AppCompatActivity {
                 requestPermissions(perms, 202);
             }
         } else {
-            UploadService.NAMESPACE = BuildConfig.APPLICATION_ID;
 
             RequestQueue requestQueue = Volley.newRequestQueue(this);
             JsonObjectRequest eosCheck = new JsonObjectRequest(Request.Method.GET, config.com_url + "checkEOSVersion", null, new Response.Listener<JSONObject>() {
@@ -112,11 +110,17 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
             requestQueue.add(eosCheck);
+
             mAudioEventHandler = new AudioEventHandler();
             registerReceiver(mAudioEventHandler, new IntentFilter("com.sidzi.circleofmusic.PLAY_TRACK"));
+
+
+            /* Handles headphone button click */
+
             AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-            ComponentName componentName = new ComponentName(getPackageName(), AudioEventHandler.class.getName());
+            ComponentName componentName = new ComponentName(getPackageName(), MediaButtonHandler.class.getName());
             audioManager.registerMediaButtonEventReceiver(componentName);
+
             Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
             setSupportActionBar(toolbar);
             // Create the adapter that will return a fragment for each of the four
@@ -169,6 +173,9 @@ public class MainActivity extends AppCompatActivity {
                     Intent intent = new Intent(getApplicationContext(), SearchActivity.class);
                     intent.putExtra("query", query);
                     startActivity(intent);
+                    TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+                    mSearchView.setVisibility(View.GONE);
+                    tabLayout.setVisibility(View.VISIBLE);
                     return false;
                 }
 
@@ -212,6 +219,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        unregisterReceiver(mAudioEventHandler);
         try {
             BucketSaver bucketSaver = new BucketSaver(this);
             bucketSaver.saveFile();
@@ -224,7 +232,6 @@ public class MainActivity extends AppCompatActivity {
             AudioEventHandler.mMediaPlayer.release();
             AudioEventHandler.mMediaPlayer = null;
             AudioEventHandler.mNotificationManager.cancelAll();
-            unregisterReceiver(mAudioEventHandler);
         } catch (IllegalArgumentException | NullPointerException e) {
             e.printStackTrace();
         }

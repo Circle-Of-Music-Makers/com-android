@@ -37,13 +37,12 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".helpers.AudioEventHandler">
+        <receiver android:name=".helpers.MediaButtonHandler">
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
             </intent-filter>
         </receiver>
 
-        <activity android:name=".ui.ListFileActivity" />
         <activity
             android:name=".ui.EosActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -52,7 +51,7 @@
         <activity
             android:name=".ui.SearchActivity"
             android:label="@string/title_activity_search"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>
