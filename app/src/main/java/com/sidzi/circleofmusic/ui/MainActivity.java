@@ -219,8 +219,10 @@ public class MainActivity extends AppCompatActivity {
 //                Add background service here
                 AudioEventHandler.mMediaPlayer.stop();
             }
+            AudioEventHandler.mTrackProgressObserver.stop();
             AudioEventHandler.mMediaPlayer.reset();
             AudioEventHandler.mMediaPlayer.release();
+            AudioEventHandler.mMediaPlayer = null;
             AudioEventHandler.mNotificationManager.cancelAll();
             unregisterReceiver(mAudioEventHandler);
         } catch (IllegalArgumentException | NullPointerException e) {

@@ -22,13 +22,12 @@ import java.util.List;
 
 public class BucketSaver {
     private Context mContext;
-    private String blcom_path;
     private List<Track> blcom_list;
     private File blcom_file;
 
     public BucketSaver(Context mContext) {
         this.mContext = mContext;
-        blcom_path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/com_backup.txt";
+        String blcom_path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/com_backup.txt";
         OrmHandler orm = OpenHelperManager.getHelper(mContext, OrmHandler.class);
         try {
             Dao<Track, String> mTrack = orm.getDao(Track.class);
@@ -41,18 +40,20 @@ public class BucketSaver {
     }
 
     public void saveFile() {
-        try {
-            blcom_file.createNewFile();
-            OutputStream outputStream = new FileOutputStream(blcom_file, false);
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
-            for (Track track :
-                    blcom_list) {
-                outputStreamWriter.write(track.getPath() + "\n");
+        if (Utils.BUCKET_OPS) {
+            try {
+                blcom_file.createNewFile();
+                OutputStream outputStream = new FileOutputStream(blcom_file, false);
+                OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
+                for (Track track :
+                        blcom_list) {
+                    outputStreamWriter.write(track.getPath() + "\n");
+                }
+                outputStream.flush();
+                outputStreamWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            outputStream.flush();
-            outputStreamWriter.close();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
@@ -64,7 +65,7 @@ public class BucketSaver {
                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
                 String path;
                 while ((path = bufferedReader.readLine()) != null) {
-                    Utils.saveToBucket(path, mContext);
+                    Utils.bucketOps(path, true, mContext);
                 }
                 inputStream.close();
             }

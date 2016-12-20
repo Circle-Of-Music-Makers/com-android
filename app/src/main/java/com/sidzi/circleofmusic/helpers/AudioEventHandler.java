@@ -36,10 +36,10 @@ import static android.content.Context.NOTIFICATION_SERVICE;
 public class AudioEventHandler extends BroadcastReceiver {
     static public MediaPlayer mMediaPlayer;
     static public NotificationManager mNotificationManager = null;
+    static public TrackProgressObserver mTrackProgressObserver = null;
     static private String mRunningTrackPath = null;
     static private List<Track> mTracksList = null;
     static private int mPlayingPosition = 0;
-    static private TrackProgressObserver mTrackProgressObserver = null;
     NotificationCompat.Builder mBuilder = null;
     int notifyId = 1;
     private TextView tvPlayingTrackName = null;
@@ -51,14 +51,16 @@ public class AudioEventHandler extends BroadcastReceiver {
 
     public AudioEventHandler() {
         super();
-        mMediaPlayer = new MediaPlayer();
-        mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer mediaPlayer) {
-                mediaPlayer.start();
-            }
-        });
+        if (mMediaPlayer == null) {
+            mMediaPlayer = new MediaPlayer();
+            mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mediaPlayer) {
+                    mediaPlayer.start();
+                }
+            });
+        }
     }
 
     @Override
@@ -84,7 +86,6 @@ public class AudioEventHandler extends BroadcastReceiver {
             final String track_artist = intent.getStringExtra("track_artist");
             final boolean bucketBoolean = intent.getBooleanExtra("bucket", false);
             mRunningTrackPath = track_path;
-
 
             //            Music Notification
 
@@ -117,28 +118,14 @@ public class AudioEventHandler extends BroadcastReceiver {
                 @Override
                 public void onClick(View v) {
                     if (mMediaPlayer != null) {
-                        try {
-                            final Dao<Track, String> dbTrack = ormHandler.getDao(Track.class);
-                            QueryBuilder<Track, String> queryBuilder = dbTrack.queryBuilder();
-                            SelectArg selectArg = new SelectArg();
-                            queryBuilder.where().eq("path", selectArg);
-                            PreparedQuery<Track> preparedQuery = queryBuilder.prepare();
-                            selectArg.setValue(mRunningTrackPath);
-                            List<Track> lister = dbTrack.query(preparedQuery);
-                            Track temp_track = lister.get(0);
-                            boolean bucket;
-                            if (temp_track.getBucket() == null || !temp_track.getBucket()) {
-                                bucket = true;
-                                ((ImageButton) v).setImageResource(R.drawable.ic_track_bucket_added);
-                                Toast.makeText(context, "Added to bucket", Toast.LENGTH_SHORT).show();
-                            } else {
-                                bucket = false;
-                                ((ImageButton) v).setImageResource(R.drawable.ic_track_bucket_add);
-                            }
-                            dbTrack.createOrUpdate(new Track(temp_track.getName(), temp_track.getPath(), temp_track.getArtist(), bucket));
-                        } catch (SQLException e) {
-                            e.printStackTrace();
+                        Utils.bucketOps(mRunningTrackPath, !(Boolean) ibAddToBucket.getTag(), context);
+                        if (!(Boolean) ibAddToBucket.getTag()) {
+                            ((ImageButton) v).setImageResource(R.drawable.ic_track_bucket_added);
+                            Toast.makeText(context, "Added to bucket", Toast.LENGTH_SHORT).show();
+                        } else {
+                            ((ImageButton) v).setImageResource(R.drawable.ic_track_bucket_add);
                         }
+                        ibAddToBucket.setTag(!(Boolean) ibAddToBucket.getTag());
                     }
                 }
             });
@@ -187,7 +174,7 @@ public class AudioEventHandler extends BroadcastReceiver {
             }
         } else {
             if (mRunningTrackPath != null) {
-                Utils.saveToBucket(mRunningTrackPath, context);
+                Utils.bucketOps(mRunningTrackPath, true, context);
             }
         }
     }
@@ -220,10 +207,11 @@ public class AudioEventHandler extends BroadcastReceiver {
         } else {
             ibAddToBucket.setImageResource(R.drawable.ic_track_bucket_added);
         }
+        ibAddToBucket.setTag(bucket);
         mMediaPlayer.reset();
         mMediaPlayer.setDataSource(track_path);
         mRunningTrackPath = track_path;
-        if (track_path.startsWith("http://")) {
+        if (track_path.startsWith("https://")) {
             mMediaPlayer.prepareAsync();
             pbTrackPlay.setIndeterminate(true);
         } else {
@@ -259,7 +247,7 @@ public class AudioEventHandler extends BroadcastReceiver {
             }
         }
 
-        void stop() {
+        public void stop() {
             stop.set(true);
         }
 

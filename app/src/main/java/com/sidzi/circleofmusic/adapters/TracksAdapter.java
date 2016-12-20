@@ -49,7 +49,7 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.ViewHolder
         try {
             Dao<Track, String> mTrack = orm.getDao(Track.class);
             QueryBuilder<Track, String> queryBuilder = mTrack.queryBuilder();
-            queryBuilder.where().like("name", "%" + query + "%");
+            queryBuilder.where().like("name", "%" + query + "%").or().like("artist", "%" + query + "%").or().like("album", "%" + query + "%");
             PreparedQuery<Track> preparedQuery = queryBuilder.prepare();
             mTrackList = mTrack.query(preparedQuery);
         } catch (SQLException e) {
