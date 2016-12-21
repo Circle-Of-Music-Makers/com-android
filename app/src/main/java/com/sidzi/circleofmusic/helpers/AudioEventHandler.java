@@ -34,12 +34,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static android.content.Context.NOTIFICATION_SERVICE;
 
 public class AudioEventHandler extends BroadcastReceiver {
-    static public MediaPlayer mMediaPlayer;
+    static public MediaPlayer mMediaPlayer = null;
     static public NotificationManager mNotificationManager = null;
-    static private String mRunningTrackPath = null;
+    static public TrackProgressObserver mTrackProgressObserver = null;
+    static public String mRunningTrackPath = null;
+
     static private List<Track> mTracksList = null;
     static private int mPlayingPosition = 0;
-    static private TrackProgressObserver mTrackProgressObserver = null;
     NotificationCompat.Builder mBuilder = null;
     int notifyId = 1;
     private TextView tvPlayingTrackName = null;
@@ -51,158 +52,126 @@ public class AudioEventHandler extends BroadcastReceiver {
 
     public AudioEventHandler() {
         super();
-        mMediaPlayer = new MediaPlayer();
-        mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer mediaPlayer) {
-                mediaPlayer.start();
-            }
-        });
+        if (mMediaPlayer == null) {
+            mMediaPlayer = new MediaPlayer();
+            mTrackProgressObserver = new TrackProgressObserver();
+            mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mediaPlayer) {
+                    mediaPlayer.start();
+                    pbTrackPlay.setIndeterminate(false);
+                }
+            });
+        }
     }
 
     @Override
     public void onReceive(final Context context, Intent intent) {
 
-        if (intent.getAction().equals("com.sidzi.circleofmusic.PLAY_TRACK")) {
+        FrameLayout flPlayer = (FrameLayout) ((MainActivity) context).findViewById(R.id.flPlayer);
 
-            FrameLayout flPlayer = (FrameLayout) ((MainActivity) context).findViewById(R.id.flPlayer);
+        flPlayer.setVisibility(View.VISIBLE);
 
-            flPlayer.setVisibility(View.VISIBLE);
+        tvPlayingTrackName = (TextView) ((MainActivity) context).findViewById(R.id.tvPlayingTrackName);
+        tvPlayingArtistName = (TextView) ((MainActivity) context).findViewById(R.id.tvPlayingTrackArtist);
+        ibPlay = (ImageButton) ((MainActivity) context).findViewById(R.id.ibPlayPause);
+        ibAddToBucket = (ImageButton) ((MainActivity) context).findViewById(R.id.ibAddToBucket);
+        ibPlayNext = (ImageButton) ((MainActivity) context).findViewById(R.id.ibPlayNext);
+        pbTrackPlay = (ProgressBar) ((MainActivity) context).findViewById(R.id.pbTrackPlay);
 
-            tvPlayingTrackName = (TextView) ((MainActivity) context).findViewById(R.id.tvPlayingTrackName);
-            tvPlayingArtistName = (TextView) ((MainActivity) context).findViewById(R.id.tvPlayingTrackArtist);
-            ibPlay = (ImageButton) ((MainActivity) context).findViewById(R.id.ibPlayPause);
-            ibAddToBucket = (ImageButton) ((MainActivity) context).findViewById(R.id.ibAddToBucket);
-            ibPlayNext = (ImageButton) ((MainActivity) context).findViewById(R.id.ibPlayNext);
-            pbTrackPlay = (ProgressBar) ((MainActivity) context).findViewById(R.id.pbTrackPlay);
+        pbTrackPlay.getProgressDrawable().setColorFilter(context.getResources().getColor(R.color.primaryInverted), PorterDuff.Mode.SRC_IN);
 
-            pbTrackPlay.getProgressDrawable().setColorFilter(context.getResources().getColor(R.color.primaryInverted), PorterDuff.Mode.SRC_IN);
+        final String track_path = intent.getStringExtra("track_path");
+        final String track_name = intent.getStringExtra("track_name");
+        final String track_artist = intent.getStringExtra("track_artist");
+        final boolean bucketBoolean = intent.getBooleanExtra("bucket", false);
+        mRunningTrackPath = track_path;
 
-            final String track_path = intent.getStringExtra("track_path");
-            final String track_name = intent.getStringExtra("track_name");
-            final String track_artist = intent.getStringExtra("track_artist");
-            final boolean bucketBoolean = intent.getBooleanExtra("bucket", false);
-            mRunningTrackPath = track_path;
+        //            Music Notification
 
+        mNotificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
+        PendingIntent mainActivity = PendingIntent.getActivity(context, 101, new Intent(context, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
 
-            //            Music Notification
+        mBuilder = new NotificationCompat.Builder(context)
+                .setSmallIcon(R.drawable.ic_statusbar)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setContentIntent(mainActivity)
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
+                .setPriority(NotificationCompat.PRIORITY_HIGH);
 
-            mNotificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
-            PendingIntent mainActivity = PendingIntent.getActivity(context, 101, new Intent(context, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
-
-            mBuilder = new NotificationCompat.Builder(context)
-                    .setSmallIcon(R.drawable.ic_statusbar)
-                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                    .setContentIntent(mainActivity)
-                    .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
-                    .setPriority(NotificationCompat.PRIORITY_HIGH);
-
-            final OrmHandler ormHandler = OpenHelperManager.getHelper(context, OrmHandler.class);
+        final OrmHandler ormHandler = OpenHelperManager.getHelper(context, OrmHandler.class);
 
 
-            ibPlay.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(final View v) {
-                    if (mMediaPlayer.isPlaying()) {
-                        mMediaPlayer.pause();
-                        ((ImageButton) v).setImageResource(R.drawable.ic_track_play);
+        ibPlay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+                if (mMediaPlayer.isPlaying()) {
+                    mMediaPlayer.pause();
+                    ((ImageButton) v).setImageResource(R.drawable.ic_track_play);
+                } else {
+                    mMediaPlayer.start();
+                    ((ImageButton) v).setImageResource(R.drawable.ic_track_stop);
+                }
+            }
+        });
+        ibAddToBucket.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mMediaPlayer != null) {
+                    Utils.bucketOps(mRunningTrackPath, !(Boolean) ibAddToBucket.getTag(), context);
+                    if (!(Boolean) ibAddToBucket.getTag()) {
+                        ((ImageButton) v).setImageResource(R.drawable.ic_track_bucket_added);
+                        Toast.makeText(context, "Added to bucket", Toast.LENGTH_SHORT).show();
                     } else {
-                        mMediaPlayer.start();
-                        ((ImageButton) v).setImageResource(R.drawable.ic_track_stop);
+                        ((ImageButton) v).setImageResource(R.drawable.ic_track_bucket_add);
                     }
+                    ibAddToBucket.setTag(!(Boolean) ibAddToBucket.getTag());
                 }
-            });
-            ibAddToBucket.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (mMediaPlayer != null) {
-                        try {
-                            final Dao<Track, String> dbTrack = ormHandler.getDao(Track.class);
-                            QueryBuilder<Track, String> queryBuilder = dbTrack.queryBuilder();
-                            SelectArg selectArg = new SelectArg();
-                            queryBuilder.where().eq("path", selectArg);
-                            PreparedQuery<Track> preparedQuery = queryBuilder.prepare();
-                            selectArg.setValue(mRunningTrackPath);
-                            List<Track> lister = dbTrack.query(preparedQuery);
-                            Track temp_track = lister.get(0);
-                            boolean bucket;
-                            if (temp_track.getBucket() == null || !temp_track.getBucket()) {
-                                bucket = true;
-                                ((ImageButton) v).setImageResource(R.drawable.ic_track_bucket_added);
-                                Toast.makeText(context, "Added to bucket", Toast.LENGTH_SHORT).show();
-                            } else {
-                                bucket = false;
-                                ((ImageButton) v).setImageResource(R.drawable.ic_track_bucket_add);
-                            }
-                            dbTrack.createOrUpdate(new Track(temp_track.getName(), temp_track.getPath(), temp_track.getArtist(), bucket));
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            });
-            ibPlayNext.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    playNext();
-                }
-            });
-            boolean bucket = false;
-            try {
-                try {
-                    Dao<Track, String> dbTrack = ormHandler.getDao(Track.class);
-                    if (bucketBoolean)
-                        mTracksList = dbTrack.queryForEq("bucket", true);
-                    else
-                        mTracksList = dbTrack.queryForAll();
-                    for (mPlayingPosition = 0; mPlayingPosition < mTracksList.size(); mPlayingPosition++) {
-                        if (mTracksList.get(mPlayingPosition).getPath().equals(mRunningTrackPath)) {
-                            break;
-                        }
-                    }
-                    QueryBuilder<Track, String> queryBuilder = dbTrack.queryBuilder();
-                    SelectArg selectArg = new SelectArg();
-                    queryBuilder.where().eq("path", selectArg);
-                    PreparedQuery<Track> preparedQuery = queryBuilder.prepare();
-                    selectArg.setValue(track_path);
-                    Track temp_track = dbTrack.query(preparedQuery).get(0);
-                    temp_track.setPlay_count(temp_track.getPlay_count() + 1);
-                    try {
-                        dbTrack.update(temp_track);
-                    } catch (SQLException e1) {
-                        e1.printStackTrace();
-                    }
-                    bucket = !(temp_track.getBucket() == null || !temp_track.getBucket());
-                } catch (IndexOutOfBoundsException e) {
-                    ibAddToBucket.setVisibility(View.INVISIBLE);
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
             }
-            try {
-                playSong(track_path, track_name, track_artist, bucket);
-            } catch (IOException e) {
-                e.printStackTrace();
+        });
+        ibPlayNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                playNext();
             }
-        } else {
-            if (mRunningTrackPath != null) {
-                final OrmHandler ormHandler = OpenHelperManager.getHelper(context, OrmHandler.class);
+        });
+        boolean bucket = false;
+        try {
+            try {
+                Dao<Track, String> dbTrack = ormHandler.getDao(Track.class);
+                if (bucketBoolean)
+                    mTracksList = dbTrack.queryForEq("bucket", true);
+                else
+                    mTracksList = dbTrack.queryForAll();
+                for (mPlayingPosition = 0; mPlayingPosition < mTracksList.size(); mPlayingPosition++) {
+                    if (mTracksList.get(mPlayingPosition).getPath().equals(mRunningTrackPath)) {
+                        break;
+                    }
+                }
+                QueryBuilder<Track, String> queryBuilder = dbTrack.queryBuilder();
+                SelectArg selectArg = new SelectArg();
+                queryBuilder.where().eq("path", selectArg);
+                PreparedQuery<Track> preparedQuery = queryBuilder.prepare();
+                selectArg.setValue(track_path);
+                Track temp_track = dbTrack.query(preparedQuery).get(0);
+                temp_track.setPlay_count(temp_track.getPlay_count() + 1);
                 try {
-                    Dao<Track, String> dbTrack = ormHandler.getDao(Track.class);
-                    QueryBuilder<Track, String> queryBuilder = dbTrack.queryBuilder();
-                    SelectArg selectArg = new SelectArg();
-                    queryBuilder.where().eq("path", selectArg);
-                    PreparedQuery<Track> preparedQuery = queryBuilder.prepare();
-                    selectArg.setValue(mRunningTrackPath);
-                    List<Track> lister = dbTrack.query(preparedQuery);
-                    Track temp_track = lister.get(0);
-                    temp_track.setBucket(true);
                     dbTrack.update(temp_track);
-                } catch (SQLException | IndexOutOfBoundsException e) {
-                    e.printStackTrace();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
                 }
+                bucket = !(temp_track.getBucket() == null || !temp_track.getBucket());
+            } catch (IndexOutOfBoundsException e) {
+                ibAddToBucket.setVisibility(View.INVISIBLE);
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        try {
+            playSong(track_path, track_name, track_artist, bucket);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -234,10 +203,11 @@ public class AudioEventHandler extends BroadcastReceiver {
         } else {
             ibAddToBucket.setImageResource(R.drawable.ic_track_bucket_added);
         }
+        ibAddToBucket.setTag(bucket);
         mMediaPlayer.reset();
         mMediaPlayer.setDataSource(track_path);
         mRunningTrackPath = track_path;
-        if (track_path.startsWith("http://")) {
+        if (track_path.startsWith("https://")) {
             mMediaPlayer.prepareAsync();
             pbTrackPlay.setIndeterminate(true);
         } else {
@@ -250,7 +220,7 @@ public class AudioEventHandler extends BroadcastReceiver {
                 }
             });
             mMediaPlayer.prepare();
-            mTrackProgressObserver = new TrackProgressObserver();
+            mTrackProgressObserver.setup();
             new Thread(mTrackProgressObserver).start();
         }
         mBuilder.setContentTitle(track_name)
@@ -264,6 +234,9 @@ public class AudioEventHandler extends BroadcastReceiver {
 
         TrackProgressObserver() {
             super();
+        }
+
+        void setup() {
             totalDuration = mMediaPlayer.getDuration();
             if (totalDuration == -1)
                 pbTrackPlay.setIndeterminate(true);
@@ -273,7 +246,7 @@ public class AudioEventHandler extends BroadcastReceiver {
             }
         }
 
-        void stop() {
+        public void stop() {
             stop.set(true);
         }
 

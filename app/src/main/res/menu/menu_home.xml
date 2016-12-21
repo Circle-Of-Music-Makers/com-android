@@ -3,8 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".ui.MainActivity">
     <item
-        android:id="@+id/update"
+        android:id="@+id/search"
+        android:icon="@android:drawable/ic_menu_search"
         android:orderInCategory="200"
-        android:title="@string/update"
-        app:showAsAction="never" />
+        android:title="@string/search"
+        app:showAsAction="always" />
 </menu>

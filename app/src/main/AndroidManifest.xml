@@ -15,7 +15,6 @@
     <uses-permission-sdk-23 android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission-sdk-23 android:name="android.permission.WAKE_LOCK" />
 
-
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
@@ -37,18 +36,22 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <receiver android:name="com.sidzi.circleofmusic.helpers.AudioEventHandler">
+
+        <receiver android:name=".helpers.MediaButtonHandler">
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
             </intent-filter>
         </receiver>
 
-        <activity android:name=".ui.ListFileActivity" />
         <activity
             android:name=".ui.EosActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_eos"
             android:theme="@style/FullscreenTheme" />
+        <activity
+            android:name=".ui.SearchActivity"
+            android:label="@string/title_activity_search"
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>

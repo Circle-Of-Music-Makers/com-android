@@ -13,29 +13,21 @@ public class Track {
     @DatabaseField
     private String artist;
     @DatabaseField
-    private String emotion;
+    private String album;
     @DatabaseField
     private Boolean bucket;
-    @DatabaseField
-    private Boolean local;
     @DatabaseField(defaultValue = "0")
     private Integer play_count;
 
     public Track() {
     }
 
-    public Track(Boolean local, String name, String path, String artist) {
-        this.local = local;
-        this.artist = artist;
-        this.name = name;
-        this.path = path;
-    }
-
-    public Track(String name, String path, String artist, Boolean bucket) {
+    public Track(String name, String path, String artist, String album, Boolean bucket) {
         this.path = path;
         this.name = name;
         this.artist = artist;
         this.bucket = bucket;
+        this.album = album;
     }
 
     public String getName() {
@@ -48,18 +40,6 @@ public class Track {
 
     public String getPath() {
         return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public String getEmotion() {
-        return emotion;
-    }
-
-    public void setEmotion(String emotion) {
-        this.emotion = emotion;
     }
 
     public Boolean getBucket() {
@@ -82,7 +62,7 @@ public class Track {
         this.play_count = play_count;
     }
 
-    public Boolean getLocal() {
-        return local;
+    public String getAlbum() {
+        return album;
     }
 }

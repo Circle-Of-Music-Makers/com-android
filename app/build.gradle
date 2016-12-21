@@ -8,8 +8,8 @@ android {
         applicationId "com.sidzi.circleofmusic"
         minSdkVersion 17
         targetSdkVersion 25
-        versionCode 7
-        versionName "Flute.BugFix"
+        versionCode 8
+        versionName "Guitar"
     }
 
     buildTypes {
@@ -22,13 +22,12 @@ android {
 }
 
 dependencies {
-    compile 'net.gotev:uploadservice:2.1'
     compile 'com.android.volley:volley:1.0.0'
     compile 'com.j256.ormlite:ormlite-android:5.0'
     compile 'com.j256.ormlite:ormlite-core:5.0'
     compile 'com.rollbar:rollbar-android:0.2.0'
-    compile 'com.android.support:appcompat-v7:25.0.1'
-    compile 'com.android.support:support-v13:25.0.1'
-    compile 'com.android.support:design:25.0.1'
-    compile 'com.android.support:recyclerview-v7:25.0.1'
+    compile 'com.android.support:appcompat-v7:25.1.0'
+    compile 'com.android.support:support-v13:25.1.0'
+    compile 'com.android.support:design:25.1.0'
+    compile 'com.android.support:recyclerview-v7:25.1.0'
 }

@@ -12,7 +12,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.sidzi.circleofmusic.adapters.ChatAdapter;
-import com.sidzi.circleofmusic.ui.MainActivity;
+import com.sidzi.circleofmusic.config;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -114,7 +114,7 @@ public class Trebie {
             case play_music:
                 String genre = entities.getJSONArray("genre").getJSONObject(0).get("value").toString();
                 Intent ready_track = new Intent("com.sidzi.circleofmusic.PLAY_TRACK");
-                ready_track.putExtra("track_path", MainActivity.com_url + "stream" + genre);
+                ready_track.putExtra("track_path", config.com_url + "stream" + genre);
                 ready_track.putExtra("track_name", genre);
                 ready_track.putExtra("track_artist", "some " + genre + " artist");
                 mContext.sendBroadcast(ready_track);
@@ -164,7 +164,7 @@ public class Trebie {
         public Map<String, String> getHeaders() throws AuthFailureError {
             Map<String, String> params = new HashMap<>();
 //        TODO remove key before commit
-            String auth = "Bearer " + MainActivity.wit_ai_key;
+            String auth = "Bearer " + config.wit_ai_key;
             params.put("Content-Type", "application/json");
             params.put("Accept", "application/json");
             params.put("Authorization", auth);
