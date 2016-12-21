@@ -1,6 +1,7 @@
 package com.sidzi.circleofmusic.helpers;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 
 import com.j256.ormlite.android.apptools.OpenHelperManager;
@@ -32,5 +33,16 @@ public class DatabaseSynchronization extends AsyncTask<Void, Void, Void> {
         }
         OpenHelperManager.releaseHelper();
         return null;
+    }
+
+    @Override
+    protected void onPostExecute(Void aVoid) {
+        SharedPreferences settings = mContext.getSharedPreferences("com_prefs", 0);
+        if (settings.getBoolean("init", true)) {
+            BucketSaver bucketSaver = new BucketSaver(mContext);
+            if (bucketSaver.importFile())
+                settings.edit().putBoolean("init", false).apply();
+        }
+        super.onPostExecute(aVoid);
     }
 }

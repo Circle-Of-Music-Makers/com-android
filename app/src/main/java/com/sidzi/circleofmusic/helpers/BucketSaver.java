@@ -28,20 +28,20 @@ public class BucketSaver {
     public BucketSaver(Context mContext) {
         this.mContext = mContext;
         String blcom_path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/com_backup.txt";
-        OrmHandler orm = OpenHelperManager.getHelper(mContext, OrmHandler.class);
-        try {
-            Dao<Track, String> mTrack = orm.getDao(Track.class);
-            blcom_list = mTrack.queryForEq("bucket", true);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        OpenHelperManager.releaseHelper();
         blcom_file = new File(blcom_path);
     }
 
     public void saveFile() {
         if (Utils.BUCKET_OPS) {
             try {
+                OrmHandler orm = OpenHelperManager.getHelper(mContext, OrmHandler.class);
+                try {
+                    Dao<Track, String> mTrack = orm.getDao(Track.class);
+                    blcom_list = mTrack.queryForEq("bucket", true);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                OpenHelperManager.releaseHelper();
                 blcom_file.createNewFile();
                 OutputStream outputStream = new FileOutputStream(blcom_file, false);
                 OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);

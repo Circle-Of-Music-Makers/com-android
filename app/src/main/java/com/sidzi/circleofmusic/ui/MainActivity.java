@@ -5,7 +5,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.os.Build;
@@ -159,12 +158,6 @@ public class MainActivity extends AppCompatActivity {
 
                 }
             });
-            SharedPreferences settings = getSharedPreferences("com_prefs", 0);
-            if (settings.getBoolean("init", true)) {
-                BucketSaver bucketSaver = new BucketSaver(this);
-                if (bucketSaver.importFile())
-                    settings.edit().putBoolean("init", false).apply();
-            }
             new DatabaseSynchronization(MainActivity.this).execute();
             mSearchView = (SearchView) findViewById(R.id.svTrackSearch);
             mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -219,8 +212,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        unregisterReceiver(mAudioEventHandler);
         try {
+            unregisterReceiver(mAudioEventHandler);
             BucketSaver bucketSaver = new BucketSaver(this);
             bucketSaver.saveFile();
             if (AudioEventHandler.mMediaPlayer.isPlaying()) {
