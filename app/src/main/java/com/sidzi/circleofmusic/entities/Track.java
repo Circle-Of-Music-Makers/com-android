@@ -28,6 +28,7 @@ public class Track {
         this.artist = artist;
         this.bucket = bucket;
         this.album = album;
+        this.play_count = 0;
     }
 
     public String getName() {
@@ -64,5 +65,12 @@ public class Track {
 
     public String getAlbum() {
         return album;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Track)
+            return ((Track) obj).getPath().contentEquals(this.path);
+        throw new UnsupportedOperationException();
     }
 }
