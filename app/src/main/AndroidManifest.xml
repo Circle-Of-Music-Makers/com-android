@@ -36,7 +36,9 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-
+        <service
+            android:name=".helpers.MusicPlayerService"
+            android:process=":remote"></service>
         <receiver android:name=".helpers.MediaButtonHandler">
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
@@ -52,6 +54,9 @@
             android:name=".ui.SearchActivity"
             android:label="@string/title_activity_search"
             android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".ui.AlarmActivity" />
+
+        <receiver android:name=".helpers.AlarmReciever" />
     </application>
 
 </manifest>

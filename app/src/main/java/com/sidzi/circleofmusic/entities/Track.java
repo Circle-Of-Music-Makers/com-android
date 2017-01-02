@@ -22,6 +22,10 @@ public class Track {
     public Track() {
     }
 
+    public Track(String path) {
+        this.path = path;
+    }
+
     public Track(String name, String path, String artist, String album, Boolean bucket) {
         this.path = path;
         this.name = name;
@@ -64,5 +68,12 @@ public class Track {
 
     public String getAlbum() {
         return album;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Track)
+            return ((Track) obj).getPath().contentEquals(this.path);
+        throw new UnsupportedOperationException();
     }
 }

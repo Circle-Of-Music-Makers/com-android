@@ -44,18 +44,20 @@ import com.sidzi.circleofmusic.adapters.PotmAdapter;
 import com.sidzi.circleofmusic.adapters.TracksAdapter;
 import com.sidzi.circleofmusic.ai.Trebie;
 import com.sidzi.circleofmusic.config;
-import com.sidzi.circleofmusic.helpers.AudioEventHandler;
 import com.sidzi.circleofmusic.helpers.BucketSaver;
 import com.sidzi.circleofmusic.helpers.DatabaseSynchronization;
 import com.sidzi.circleofmusic.helpers.LocalMusicLoader;
 import com.sidzi.circleofmusic.helpers.MediaButtonHandler;
+import com.sidzi.circleofmusic.helpers.MusicPlayerService;
+import com.sidzi.circleofmusic.helpers.MusicPlayerViewHandler;
 import com.sidzi.circleofmusic.helpers.VerticalSpaceDecorationHelper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
-    private AudioEventHandler mAudioEventHandler;
+    static public MusicPlayerService mMusicPlayerService;
+    private MusicPlayerViewHandler mMusicPlayerViewHandler;
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -110,11 +112,19 @@ public class MainActivity extends AppCompatActivity {
             });
             requestQueue.add(eosCheck);
 
-            mAudioEventHandler = new AudioEventHandler();
-            registerReceiver(mAudioEventHandler, new IntentFilter("com.sidzi.circleofmusic.PLAY_TRACK"));
+
+            IntentFilter intentFilter = new IntentFilter();
+            intentFilter.addAction(MusicPlayerService.ACTION_PLAY_TRACK);
+            intentFilter.addAction(MusicPlayerService.ACTION_PAUSE_TRACK);
+            intentFilter.addAction(MusicPlayerService.ACTION_NEXT_TRACK);
+
+
+            mMusicPlayerViewHandler = new MusicPlayerViewHandler();
+            registerReceiver(mMusicPlayerViewHandler, intentFilter);
 
 
             /* Handles headphone button click */
+
 
             AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
             ComponentName componentName = new ComponentName(getPackageName(), MediaButtonHandler.class.getName());
@@ -177,6 +187,7 @@ public class MainActivity extends AppCompatActivity {
                     return false;
                 }
             });
+            mMusicPlayerService = new MusicPlayerService(this);
         }
     }
 
@@ -200,6 +211,10 @@ public class MainActivity extends AppCompatActivity {
                     tabLayout.setVisibility(View.INVISIBLE);
                 }
                 break;
+            case R.id.alarm:
+                Intent intent = new Intent(this, AlarmActivity.class);
+                startActivity(intent);
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -213,18 +228,17 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         try {
-            unregisterReceiver(mAudioEventHandler);
+            unregisterReceiver(mMusicPlayerViewHandler);
             BucketSaver bucketSaver = new BucketSaver(this);
             bucketSaver.saveFile();
-            if (AudioEventHandler.mMediaPlayer.isPlaying()) {
-//                Add background service here
-                AudioEventHandler.mMediaPlayer.stop();
-            }
-            AudioEventHandler.mTrackProgressObserver.stop();
-            AudioEventHandler.mMediaPlayer.reset();
-            AudioEventHandler.mMediaPlayer.release();
-            AudioEventHandler.mMediaPlayer = null;
-            AudioEventHandler.mNotificationManager.cancelAll();
+//            if (MusicPlayerViewHandler.mMediaPlayer.isPlaying()) {
+////                Add background service here
+//                MusicPlayerViewHandler.mMediaPlayer.stop();
+//            }
+////            MusicPlayerViewHandler.mTrackProgressObserver.stop();
+//            MusicPlayerViewHandler.mMediaPlayer.reset();
+//            MusicPlayerViewHandler.mMediaPlayer.release();
+//            MusicPlayerViewHandler.mMediaPlayer = null;
         } catch (IllegalArgumentException | NullPointerException e) {
             e.printStackTrace();
         }
