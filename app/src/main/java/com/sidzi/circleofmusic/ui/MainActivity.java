@@ -15,6 +15,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -50,14 +51,14 @@ import com.sidzi.circleofmusic.helpers.LocalMusicLoader;
 import com.sidzi.circleofmusic.helpers.MediaButtonHandler;
 import com.sidzi.circleofmusic.helpers.MusicPlayerService;
 import com.sidzi.circleofmusic.helpers.MusicPlayerViewHandler;
+import com.sidzi.circleofmusic.helpers.MusicServiceConnection;
 import com.sidzi.circleofmusic.helpers.VerticalSpaceDecorationHelper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
-    static public MusicPlayerService mMusicPlayerService;
-    private MusicPlayerViewHandler mMusicPlayerViewHandler;
+    static public MusicServiceConnection mMusicServiceConnection;
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -73,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
      */
     private ViewPager mViewPager;
     private SearchView mSearchView;
+    private MusicPlayerViewHandler mMusicPlayerViewHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,13 +116,18 @@ public class MainActivity extends AppCompatActivity {
 
 
             IntentFilter intentFilter = new IntentFilter();
-            intentFilter.addAction(MusicPlayerService.ACTION_PLAY_TRACK);
-            intentFilter.addAction(MusicPlayerService.ACTION_PAUSE_TRACK);
-            intentFilter.addAction(MusicPlayerService.ACTION_NEXT_TRACK);
-
+            intentFilter.addAction(MusicPlayerService.ACTION_UPDATE_METADATA);
+//            intentFilter.addAction(MusicPlayerService.ACTION_PAUSE_TRACK);
+//            intentFilter.addAction(MusicPlayerService.ACTION_NEXT_TRACK);
 
             mMusicPlayerViewHandler = new MusicPlayerViewHandler();
-            registerReceiver(mMusicPlayerViewHandler, intentFilter);
+
+            LocalBroadcastManager.getInstance(this).registerReceiver(mMusicPlayerViewHandler, intentFilter);
+
+            Intent intent = new Intent(this, MusicPlayerService.class);
+            mMusicServiceConnection = new MusicServiceConnection();
+            bindService(intent, mMusicServiceConnection, BIND_AUTO_CREATE);
+            startService(intent);
 
 
             /* Handles headphone button click */
@@ -187,13 +194,11 @@ public class MainActivity extends AppCompatActivity {
                     return false;
                 }
             });
-            mMusicPlayerService = new MusicPlayerService(this);
         }
     }
 
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
-
         getMenuInflater().inflate(R.menu.menu_home, menu);
         return super.onCreateOptionsMenu(menu);
     }
@@ -228,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         try {
-            unregisterReceiver(mMusicPlayerViewHandler);
+//            unregisterReceiver(mMusicPlayerViewHandler);
             BucketSaver bucketSaver = new BucketSaver(this);
             bucketSaver.saveFile();
 //            if (MusicPlayerViewHandler.mMediaPlayer.isPlaying()) {

@@ -1,6 +1,7 @@
 package com.sidzi.circleofmusic.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
@@ -17,7 +18,9 @@ import com.j256.ormlite.stmt.QueryBuilder;
 import com.sidzi.circleofmusic.R;
 import com.sidzi.circleofmusic.entities.Track;
 import com.sidzi.circleofmusic.helpers.MusicPlayerService;
+import com.sidzi.circleofmusic.helpers.MusicServiceConnection;
 import com.sidzi.circleofmusic.helpers.OrmHandler;
+import com.sidzi.circleofmusic.ui.MainActivity;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -114,7 +117,10 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.ViewHolder
 
         @Override
         public void onClick(View v) {
-            MusicPlayerService.play(v.getTag(R.id.tag_track_path).toString(), mContext);
+            Intent intent = new Intent(mContext, MusicPlayerService.class);
+            MusicServiceConnection mMusicServiceConnection = MainActivity.mMusicServiceConnection;
+            mContext.bindService(intent, mMusicServiceConnection, Context.BIND_AUTO_CREATE);
+            mMusicServiceConnection.getmMusicPlayerService().play(v.getTag(R.id.tag_track_path).toString());
         }
 
         @Override

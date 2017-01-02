@@ -16,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.sidzi.circleofmusic.R;
+import com.sidzi.circleofmusic.entities.Track;
 import com.sidzi.circleofmusic.ui.MainActivity;
 
 import static android.content.Context.NOTIFICATION_SERVICE;
@@ -49,48 +50,47 @@ public class MusicPlayerViewHandler extends BroadcastReceiver {
                 .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
                 .setPriority(NotificationCompat.PRIORITY_HIGH);
 
-        ibPlay.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(final View v) {
-                if (MusicPlayerService.mMediaPlayer.isPlaying()) {
-                    MusicPlayerService.mMediaPlayer.pause();
-                } else {
-                    MusicPlayerService.mMediaPlayer.start();
-                }
-            }
-        });
+//        ibPlay.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(final View v) {
+//                if (MusicPlayerService.mMediaPlayer.isPlaying()) {
+//                    MusicPlayerService.mMediaPlayer.pause();
+//                } else {
+//                    MusicPlayerService.mMediaPlayer.start();
+//                }
+//            }
+//        });
+        final Track temp_track = (Track) intent.getSerializableExtra("track_metadata");
         ibAddToBucket.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (MusicPlayerService.mMediaPlayer != null) {
-                    Utils.bucketOps(MusicPlayerService.PLAYING_TRACK.getPath(), !(Boolean) ibAddToBucket.getTag(), context);
-                    if (MusicPlayerService.PLAYING_TRACK.getBucket()) {
-                        ((ImageButton) v).setImageResource(R.drawable.ic_track_bucket_added);
-                        Toast.makeText(context, "Added to bucket", Toast.LENGTH_SHORT).show();
-                    } else {
-                        ((ImageButton) v).setImageResource(R.drawable.ic_track_bucket_add);
-                    }
+                Utils.bucketOps(temp_track.getPath(), !(Boolean) ibAddToBucket.getTag(), context);
+                if (temp_track.getBucket()) {
+                    ((ImageButton) v).setImageResource(R.drawable.ic_track_bucket_added);
+                    Toast.makeText(context, "Added to bucket", Toast.LENGTH_SHORT).show();
+                } else {
+                    ((ImageButton) v).setImageResource(R.drawable.ic_track_bucket_add);
                 }
             }
         });
-        ibPlayNext.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                MusicPlayerService.next(context);
-            }
-        });
+//        ibPlayNext.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+////                MusicPlayerService.next(context);
+//            }
+//        });
         switch (intent.getAction()) {
-            case MusicPlayerService.ACTION_PLAY_TRACK:
-                tvPlayingTrackName.setText(MusicPlayerService.PLAYING_TRACK.getName());
-                tvPlayingArtistName.setText(MusicPlayerService.PLAYING_TRACK.getAlbum());
-                if (!MusicPlayerService.PLAYING_TRACK.getBucket()) {
+            case MusicPlayerService.ACTION_UPDATE_METADATA:
+                tvPlayingTrackName.setText(temp_track.getName());
+                tvPlayingArtistName.setText(temp_track.getAlbum());
+                if (!temp_track.getBucket()) {
                     ibAddToBucket.setImageResource(R.drawable.ic_track_bucket_add);
                 } else {
                     ibAddToBucket.setImageResource(R.drawable.ic_track_bucket_added);
                 }
-                ibAddToBucket.setTag(MusicPlayerService.PLAYING_TRACK.getBucket());
-                mBuilder.setContentTitle(MusicPlayerService.PLAYING_TRACK.getName())
-                        .setContentText(MusicPlayerService.PLAYING_TRACK.getAlbum());
+                ibAddToBucket.setTag(temp_track.getBucket());
+                mBuilder.setContentTitle(temp_track.getName())
+                        .setContentText(temp_track.getAlbum());
                 int notifyId = 1;
                 mNotificationManager.notify(notifyId, mBuilder.build());
                 break;

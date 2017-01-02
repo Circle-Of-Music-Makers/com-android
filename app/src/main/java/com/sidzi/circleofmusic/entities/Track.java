@@ -4,8 +4,14 @@ package com.sidzi.circleofmusic.entities;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.io.Serializable;
+
 @DatabaseTable(tableName = "table_tracks")
-public class Track {
+public class Track implements Serializable, Externalizable {
     @DatabaseField(id = true)
     private String path;
     @DatabaseField
@@ -75,5 +81,15 @@ public class Track {
         if (obj instanceof Track)
             return ((Track) obj).getPath().contentEquals(this.path);
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput objectOutput) throws IOException {
+        objectOutput.writeObject(this);
+    }
+
+    @Override
+    public void readExternal(ObjectInput objectInput) throws IOException, ClassNotFoundException {
+        objectInput.readObject();
     }
 }
