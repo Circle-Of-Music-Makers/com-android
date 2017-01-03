@@ -7,6 +7,7 @@ import android.content.Intent;
 public class MediaButtonHandler extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-//        Utils.bucketOps(MusicPlayerService.PLAYING_TRACK.getPath(), true, context);
+        if (MusicPlayerService.PLAYING_TRACK != null)
+            Utils.bucketOps(MusicPlayerService.PLAYING_TRACK.getPath(), true, context);
     }
 }

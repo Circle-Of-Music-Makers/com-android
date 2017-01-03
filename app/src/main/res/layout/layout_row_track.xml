@@ -12,28 +12,22 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin">
 
-    <RelativeLayout
-        android:id="@+id/rlTrackHolder"
+    <TextView
+        android:id="@+id/tvTrackName"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textAlignment="viewEnd"
+        android:textColor="@color/textPrimary"
+        android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/tvTrackName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:textAlignment="viewEnd"
-            android:textColor="@color/textPrimary"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/tvTrackInfo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/tvTrackName"
-            android:textAlignment="viewEnd"
-            android:textColor="@color/textSecondary" />
-    </RelativeLayout>
+    <TextView
+        android:id="@+id/tvTrackInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvTrackName"
+        android:textAlignment="viewEnd"
+        android:textColor="@color/textSecondary" />
 
 </RelativeLayout>

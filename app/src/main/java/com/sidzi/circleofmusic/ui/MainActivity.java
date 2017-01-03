@@ -28,8 +28,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -117,17 +117,16 @@ public class MainActivity extends AppCompatActivity {
 
             IntentFilter intentFilter = new IntentFilter();
             intentFilter.addAction(MusicPlayerService.ACTION_UPDATE_METADATA);
-//            intentFilter.addAction(MusicPlayerService.ACTION_PAUSE_TRACK);
-//            intentFilter.addAction(MusicPlayerService.ACTION_NEXT_TRACK);
-
-            mMusicPlayerViewHandler = new MusicPlayerViewHandler();
-
-            LocalBroadcastManager.getInstance(this).registerReceiver(mMusicPlayerViewHandler, intentFilter);
+            intentFilter.addAction(MusicPlayerService.ACTION_PAUSE);
+            intentFilter.addAction(MusicPlayerService.ACTION_PLAY);
 
             Intent intent = new Intent(this, MusicPlayerService.class);
             mMusicServiceConnection = new MusicServiceConnection();
             bindService(intent, mMusicServiceConnection, BIND_AUTO_CREATE);
             startService(intent);
+
+            mMusicPlayerViewHandler = new MusicPlayerViewHandler(this);
+            LocalBroadcastManager.getInstance(this).registerReceiver(mMusicPlayerViewHandler, intentFilter);
 
 
             /* Handles headphone button click */
@@ -149,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
 
             TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
             tabLayout.setupWithViewPager(mViewPager);
-            final FrameLayout fl = (FrameLayout) findViewById(R.id.flPlayer);
+            final LinearLayout fl = (LinearLayout) findViewById(R.id.llPlayer);
             mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
                 @Override
                 public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {

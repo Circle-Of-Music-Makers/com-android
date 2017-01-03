@@ -9,7 +9,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.PorterDuff;
 import android.support.v4.app.NotificationCompat;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -23,49 +22,67 @@ import static android.content.Context.NOTIFICATION_SERVICE;
 
 public class MusicPlayerViewHandler extends BroadcastReceiver {
 
-    @Override
-    public void onReceive(final Context context, Intent intent) {
-        FrameLayout flPlayer = (FrameLayout) ((MainActivity) context).findViewById(R.id.flPlayer);
+    private Context mContext;
+    private ImageButton flPlayer;
+    private TextView tvPlayingTrackName;
+    private TextView tvPlayingArtistName;
+    private ImageButton ibPlay;
+    private ImageButton ibAddToBucket;
+    private ImageButton ibPlayNext;
+    private ProgressBar pbTrackPlay;
+    private NotificationManager mNotificationManager;
+    private NotificationCompat.Builder mBuilder;
+    private MusicServiceConnection mMusicServiceConnection;
 
-        flPlayer.setVisibility(View.VISIBLE);
+    public MusicPlayerViewHandler(Context mContext) {
+        super();
+        this.mContext = mContext;
 
-        TextView tvPlayingTrackName = (TextView) ((MainActivity) context).findViewById(R.id.tvPlayingTrackName);
-        TextView tvPlayingArtistName = (TextView) ((MainActivity) context).findViewById(R.id.tvPlayingTrackArtist);
-        ImageButton ibPlay = (ImageButton) ((MainActivity) context).findViewById(R.id.ibPlayPause);
-        final ImageButton ibAddToBucket = (ImageButton) ((MainActivity) context).findViewById(R.id.ibAddToBucket);
-        ImageButton ibPlayNext = (ImageButton) ((MainActivity) context).findViewById(R.id.ibPlayNext);
-        ProgressBar pbTrackPlay = (ProgressBar) ((MainActivity) context).findViewById(R.id.pbTrackPlay);
-
-        pbTrackPlay.getProgressDrawable().setColorFilter(context.getResources().getColor(R.color.primaryInverted), PorterDuff.Mode.SRC_IN);
+        tvPlayingTrackName = (TextView) ((MainActivity) mContext).findViewById(R.id.tvPlayingTrackName);
+        tvPlayingArtistName = (TextView) ((MainActivity) mContext).findViewById(R.id.tvPlayingTrackArtist);
+        ibPlay = (ImageButton) ((MainActivity) mContext).findViewById(R.id.ibPlayPause);
+        ibAddToBucket = (ImageButton) ((MainActivity) mContext).findViewById(R.id.ibAddToBucket);
+        ibPlayNext = (ImageButton) ((MainActivity) mContext).findViewById(R.id.ibPlayNext);
+        pbTrackPlay = (ProgressBar) ((MainActivity) mContext).findViewById(R.id.pbTrackPlay);
+        pbTrackPlay.getProgressDrawable().setColorFilter(mContext.getResources().getColor(R.color.primaryInverted), PorterDuff.Mode.SRC_IN);
 
         //            Music Notification
 
-        NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
-        PendingIntent mainActivity = PendingIntent.getActivity(context, 101, new Intent(context, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+        mNotificationManager = (NotificationManager) mContext.getSystemService(NOTIFICATION_SERVICE);
+        PendingIntent mainActivity = PendingIntent.getActivity(mContext, 101, new Intent(mContext, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
 
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context)
+        mBuilder = new NotificationCompat.Builder(mContext)
                 .setSmallIcon(R.drawable.ic_statusbar)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setContentIntent(mainActivity)
-                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
+                .setLargeIcon(BitmapFactory.decodeResource(mContext.getResources(), R.mipmap.ic_launcher))
                 .setPriority(NotificationCompat.PRIORITY_HIGH);
 
-//        ibPlay.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(final View v) {
-//                if (MusicPlayerService.mMediaPlayer.isPlaying()) {
-//                    MusicPlayerService.mMediaPlayer.pause();
-//                } else {
-//                    MusicPlayerService.mMediaPlayer.start();
-//                }
-//            }
-//        });
+        mMusicServiceConnection = MainActivity.mMusicServiceConnection;
+
+    }
+
+    @Override
+    public void onReceive(final Context context, Intent intent) {
+
         final Track temp_track = (Track) intent.getSerializableExtra("track_metadata");
+        context.bindService(new Intent(mContext, MusicPlayerService.class), mMusicServiceConnection, Context.BIND_AUTO_CREATE);
+        final MusicPlayerService mpService = mMusicServiceConnection.getmMusicPlayerService();
+
+        ibPlay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+                if (mpService.mMediaPlayer.isPlaying()) {
+                    mpService.pause();
+                } else {
+                    mpService.unpause();
+                }
+            }
+        });
         ibAddToBucket.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Utils.bucketOps(temp_track.getPath(), !(Boolean) ibAddToBucket.getTag(), context);
-                if (temp_track.getBucket()) {
+                if (mpService.bucketOperation()) {
                     ((ImageButton) v).setImageResource(R.drawable.ic_track_bucket_added);
                     Toast.makeText(context, "Added to bucket", Toast.LENGTH_SHORT).show();
                 } else {
@@ -73,12 +90,12 @@ public class MusicPlayerViewHandler extends BroadcastReceiver {
                 }
             }
         });
-//        ibPlayNext.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-////                MusicPlayerService.next(context);
-//            }
-//        });
+        ibPlayNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mpService.next();
+            }
+        });
         switch (intent.getAction()) {
             case MusicPlayerService.ACTION_UPDATE_METADATA:
                 tvPlayingTrackName.setText(temp_track.getName());
@@ -89,17 +106,18 @@ public class MusicPlayerViewHandler extends BroadcastReceiver {
                     ibAddToBucket.setImageResource(R.drawable.ic_track_bucket_added);
                 }
                 ibAddToBucket.setTag(temp_track.getBucket());
+                ibPlay.setImageResource(R.drawable.ic_track_stop);
                 mBuilder.setContentTitle(temp_track.getName())
                         .setContentText(temp_track.getAlbum());
                 int notifyId = 1;
                 mNotificationManager.notify(notifyId, mBuilder.build());
                 break;
-//            case MusicPlayerService.ACTION_PAUSE_TRACK:
-//
-//                break;
-//            case MusicPlayerService.ACTION_NEXT_TRACK:
-//                break;
+            case MusicPlayerService.ACTION_PAUSE:
+                ibPlay.setImageResource(R.drawable.ic_track_play);
+                break;
+            case MusicPlayerService.ACTION_PLAY:
+                ibPlay.setImageResource(R.drawable.ic_track_stop);
+                break;
         }
-
     }
 }
