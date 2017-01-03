@@ -1,4 +1,4 @@
-package com.sidzi.circleofmusic.helpers;
+package com.sidzi.circleofmusic.services;
 
 
 import android.app.Service;
@@ -14,6 +14,8 @@ import android.support.v4.content.LocalBroadcastManager;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.Dao;
 import com.sidzi.circleofmusic.entities.Track;
+import com.sidzi.circleofmusic.helpers.OrmHandler;
+import com.sidzi.circleofmusic.helpers.Utils;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -24,9 +26,10 @@ public class MusicPlayerService extends Service {
     final public static String ACTION_UPDATE_METADATA = "com.sidzi.circleofmusic.UPDATE_METADATA";
     final public static String ACTION_PAUSE = "com.sidzi.circleofmusic.PAUSE";
     final public static String ACTION_PLAY = "com.sidzi.circleofmusic.PLAY";
+    public static final String ACTION_CLOSE = "com.sidzi.circleofmusic.CLOSE";
     public static Track PLAYING_TRACK = null;
     private final IBinder mMIBinder = new MusicBinder();
-    MediaPlayer mMediaPlayer = null;
+    public MediaPlayer mMediaPlayer = null;
     private int PLAYING_TRACK_POSITION = -1;
     private LocalBroadcastManager localBroadcastManager;
     private List<Track> mTrackList;
@@ -63,6 +66,14 @@ public class MusicPlayerService extends Service {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public boolean stopService(Intent name) {
+        mMediaPlayer.stop();
+        mMediaPlayer.release();
+        stopSelf();
+        return super.stopService(name);
     }
 
     public void play(String track_path) {
@@ -125,7 +136,7 @@ public class MusicPlayerService extends Service {
     }
 
     public class MusicBinder extends Binder {
-        MusicPlayerService getService() {
+        public MusicPlayerService getService() {
             return MusicPlayerService.this;
         }
     }

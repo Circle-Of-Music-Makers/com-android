@@ -36,7 +36,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <service android:name=".helpers.MusicPlayerService" />
+        <service android:name=".services.MusicPlayerService" />
         <receiver android:name=".helpers.MediaButtonHandler">
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />

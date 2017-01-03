@@ -49,16 +49,18 @@ import com.sidzi.circleofmusic.helpers.BucketSaver;
 import com.sidzi.circleofmusic.helpers.DatabaseSynchronization;
 import com.sidzi.circleofmusic.helpers.LocalMusicLoader;
 import com.sidzi.circleofmusic.helpers.MediaButtonHandler;
-import com.sidzi.circleofmusic.helpers.MusicPlayerService;
 import com.sidzi.circleofmusic.helpers.MusicPlayerViewHandler;
 import com.sidzi.circleofmusic.helpers.MusicServiceConnection;
 import com.sidzi.circleofmusic.helpers.VerticalSpaceDecorationHelper;
+import com.sidzi.circleofmusic.services.MusicPlayerService;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
-    static public MusicServiceConnection mMusicServiceConnection;
+
+    //    TODO find a workaround for this static field
+    public static MusicServiceConnection mMusicServiceConnection;
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -121,9 +123,10 @@ public class MainActivity extends AppCompatActivity {
             intentFilter.addAction(MusicPlayerService.ACTION_PLAY);
 
             Intent intent = new Intent(this, MusicPlayerService.class);
-            mMusicServiceConnection = new MusicServiceConnection();
+            mMusicServiceConnection = new MusicServiceConnection(this);
+            if (MusicPlayerService.PLAYING_TRACK == null)
+                startService(intent);
             bindService(intent, mMusicServiceConnection, BIND_AUTO_CREATE);
-            startService(intent);
 
             mMusicPlayerViewHandler = new MusicPlayerViewHandler(this);
             LocalBroadcastManager.getInstance(this).registerReceiver(mMusicPlayerViewHandler, intentFilter);
@@ -232,17 +235,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         try {
-//            unregisterReceiver(mMusicPlayerViewHandler);
             BucketSaver bucketSaver = new BucketSaver(this);
             bucketSaver.saveFile();
-//            if (MusicPlayerViewHandler.mMediaPlayer.isPlaying()) {
-////                Add background service here
-//                MusicPlayerViewHandler.mMediaPlayer.stop();
-//            }
-////            MusicPlayerViewHandler.mTrackProgressObserver.stop();
-//            MusicPlayerViewHandler.mMediaPlayer.reset();
-//            MusicPlayerViewHandler.mMediaPlayer.release();
-//            MusicPlayerViewHandler.mMediaPlayer = null;
         } catch (IllegalArgumentException | NullPointerException e) {
             e.printStackTrace();
         }

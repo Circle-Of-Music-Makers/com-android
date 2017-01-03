@@ -17,8 +17,8 @@ import com.j256.ormlite.stmt.PreparedQuery;
 import com.j256.ormlite.stmt.QueryBuilder;
 import com.sidzi.circleofmusic.R;
 import com.sidzi.circleofmusic.entities.Track;
-import com.sidzi.circleofmusic.helpers.MusicPlayerService;
 import com.sidzi.circleofmusic.helpers.OrmHandler;
+import com.sidzi.circleofmusic.services.MusicPlayerService;
 
 import java.sql.SQLException;
 import java.util.ArrayList;

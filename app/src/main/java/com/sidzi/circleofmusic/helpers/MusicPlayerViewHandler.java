@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import com.sidzi.circleofmusic.R;
 import com.sidzi.circleofmusic.entities.Track;
+import com.sidzi.circleofmusic.services.MusicPlayerService;
 import com.sidzi.circleofmusic.ui.MainActivity;
 
 import static android.content.Context.NOTIFICATION_SERVICE;
@@ -23,7 +24,6 @@ import static android.content.Context.NOTIFICATION_SERVICE;
 public class MusicPlayerViewHandler extends BroadcastReceiver {
 
     private Context mContext;
-    private ImageButton flPlayer;
     private TextView tvPlayingTrackName;
     private TextView tvPlayingArtistName;
     private ImageButton ibPlay;
@@ -50,13 +50,16 @@ public class MusicPlayerViewHandler extends BroadcastReceiver {
 
         mNotificationManager = (NotificationManager) mContext.getSystemService(NOTIFICATION_SERVICE);
         PendingIntent mainActivity = PendingIntent.getActivity(mContext, 101, new Intent(mContext, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent stopService = PendingIntent.getBroadcast(mContext, 4123, new Intent(MusicPlayerService.ACTION_CLOSE), PendingIntent.FLAG_UPDATE_CURRENT);
 
+        NotificationCompat.Action stopAction = new NotificationCompat.Action(R.drawable.ic_play_next, "Stop", stopService);
         mBuilder = new NotificationCompat.Builder(mContext)
                 .setSmallIcon(R.drawable.ic_statusbar)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setContentIntent(mainActivity)
+                .setOngoing(true)
                 .setLargeIcon(BitmapFactory.decodeResource(mContext.getResources(), R.mipmap.ic_launcher))
-                .setPriority(NotificationCompat.PRIORITY_HIGH);
+                .setPriority(NotificationCompat.PRIORITY_HIGH).addAction(stopAction);
 
         mMusicServiceConnection = MainActivity.mMusicServiceConnection;
 
@@ -117,6 +120,11 @@ public class MusicPlayerViewHandler extends BroadcastReceiver {
                 break;
             case MusicPlayerService.ACTION_PLAY:
                 ibPlay.setImageResource(R.drawable.ic_track_stop);
+                break;
+            case MusicPlayerService.ACTION_CLOSE:
+                mpService.stopService(new Intent(context, MusicPlayerService.class));
+                mNotificationManager.cancelAll();
+                ((MainActivity) mContext).finish();
                 break;
         }
     }
