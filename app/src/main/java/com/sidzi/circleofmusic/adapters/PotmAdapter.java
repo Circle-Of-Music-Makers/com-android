@@ -96,7 +96,7 @@ public class PotmAdapter extends RecyclerView.Adapter<PotmAdapter.ViewHolder> {
         @Override
         public void onClick(View v) {
             Intent intent = new Intent(mContext, MusicPlayerService.class);
-            MusicServiceConnection mMusicServiceConnection = MainActivity.mMusicServiceConnection;
+            MusicServiceConnection mMusicServiceConnection = ((MainActivity) mContext).mMusicServiceConnection;
             mContext.bindService(intent, mMusicServiceConnection, Context.BIND_AUTO_CREATE);
             mMusicServiceConnection.getmMusicPlayerService().play(v.getTag(R.id.tag_track_path).toString(), v.getTag(R.id.tag_track_artist).toString(), v.getTag(R.id.tag_track_name).toString());
         }

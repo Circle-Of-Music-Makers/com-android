@@ -59,8 +59,7 @@ import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
 
-    //    TODO find a workaround for this static field
-    public static MusicServiceConnection mMusicServiceConnection;
+    public MusicServiceConnection mMusicServiceConnection;
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -246,6 +245,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             BucketSaver bucketSaver = new BucketSaver(this);
             bucketSaver.saveFile();
+            unbindService(mMusicServiceConnection);
         } catch (IllegalArgumentException | NullPointerException e) {
             e.printStackTrace();
         }
