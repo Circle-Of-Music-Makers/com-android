@@ -44,6 +44,7 @@ public class Track implements Serializable, Externalizable {
         this.artist = artist;
         this.bucket = bucket;
         this.album = album;
+        this.play_count = 0;
     }
 
     public String getName() {

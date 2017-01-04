@@ -10,6 +10,7 @@ import com.sidzi.circleofmusic.entities.Track;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class DatabaseSynchronization extends AsyncTask<Void, Void, Void> {
     private Context mContext;
@@ -22,14 +23,17 @@ public class DatabaseSynchronization extends AsyncTask<Void, Void, Void> {
     protected Void doInBackground(Void... voids) {
         ArrayList<Track> mTrackList = Utils.musicLoader(mContext);
         OrmHandler ormHandler = OpenHelperManager.getHelper(mContext, OrmHandler.class);
-        for (Track t :
-                mTrackList) {
-            try {
-                Dao<Track, String> dbTrack = ormHandler.getDao(Track.class);
+        try {
+            Dao<Track, String> dbTrack = ormHandler.getDao(Track.class);
+            List<Track> _temp = dbTrack.queryForAll();
+            _temp.removeAll(mTrackList);
+            for (Track t :
+                    mTrackList) {
                 dbTrack.createIfNotExists(t);
-            } catch (SQLException e) {
-                e.printStackTrace();
             }
+            dbTrack.delete(_temp);
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         OpenHelperManager.releaseHelper();
         return null;

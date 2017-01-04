@@ -25,6 +25,7 @@
             android:name=".ui.MainActivity"
             android:label="@string/title_activity_main"
             android:launchMode="singleTask"
+            android:screenOrientation="portrait"
             android:theme="@style/splashScreen"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
@@ -51,6 +52,7 @@
         <activity
             android:name=".ui.SearchActivity"
             android:label="@string/title_activity_search"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".ui.AlarmActivity" />
 
