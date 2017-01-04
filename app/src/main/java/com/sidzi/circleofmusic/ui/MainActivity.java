@@ -15,6 +15,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -27,8 +28,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -44,18 +45,21 @@ import com.sidzi.circleofmusic.adapters.PotmAdapter;
 import com.sidzi.circleofmusic.adapters.TracksAdapter;
 import com.sidzi.circleofmusic.ai.Trebie;
 import com.sidzi.circleofmusic.config;
-import com.sidzi.circleofmusic.helpers.AudioEventHandler;
 import com.sidzi.circleofmusic.helpers.BucketSaver;
 import com.sidzi.circleofmusic.helpers.DatabaseSynchronization;
 import com.sidzi.circleofmusic.helpers.LocalMusicLoader;
 import com.sidzi.circleofmusic.helpers.MediaButtonHandler;
+import com.sidzi.circleofmusic.helpers.MusicPlayerViewHandler;
+import com.sidzi.circleofmusic.helpers.MusicServiceConnection;
 import com.sidzi.circleofmusic.helpers.VerticalSpaceDecorationHelper;
+import com.sidzi.circleofmusic.services.MusicPlayerService;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
-    private AudioEventHandler mAudioEventHandler;
+
+    public MusicServiceConnection mMusicServiceConnection;
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -71,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
      */
     private ViewPager mViewPager;
     private SearchView mSearchView;
+    private MusicPlayerViewHandler mMusicPlayerViewHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,11 +115,26 @@ public class MainActivity extends AppCompatActivity {
             });
             requestQueue.add(eosCheck);
 
-            mAudioEventHandler = new AudioEventHandler();
-            registerReceiver(mAudioEventHandler, new IntentFilter("com.sidzi.circleofmusic.PLAY_TRACK"));
+
+            IntentFilter intentFilter = new IntentFilter();
+            intentFilter.addAction(MusicPlayerService.ACTION_UPDATE_METADATA);
+            intentFilter.addAction(MusicPlayerService.ACTION_PAUSE);
+            intentFilter.addAction(MusicPlayerService.ACTION_PLAY);
+            intentFilter.addAction(MusicPlayerService.ACTION_CLOSE);
+
+
+            Intent intent = new Intent(this, MusicPlayerService.class);
+            if (MusicPlayerService.PLAYING_TRACK == null)
+                startService(intent);
+            mMusicServiceConnection = new MusicServiceConnection(this);
+            bindService(intent, mMusicServiceConnection, BIND_AUTO_CREATE);
+
+            mMusicPlayerViewHandler = new MusicPlayerViewHandler(this);
+            LocalBroadcastManager.getInstance(this).registerReceiver(mMusicPlayerViewHandler, intentFilter);
 
 
             /* Handles headphone button click */
+
 
             AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
             ComponentName componentName = new ComponentName(getPackageName(), MediaButtonHandler.class.getName());
@@ -132,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
 
             TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
             tabLayout.setupWithViewPager(mViewPager);
-            final FrameLayout fl = (FrameLayout) findViewById(R.id.flPlayer);
+            final LinearLayout fl = (LinearLayout) findViewById(R.id.llPlayer);
             mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
                 @Override
                 public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -182,7 +202,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
-
         getMenuInflater().inflate(R.menu.menu_home, menu);
         return super.onCreateOptionsMenu(menu);
     }
@@ -200,6 +219,17 @@ public class MainActivity extends AppCompatActivity {
                     tabLayout.setVisibility(View.INVISIBLE);
                 }
                 break;
+            case R.id.alarm:
+                Intent intent = new Intent(this, AlarmActivity.class);
+                startActivity(intent);
+                break;
+            case R.id.exit:
+                mMusicServiceConnection.getmMusicPlayerService().onDestroy();
+                unbindService(mMusicServiceConnection);
+                stopService(new Intent(this, MusicPlayerService.class));
+                LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(MusicPlayerService.ACTION_CLOSE));
+                finish();
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -213,18 +243,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         try {
-            unregisterReceiver(mAudioEventHandler);
             BucketSaver bucketSaver = new BucketSaver(this);
             bucketSaver.saveFile();
-            if (AudioEventHandler.mMediaPlayer.isPlaying()) {
-//                Add background service here
-                AudioEventHandler.mMediaPlayer.stop();
-            }
-            AudioEventHandler.mTrackProgressObserver.stop();
-            AudioEventHandler.mMediaPlayer.reset();
-            AudioEventHandler.mMediaPlayer.release();
-            AudioEventHandler.mMediaPlayer = null;
-            AudioEventHandler.mNotificationManager.cancelAll();
+            unbindService(mMusicServiceConnection);
         } catch (IllegalArgumentException | NullPointerException e) {
             e.printStackTrace();
         }

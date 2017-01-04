@@ -15,10 +15,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-class Utils {
+public class Utils {
     static boolean BUCKET_OPS = false;
 
-    static void bucketOps(String path, Boolean bucket, Context mContext) {
+    public static void bucketOps(String path, Boolean bucket, Context mContext) {
         final OrmHandler ormHandler = OpenHelperManager.getHelper(mContext, OrmHandler.class);
         try {
             Dao<Track, String> dbTrack = ormHandler.getDao(Track.class);

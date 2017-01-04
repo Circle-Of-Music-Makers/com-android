@@ -8,4 +8,12 @@
         android:orderInCategory="200"
         android:title="@string/search"
         app:showAsAction="always" />
+
+    <item
+        android:id="@+id/alarm"
+        android:title="Alarm" />
+
+    <item
+        android:id="@+id/exit"
+        android:title="Quit" />
 </menu>
