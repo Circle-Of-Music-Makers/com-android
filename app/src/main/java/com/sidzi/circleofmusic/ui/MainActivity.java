@@ -121,6 +121,8 @@ public class MainActivity extends AppCompatActivity {
             intentFilter.addAction(MusicPlayerService.ACTION_UPDATE_METADATA);
             intentFilter.addAction(MusicPlayerService.ACTION_PAUSE);
             intentFilter.addAction(MusicPlayerService.ACTION_PLAY);
+            intentFilter.addAction(MusicPlayerService.ACTION_CLOSE);
+
 
             Intent intent = new Intent(this, MusicPlayerService.class);
             mMusicServiceConnection = new MusicServiceConnection(this);
@@ -221,6 +223,9 @@ public class MainActivity extends AppCompatActivity {
             case R.id.alarm:
                 Intent intent = new Intent(this, AlarmActivity.class);
                 startActivity(intent);
+                break;
+            case R.id.exit:
+                LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(MusicPlayerService.ACTION_CLOSE));
                 break;
         }
         return super.onOptionsItemSelected(item);

@@ -61,7 +61,7 @@ public class MusicPlayerViewHandler extends BroadcastReceiver {
                 .setLargeIcon(BitmapFactory.decodeResource(mContext.getResources(), R.mipmap.ic_launcher))
                 .setPriority(NotificationCompat.PRIORITY_HIGH).addAction(stopAction);
 
-        mMusicServiceConnection = MainActivity.mMusicServiceConnection;
+        mMusicServiceConnection = new MusicServiceConnection(mContext);
 
     }
 
