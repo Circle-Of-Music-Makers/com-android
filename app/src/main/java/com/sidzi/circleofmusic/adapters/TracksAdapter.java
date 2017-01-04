@@ -17,14 +17,14 @@ import com.j256.ormlite.stmt.PreparedQuery;
 import com.j256.ormlite.stmt.QueryBuilder;
 import com.sidzi.circleofmusic.R;
 import com.sidzi.circleofmusic.entities.Track;
+import com.sidzi.circleofmusic.helpers.MusicServiceConnection;
 import com.sidzi.circleofmusic.helpers.OrmHandler;
 import com.sidzi.circleofmusic.services.MusicPlayerService;
+import com.sidzi.circleofmusic.ui.MainActivity;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.sidzi.circleofmusic.ui.MainActivity.mMusicServiceConnection;
 
 public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.ViewHolder> {
 
@@ -118,6 +118,7 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.ViewHolder
         @Override
         public void onClick(View v) {
             Intent intent = new Intent(mContext, MusicPlayerService.class);
+            MusicServiceConnection mMusicServiceConnection = MainActivity.mMusicServiceConnection;
             mContext.bindService(intent, mMusicServiceConnection, Context.BIND_AUTO_CREATE);
             mMusicServiceConnection.getmMusicPlayerService().play(v.getTag(R.id.tag_track_path).toString());
         }
