@@ -27,12 +27,13 @@ public class MusicServiceConnection implements ServiceConnection {
             Intent intent = new Intent(MusicPlayerService.ACTION_UPDATE_METADATA);
             intent.putExtra("track_metadata", MusicPlayerService.PLAYING_TRACK);
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+            if (!mMusicPlayerService.mMediaPlayer.isPlaying())
+                LocalBroadcastManager.getInstance(mContext).sendBroadcast(new Intent(MusicPlayerService.ACTION_PAUSE));
         }
     }
 
     @Override
     public void onServiceDisconnected(ComponentName componentName) {
-
     }
 
     public MusicPlayerService getmMusicPlayerService() {

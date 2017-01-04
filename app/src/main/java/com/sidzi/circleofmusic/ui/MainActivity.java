@@ -225,7 +225,11 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
                 break;
             case R.id.exit:
+                mMusicServiceConnection.getmMusicPlayerService().onDestroy();
+                unbindService(mMusicServiceConnection);
+                stopService(new Intent(this, MusicPlayerService.class));
                 LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(MusicPlayerService.ACTION_CLOSE));
+                finish();
                 break;
         }
         return super.onOptionsItemSelected(item);

@@ -16,8 +16,10 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 import com.sidzi.circleofmusic.R;
-import com.sidzi.circleofmusic.config;
 import com.sidzi.circleofmusic.entities.Potm;
+import com.sidzi.circleofmusic.helpers.MusicServiceConnection;
+import com.sidzi.circleofmusic.services.MusicPlayerService;
+import com.sidzi.circleofmusic.ui.MainActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -93,12 +95,10 @@ public class PotmAdapter extends RecyclerView.Adapter<PotmAdapter.ViewHolder> {
 
         @Override
         public void onClick(View v) {
-            Intent ready_track = new Intent("com.sidzi.circleofmusic.PLAY_TRACK");
-            ready_track.putExtra("track_path", config.com_url + v.getTag(R.id.tag_track_path).toString());
-            ready_track.putExtra("track_name", v.getTag(R.id.tag_track_name).toString());
-            ready_track.putExtra("track_artist", v.getTag(R.id.tag_track_artist).toString());
-            ready_track.putExtra("bucket", false);
-            mContext.sendBroadcast(ready_track);
+            Intent intent = new Intent(mContext, MusicPlayerService.class);
+            MusicServiceConnection mMusicServiceConnection = MainActivity.mMusicServiceConnection;
+            mContext.bindService(intent, mMusicServiceConnection, Context.BIND_AUTO_CREATE);
+            mMusicServiceConnection.getmMusicPlayerService().play(v.getTag(R.id.tag_track_path).toString(), v.getTag(R.id.tag_track_artist).toString(), v.getTag(R.id.tag_track_name).toString());
         }
     }
 }

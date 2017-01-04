@@ -13,6 +13,7 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.Dao;
+import com.sidzi.circleofmusic.config;
 import com.sidzi.circleofmusic.entities.Track;
 import com.sidzi.circleofmusic.helpers.OrmHandler;
 import com.sidzi.circleofmusic.helpers.Utils;
@@ -42,14 +43,6 @@ public class MusicPlayerService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        mMediaPlayer = new MediaPlayer();
-        mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer mediaPlayer) {
-                mediaPlayer.start();
-            }
-        });
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -69,33 +62,47 @@ public class MusicPlayerService extends Service {
     }
 
     @Override
-    public boolean stopService(Intent name) {
-        mMediaPlayer.stop();
-        mMediaPlayer.release();
-        stopSelf();
-        return super.stopService(name);
+    public void onDestroy() {
+        if (mMediaPlayer != null) {
+            mMediaPlayer.reset();
+            mMediaPlayer.release();
+            mMediaPlayer = null;
+        }
+        PLAYING_TRACK = null;
+        super.onDestroy();
     }
 
+
     public void play(String track_path) {
-        if (mMediaPlayer.isPlaying()) {
-            mMediaPlayer.stop();
-        }
+        if (mMediaPlayer == null)
+            init();
         mMediaPlayer.reset();
         try {
             mMediaPlayer.setDataSource(track_path);
-            if (track_path.startsWith("https://")) {
-                mMediaPlayer.prepareAsync();
-            } else {
-                mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                    @Override
-                    public void onCompletion(MediaPlayer mediaPlayer) {
-                        next();
-                    }
-                });
-                mMediaPlayer.prepare();
-            }
+            mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mediaPlayer) {
+                    next();
+                }
+            });
+            mMediaPlayer.prepare();
             PLAYING_TRACK_POSITION = mTrackList.indexOf(new Track(track_path));
             PLAYING_TRACK = mTrackList.get(PLAYING_TRACK_POSITION);
+            uiUpdate(PLAYING_TRACK);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void play(String Path, String Artist, String Name) {
+        if (mMediaPlayer == null)
+            init();
+        mMediaPlayer.reset();
+        try {
+            mMediaPlayer.setDataSource(config.com_url + Path);
+            mMediaPlayer.prepareAsync();
+            PLAYING_TRACK = new Track(Name, Path, Artist);
+            PLAYING_TRACK.setBucket(false);
             uiUpdate(PLAYING_TRACK);
         } catch (IOException e) {
             e.printStackTrace();
@@ -127,6 +134,18 @@ public class MusicPlayerService extends Service {
         Intent intent = new Intent(action);
         intent.putExtra("track_metadata", track);
         localBroadcastManager.sendBroadcast(intent);
+    }
+
+    private void init() {
+        mMediaPlayer = new MediaPlayer();
+        mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mediaPlayer) {
+                mediaPlayer.start();
+                uiUpdate(null);
+            }
+        });
     }
 
     @Nullable

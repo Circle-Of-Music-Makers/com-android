@@ -50,16 +50,13 @@ public class MusicPlayerViewHandler extends BroadcastReceiver {
 
         mNotificationManager = (NotificationManager) mContext.getSystemService(NOTIFICATION_SERVICE);
         PendingIntent mainActivity = PendingIntent.getActivity(mContext, 101, new Intent(mContext, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
-        PendingIntent stopService = PendingIntent.getBroadcast(mContext, 4123, new Intent(MusicPlayerService.ACTION_CLOSE), PendingIntent.FLAG_UPDATE_CURRENT);
 
-        NotificationCompat.Action stopAction = new NotificationCompat.Action(R.drawable.ic_play_next, "Stop", stopService);
         mBuilder = new NotificationCompat.Builder(mContext)
                 .setSmallIcon(R.drawable.ic_statusbar)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setContentIntent(mainActivity)
                 .setOngoing(true)
-                .setLargeIcon(BitmapFactory.decodeResource(mContext.getResources(), R.mipmap.ic_launcher))
-                .setPriority(NotificationCompat.PRIORITY_HIGH).addAction(stopAction);
+                .setLargeIcon(BitmapFactory.decodeResource(mContext.getResources(), R.mipmap.ic_launcher));
 
         mMusicServiceConnection = new MusicServiceConnection(mContext);
 
@@ -102,16 +99,15 @@ public class MusicPlayerViewHandler extends BroadcastReceiver {
         switch (intent.getAction()) {
             case MusicPlayerService.ACTION_UPDATE_METADATA:
                 tvPlayingTrackName.setText(temp_track.getName());
-                tvPlayingArtistName.setText(temp_track.getAlbum());
+                tvPlayingArtistName.setText(temp_track.getArtist());
                 if (!temp_track.getBucket()) {
                     ibAddToBucket.setImageResource(R.drawable.ic_track_bucket_add);
                 } else {
                     ibAddToBucket.setImageResource(R.drawable.ic_track_bucket_added);
                 }
                 ibAddToBucket.setTag(temp_track.getBucket());
-                ibPlay.setImageResource(R.drawable.ic_track_stop);
                 mBuilder.setContentTitle(temp_track.getName())
-                        .setContentText(temp_track.getAlbum());
+                        .setContentText(temp_track.getArtist());
                 int notifyId = 1;
                 mNotificationManager.notify(notifyId, mBuilder.build());
                 break;
@@ -122,9 +118,7 @@ public class MusicPlayerViewHandler extends BroadcastReceiver {
                 ibPlay.setImageResource(R.drawable.ic_track_stop);
                 break;
             case MusicPlayerService.ACTION_CLOSE:
-                mpService.stopService(new Intent(context, MusicPlayerService.class));
                 mNotificationManager.cancelAll();
-                ((MainActivity) mContext).finish();
                 break;
         }
     }

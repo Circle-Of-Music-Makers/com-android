@@ -32,6 +32,12 @@ public class Track implements Serializable, Externalizable {
         this.path = path;
     }
 
+    public Track(String name, String path, String artist) {
+        this.path = path;
+        this.name = name;
+        this.artist = artist;
+    }
+
     public Track(String name, String path, String artist, String album, Boolean bucket) {
         this.path = path;
         this.name = name;
