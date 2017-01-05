@@ -9,7 +9,6 @@ import com.sidzi.circleofmusic.entities.Track;
 import java.util.ArrayList;
 
 public class LocalMusicLoader extends AsyncTask<Void, Void, ArrayList<Track>> {
-    private final ArrayList<Track> mTrackList = new ArrayList<>();
     private Context mContext;
     private TracksAdapter tracksAdapter;
 

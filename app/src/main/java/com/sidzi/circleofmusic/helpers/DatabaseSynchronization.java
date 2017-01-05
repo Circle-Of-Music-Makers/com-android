@@ -6,8 +6,10 @@ import android.os.AsyncTask;
 
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.Dao;
+import com.sidzi.circleofmusic.config;
 import com.sidzi.circleofmusic.entities.Track;
 
+import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,8 +46,15 @@ public class DatabaseSynchronization extends AsyncTask<Void, Void, Void> {
         SharedPreferences settings = mContext.getSharedPreferences("com_prefs", 0);
         if (settings.getBoolean("init", true)) {
             BucketSaver bucketSaver = new BucketSaver(mContext);
-            if (bucketSaver.importFile())
-                settings.edit().putBoolean("init", false).apply();
+            if (bucketSaver.importFile()) {
+                File com_dir = new File(config.com_local_url);
+                if (!com_dir.exists()) {
+                    if (!com_dir.mkdirs()) {
+                        throw new UnsupportedOperationException("Could not create com folder");
+                    }
+                }
+            }
+            settings.edit().putBoolean("init", false).apply();
         }
         super.onPostExecute(aVoid);
     }
