@@ -220,7 +220,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
             case R.id.alarm:
-                Intent intent = new Intent(this, AlarmActivity.class);
+                Intent intent = new Intent(this, AlarmSettingActivity.class);
                 startActivity(intent);
                 break;
             case R.id.exit:

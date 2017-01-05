@@ -14,4 +14,9 @@
     <string name="say_hello_to_trebie">Say Hello to Trebie</string>
     <string name="title_activity_search">Search Results</string>
     <string name="search">Search</string>
+
+    <string name="title_activity_alarm">AlarmActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="stop_alarm">Stop Alarm</string>
 </resources>
