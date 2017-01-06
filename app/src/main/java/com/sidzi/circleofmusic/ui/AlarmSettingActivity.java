@@ -79,10 +79,17 @@ public class AlarmSettingActivity extends AppCompatActivity {
                                                             request.setDestinationInExternalPublicDir("", "com-data/alarms/" + arrayAdapter.getItem(i));
                                                             downloadManager.enqueue(request);
                                                         }
-                                                        setAlarm(config.com_local_url + arrayAdapter.getItem(i));
+                                                        if (!new File(config.com_local_url + "secondary_" + arrayAdapter.getItem(i)).exists()) {
+                                                            DownloadManager.Request request2 = new DownloadManager.Request(Uri.parse(config.com_url + "getAlarmSecondary" + arrayAdapter.getItem(i)));
+                                                            request2.setTitle("Downloading Secondary Alarm Sound");
+                                                            request2.setDestinationInExternalPublicDir("", "com-data/alarms/secondary_" + arrayAdapter.getItem(i));
+                                                            downloadManager.enqueue(request2);
+                                                        }
+                                                        setAlarm(config.com_local_url + arrayAdapter.getItem(i), config.com_local_url + "secondary_" + arrayAdapter.getItem(i));
                                                         finish();
                                                     }
                                                 });
+                                                innerBuilder.create().show();
                                             } catch (JSONException e) {
                                                 e.printStackTrace();
                                             }
@@ -96,7 +103,6 @@ public class AlarmSettingActivity extends AppCompatActivity {
                                     });
                                     requestQueue.add(alarmArray);
                                     dialogInterface.dismiss();
-                                    innerBuilder.create().show();
                                 }
                             })
                             .setNegativeButton("Personal Music", new DialogInterface.OnClickListener() {
@@ -114,12 +120,12 @@ public class AlarmSettingActivity extends AppCompatActivity {
         });
     }
 
-    void setAlarm(String alarm) {
+    void setAlarm(String alarm, String secondary_alarm) {
 
         Intent intent = new Intent(this, AlarmActivity.class);
 
         intent.putExtra("alarm_path", alarm);
-        intent.putExtra("after_alarm_path", "Alarm");
+        intent.putExtra("after_alarm_path", secondary_alarm);
 
 
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
@@ -157,7 +163,7 @@ public class AlarmSettingActivity extends AppCompatActivity {
             String path;
             path = data.getStringExtra("filepath");
             if (!path.equals("") && !(new File(path).isDirectory()))
-                setAlarm(path);
+                setAlarm(path, "");
             else
                 startActivityForResult(new Intent(this, ListFileActivity.class), REQUEST_ALARM_PATH);
         }
