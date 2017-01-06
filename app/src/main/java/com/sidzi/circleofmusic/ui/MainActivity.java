@@ -50,10 +50,10 @@ import com.sidzi.circleofmusic.config;
 import com.sidzi.circleofmusic.helpers.BucketSaver;
 import com.sidzi.circleofmusic.helpers.DatabaseSynchronization;
 import com.sidzi.circleofmusic.helpers.LocalMusicLoader;
-import com.sidzi.circleofmusic.helpers.MediaButtonHandler;
-import com.sidzi.circleofmusic.helpers.MusicPlayerViewHandler;
 import com.sidzi.circleofmusic.helpers.MusicServiceConnection;
 import com.sidzi.circleofmusic.helpers.VerticalSpaceDecorationHelper;
+import com.sidzi.circleofmusic.recievers.MediaButtonHandler;
+import com.sidzi.circleofmusic.recievers.MusicPlayerViewHandler;
 import com.sidzi.circleofmusic.services.MusicPlayerService;
 
 import org.json.JSONException;
@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 //        TODO remove key before commit
-        Rollbar.init(this, config.rollbar_key, "production");
+        Rollbar.init(this, config.rollbar_key, "release");
         setTheme(R.style.AppTheme_NoActionBar);
         setContentView(R.layout.activity_main);
 

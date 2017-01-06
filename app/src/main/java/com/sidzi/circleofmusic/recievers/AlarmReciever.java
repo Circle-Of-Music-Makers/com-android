@@ -1,4 +1,4 @@
-package com.sidzi.circleofmusic.helpers;
+package com.sidzi.circleofmusic.recievers;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

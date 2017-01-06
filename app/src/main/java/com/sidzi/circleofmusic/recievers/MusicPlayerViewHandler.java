@@ -1,4 +1,4 @@
-package com.sidzi.circleofmusic.helpers;
+package com.sidzi.circleofmusic.recievers;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import com.sidzi.circleofmusic.R;
 import com.sidzi.circleofmusic.entities.Track;
+import com.sidzi.circleofmusic.helpers.MusicServiceConnection;
 import com.sidzi.circleofmusic.services.MusicPlayerService;
 import com.sidzi.circleofmusic.ui.MainActivity;
 

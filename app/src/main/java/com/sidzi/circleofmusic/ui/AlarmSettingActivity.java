@@ -32,6 +32,7 @@ import java.io.File;
 import java.util.Calendar;
 
 public class AlarmSettingActivity extends AppCompatActivity {
+    private static final int REQUEST_ALARM_PATH = 4114;
     EditText etTimePicker;
 
     @Override
@@ -46,71 +47,78 @@ public class AlarmSettingActivity extends AppCompatActivity {
 
         final DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
 
+        etTimePicker.setHint("\"hhmm\" in 24 hr format");
 
         bSelectAlarm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                builder.setTitle("Select a sound")
-                        .setMessage("Select from a list of CoM alarms or choose from your own collection")
-                        .setPositiveButton("CoM Alarms", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(final DialogInterface dialogInterface, int i) {
+                if (etTimePicker.getText().toString().equals("")) {
+                    Toast.makeText(getApplicationContext(), "Enter the time first", Toast.LENGTH_SHORT).show();
+                } else {
+                    builder.setTitle("Select a sound")
+                            .setMessage("Select from a list of CoM alarms or choose from your own collection")
+                            .setPositiveButton("CoM Alarms", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(final DialogInterface dialogInterface, int i) {
 //                                Load CoM alarms
-                                RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
-                                JsonObjectRequest alarmArray = new JsonObjectRequest(Request.Method.GET, config.com_url + "getAlarms", null, new Response.Listener<JSONObject>() {
-                                    @Override
-                                    public void onResponse(JSONObject response) {
-                                        try {
-                                            final JSONArray alarms = response.getJSONArray("alarms");
-                                            final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(getApplicationContext(), R.layout.layout_row_alarm_selection);
-                                            for (int i = 0; i < alarms.length(); i++)
-                                                arrayAdapter.add(alarms.get(i).toString());
-                                            innerBuilder.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(DialogInterface dialogInterface, int i) {
-                                                    if (!new File(config.com_local_url + arrayAdapter.getItem(i)).exists()) {
-                                                        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(config.com_url + "getAlarm" + arrayAdapter.getItem(i)));
-                                                        request.setTitle("Downloading Alarm Sound");
-                                                        request.setDestinationInExternalPublicDir("", "com-data/alarms/" + arrayAdapter.getItem(i));
-                                                        downloadManager.enqueue(request);
+                                    RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
+                                    JsonObjectRequest alarmArray = new JsonObjectRequest(Request.Method.GET, config.com_url + "getAlarms", null, new Response.Listener<JSONObject>() {
+                                        @Override
+                                        public void onResponse(JSONObject response) {
+                                            try {
+                                                final JSONArray alarms = response.getJSONArray("alarms");
+                                                final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(getApplicationContext(), R.layout.layout_row_alarm_selection);
+                                                for (int i = 0; i < alarms.length(); i++)
+                                                    arrayAdapter.add(alarms.get(i).toString());
+                                                innerBuilder.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                                        if (!new File(config.com_local_url + arrayAdapter.getItem(i)).exists()) {
+                                                            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(config.com_url + "getAlarm" + arrayAdapter.getItem(i)));
+                                                            request.setTitle("Downloading Alarm Sound");
+                                                            request.setDestinationInExternalPublicDir("", "com-data/alarms/" + arrayAdapter.getItem(i));
+                                                            downloadManager.enqueue(request);
+                                                        }
+                                                        setAlarm(config.com_local_url + arrayAdapter.getItem(i));
+                                                        finish();
                                                     }
-                                                    setAlarm(arrayAdapter.getItem(i));
-                                                    finish();
-                                                }
-                                            });
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
+                                                });
+                                            } catch (JSONException e) {
+                                                e.printStackTrace();
+                                            }
+
                                         }
+                                    }, new Response.ErrorListener() {
+                                        @Override
+                                        public void onErrorResponse(VolleyError error) {
 
-                                    }
-                                }, new Response.ErrorListener() {
-                                    @Override
-                                    public void onErrorResponse(VolleyError error) {
-
-                                    }
-                                });
-                                requestQueue.add(alarmArray);
-                                dialogInterface.dismiss();
-                                innerBuilder.create().show();
-                            }
-                        })
-                        .setNegativeButton("Personal Music", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
+                                        }
+                                    });
+                                    requestQueue.add(alarmArray);
+                                    dialogInterface.dismiss();
+                                    innerBuilder.create().show();
+                                }
+                            })
+                            .setNegativeButton("Personal Music", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
 //                                Load file browser
-                            }
-                        });
-                builder.create().show();
+                                    Intent intent = new Intent(AlarmSettingActivity.this, ListFileActivity.class);
+                                    startActivityForResult(intent, REQUEST_ALARM_PATH);
+
+                                }
+                            });
+                    builder.create().show();
+                }
             }
         });
-        etTimePicker.setHint("\"hhmm\" in 24 hr format");
     }
 
     void setAlarm(String alarm) {
 
         Intent intent = new Intent(this, AlarmActivity.class);
 
-        intent.putExtra("alarm_path", config.com_local_url + alarm);
+        intent.putExtra("alarm_path", alarm);
         intent.putExtra("after_alarm_path", "Alarm");
 
 
@@ -135,11 +143,24 @@ public class AlarmSettingActivity extends AppCompatActivity {
     }
 
     int diffH(int c, int s) {
-//        TODO Correct subtraction of time
         if (c <= s) {
             return s - c;
         } else {
             return s + 24 - c;
         }
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_ALARM_PATH && resultCode == RESULT_OK) {
+            String path;
+            path = data.getStringExtra("filepath");
+            if (!path.equals("") && !(new File(path).isDirectory()))
+                setAlarm(path);
+            else
+                startActivityForResult(new Intent(this, ListFileActivity.class), REQUEST_ALARM_PATH);
+        }
+    }
+
 }

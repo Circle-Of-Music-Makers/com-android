@@ -21,4 +21,6 @@
     <string name="stop_alarm">Stop Alarm</string>
     <string name="select_alarm_sound">Select alarm sound</string>
     <string name="set_alarm">Set Alarm</string>
+    <string name="select_this_file">Select this file</string>
+    <string name="go_up_a_level">Up</string>
 </resources>

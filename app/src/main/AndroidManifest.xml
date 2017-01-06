@@ -40,7 +40,7 @@
 
         <service android:name=".services.MusicPlayerService" />
 
-        <receiver android:name=".helpers.MediaButtonHandler">
+        <receiver android:name=".recievers.MediaButtonHandler">
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
             </intent-filter>
@@ -58,13 +58,15 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".ui.AlarmSettingActivity" />
 
-        <receiver android:name=".helpers.AlarmReciever" />
+        <receiver android:name=".recievers.AlarmReciever" />
 
         <activity
             android:name=".ui.AlarmActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_alarm"
             android:theme="@style/FullscreenTheme" />
+
+        <activity android:name=".ui.ListFileActivity" />
     </application>
 
 </manifest>
