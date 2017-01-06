@@ -34,7 +34,9 @@ public class MusicPlayerService extends Service {
     private int PLAYING_TRACK_POSITION = -1;
     private LocalBroadcastManager localBroadcastManager;
     private List<Track> mTrackList;
+    private List<Track> mBucketList;
     private Context mContext;
+    private int songsTillSleep = -1;
 
 
     public MusicPlayerService() {
@@ -56,6 +58,7 @@ public class MusicPlayerService extends Service {
         try {
             dbTrack = ormHandler.getDao(Track.class);
             mTrackList = dbTrack.queryForAll();
+            mBucketList = dbTrack.queryForEq("bucket", true);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -89,6 +92,10 @@ public class MusicPlayerService extends Service {
             PLAYING_TRACK_POSITION = mTrackList.indexOf(new Track(track_path));
             PLAYING_TRACK = mTrackList.get(PLAYING_TRACK_POSITION);
             uiUpdate(PLAYING_TRACK);
+            if (songsTillSleep == 0)
+                onDestroy();
+            else
+                songsTillSleep--;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -104,6 +111,31 @@ public class MusicPlayerService extends Service {
             PLAYING_TRACK = new Track(Name, Path, Artist);
             PLAYING_TRACK.setBucket(false);
             uiUpdate(PLAYING_TRACK);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void bucketPlay(String track_path) {
+        if (mMediaPlayer == null)
+            init();
+        mMediaPlayer.reset();
+        try {
+            mMediaPlayer.setDataSource(track_path);
+            mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mediaPlayer) {
+                    bucketPlay(mBucketList.get(++PLAYING_TRACK_POSITION).getPath());
+                }
+            });
+            mMediaPlayer.prepare();
+            PLAYING_TRACK_POSITION = mBucketList.indexOf(new Track(track_path));
+            PLAYING_TRACK = mBucketList.get(PLAYING_TRACK_POSITION);
+            uiUpdate(PLAYING_TRACK);
+            if (songsTillSleep == 0)
+                onDestroy();
+            else
+                songsTillSleep--;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -134,6 +166,10 @@ public class MusicPlayerService extends Service {
         Intent intent = new Intent(action);
         intent.putExtra("track_metadata", track);
         localBroadcastManager.sendBroadcast(intent);
+    }
+
+    public void setSongsTillSleep(int count) {
+        songsTillSleep = count;
     }
 
     private void init() {
