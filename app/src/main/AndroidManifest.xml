@@ -37,7 +37,9 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+
         <service android:name=".services.MusicPlayerService" />
+
         <receiver android:name=".helpers.MediaButtonHandler">
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
@@ -54,9 +56,15 @@
             android:label="@string/title_activity_search"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".ui.AlarmActivity" />
+        <activity android:name=".ui.AlarmSettingActivity" />
 
         <receiver android:name=".helpers.AlarmReciever" />
+
+        <activity
+            android:name=".ui.AlarmActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_alarm"
+            android:theme="@style/FullscreenTheme" />
     </application>
 
 </manifest>

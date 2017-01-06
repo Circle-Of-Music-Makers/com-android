@@ -3,6 +3,7 @@ package com.sidzi.circleofmusic.ui;
 import android.Manifest;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -17,6 +18,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -220,8 +222,22 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
             case R.id.alarm:
-                Intent intent = new Intent(this, AlarmActivity.class);
+                Intent intent = new Intent(this, AlarmSettingActivity.class);
                 startActivity(intent);
+                break;
+            case R.id.sleepTimer:
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                final EditText editText = new EditText(this);
+                builder.setTitle("# of songs till sleep")
+                        .setView(editText)
+                        .setPositiveButton("set", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                mMusicServiceConnection.getmMusicPlayerService().setSongsTillSleep(Integer.parseInt(((editText.getText().toString()))));
+                                dialogInterface.dismiss();
+                            }
+                        });
+                builder.create().show();
                 break;
             case R.id.exit:
                 mMusicServiceConnection.getmMusicPlayerService().onDestroy();
