@@ -29,7 +29,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.util.Calendar;
+
+import static android.os.Build.VERSION.SDK_INT;
 
 public class AlarmSettingActivity extends AppCompatActivity {
     private static final int REQUEST_ALARM_PATH = 4114;
@@ -98,7 +101,23 @@ public class AlarmSettingActivity extends AppCompatActivity {
                                     }, new Response.ErrorListener() {
                                         @Override
                                         public void onErrorResponse(VolleyError error) {
-
+                                            File[] alarms = new File(config.com_local_url).listFiles(new FilenameFilter() {
+                                                @Override
+                                                public boolean accept(File file, String s) {
+                                                    return !s.startsWith("secondary_");
+                                                }
+                                            });
+                                            final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(getApplicationContext(), R.layout.layout_row_alarm_selection);
+                                            for (File alarm : alarms)
+                                                arrayAdapter.add(alarm.getName());
+                                            innerBuilder.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialogInterface, int i) {
+                                                    setAlarm(config.com_local_url + arrayAdapter.getItem(i), config.com_local_url + "secondary_" + arrayAdapter.getItem(i));
+                                                    finish();
+                                                }
+                                            });
+                                            innerBuilder.create().show();
                                         }
                                     });
                                     requestQueue.add(alarmArray);
@@ -143,7 +162,10 @@ public class AlarmSettingActivity extends AppCompatActivity {
         else
             calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE), hour, minute);
 
-        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+        if (SDK_INT >= 19)
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+        else
+            alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
 
         Toast.makeText(getApplicationContext(), "Setting Alarm for " + dH + " hrs from now", Toast.LENGTH_LONG).show();
     }
