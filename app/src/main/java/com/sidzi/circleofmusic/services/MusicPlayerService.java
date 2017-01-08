@@ -125,7 +125,10 @@ public class MusicPlayerService extends Service {
             mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mediaPlayer) {
-                    bucketPlay(mBucketList.get(++PLAYING_TRACK_POSITION).getPath());
+                    try {
+                        bucketPlay(mBucketList.get(++PLAYING_TRACK_POSITION).getPath());
+                    } catch (IndexOutOfBoundsException ignore) {
+                    }
                 }
             });
             mMediaPlayer.prepare();

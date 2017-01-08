@@ -30,7 +30,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
 import com.android.volley.Request;
@@ -42,10 +41,8 @@ import com.android.volley.toolbox.Volley;
 import com.rollbar.android.Rollbar;
 import com.sidzi.circleofmusic.BuildConfig;
 import com.sidzi.circleofmusic.R;
-import com.sidzi.circleofmusic.adapters.ChatAdapter;
 import com.sidzi.circleofmusic.adapters.PotmAdapter;
 import com.sidzi.circleofmusic.adapters.TracksAdapter;
-import com.sidzi.circleofmusic.ai.Trebie;
 import com.sidzi.circleofmusic.config;
 import com.sidzi.circleofmusic.helpers.BucketSaver;
 import com.sidzi.circleofmusic.helpers.DatabaseSynchronization;
@@ -163,15 +160,8 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public void onPageSelected(int position) {
-                    if (position == 2) {
-                        fl.setVisibility(View.GONE);
-                    } else {
-                        if (fl.getVisibility() != View.VISIBLE) {
-                            fl.setVisibility(View.VISIBLE);
-                        }
-                        if (position == 1) {
-                            mSectionsPagerAdapter.notifyDataSetChanged();
-                        }
+                    if (position >= 1) {
+                        mSectionsPagerAdapter.notifyDataSetChanged();
                     }
                 }
 
@@ -321,35 +311,35 @@ public class MainActivity extends AppCompatActivity {
                     final PotmAdapter potmAdapter = new PotmAdapter(getContext());
                     mRecyclerView.setAdapter(potmAdapter);
                     break;
+//                case 3:
+//                    homeView = inflater.inflate(R.layout.fragment_chat_bot, container, false);
+//                    final RecyclerView chatRecyclerView = (RecyclerView) homeView.findViewById(R.id.rvChatConsole);
+//                    final Trebie mTrebie = new Trebie(getContext());
+//                    final ChatAdapter chatAdapter = new ChatAdapter();
+//                    final LinearLayoutManager chatLayoutManager = new LinearLayoutManager(getContext());
+//                    mTrebie.setmChatAdapter(chatAdapter);
+//                    mTrebie.setmRecyclerView(chatRecyclerView);
+//                    chatLayoutManager.setStackFromEnd(true);
+//                    chatRecyclerView.setAdapter(chatAdapter);
+//                    chatRecyclerView.setLayoutManager(chatLayoutManager);
+//                    ImageButton ibSend = (ImageButton) homeView.findViewById(R.id.ibSendMessage);
+//                    final EditText etChatMessage = (EditText) homeView.findViewById(R.id.etChatMessage);
+//                    etChatMessage.setHint("Say \"help me\" to Trebie to get started");
+//                    ibSend.setOnClickListener(new View.OnClickListener() {
+//                        @Override
+//                        public void onClick(View view) {
+//                            etChatMessage.setHint("");
+//                            String message = etChatMessage.getText().toString();
+//                            if (!message.equals("")) {
+//                                chatAdapter.addMessage(message, true);
+//                                chatRecyclerView.smoothScrollToPosition(chatAdapter.getItemCount());
+//                                etChatMessage.setText("");
+//                                mTrebie.converse(message, null);
+//                            }
+//                        }
+//                    });
+//                    break;
                 case 3:
-                    homeView = inflater.inflate(R.layout.fragment_chat_bot, container, false);
-                    final RecyclerView chatRecyclerView = (RecyclerView) homeView.findViewById(R.id.rvChatConsole);
-                    final Trebie mTrebie = new Trebie(getContext());
-                    final ChatAdapter chatAdapter = new ChatAdapter();
-                    final LinearLayoutManager chatLayoutManager = new LinearLayoutManager(getContext());
-                    mTrebie.setmChatAdapter(chatAdapter);
-                    mTrebie.setmRecyclerView(chatRecyclerView);
-                    chatLayoutManager.setStackFromEnd(true);
-                    chatRecyclerView.setAdapter(chatAdapter);
-                    chatRecyclerView.setLayoutManager(chatLayoutManager);
-                    ImageButton ibSend = (ImageButton) homeView.findViewById(R.id.ibSendMessage);
-                    final EditText etChatMessage = (EditText) homeView.findViewById(R.id.etChatMessage);
-                    etChatMessage.setHint("Say \"help me\" to Trebie to get started");
-                    ibSend.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            etChatMessage.setHint("");
-                            String message = etChatMessage.getText().toString();
-                            if (!message.equals("")) {
-                                chatAdapter.addMessage(message, true);
-                                chatRecyclerView.smoothScrollToPosition(chatAdapter.getItemCount());
-                                etChatMessage.setText("");
-                                mTrebie.converse(message, null);
-                            }
-                        }
-                    });
-                    break;
-                case 4:
                     TracksAdapter tracksAdapter2 = new TracksAdapter(getContext());
                     tracksAdapter2.getBucketedTracks();
                     mRecyclerView.setAdapter(tracksAdapter2);
@@ -378,8 +368,8 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public int getCount() {
-            // Show 4 total pages.
-            return 4;
+            // Show 3 total pages.
+            return 3;
         }
 
         @Override
@@ -389,9 +379,9 @@ public class MainActivity extends AppCompatActivity {
                     return "Local";
                 case 1:
                     return "POTM";
+//                case 2:
+//                    return "Trebie";
                 case 2:
-                    return "Trebie";
-                case 3:
                     return "Bucket";
             }
             return null;
