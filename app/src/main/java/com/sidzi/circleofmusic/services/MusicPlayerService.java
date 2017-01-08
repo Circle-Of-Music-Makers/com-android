@@ -132,8 +132,11 @@ public class MusicPlayerService extends Service {
                 }
             });
             mMediaPlayer.prepare();
-            PLAYING_TRACK_POSITION = mBucketList.indexOf(new Track(track_path));
-            PLAYING_TRACK = mBucketList.get(PLAYING_TRACK_POSITION);
+            try {
+                PLAYING_TRACK_POSITION = mBucketList.indexOf(new Track(track_path));
+                PLAYING_TRACK = mBucketList.get(PLAYING_TRACK_POSITION);
+            } catch (IndexOutOfBoundsException | NullPointerException ignore) {
+            }
             uiUpdate(PLAYING_TRACK);
             if (songsTillSleep == 0)
                 onDestroy();
