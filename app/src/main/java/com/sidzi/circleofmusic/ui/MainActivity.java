@@ -24,6 +24,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -218,6 +219,7 @@ public class MainActivity extends AppCompatActivity {
             case R.id.sleepTimer:
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 final EditText editText = new EditText(this);
+                editText.setInputType(InputType.TYPE_CLASS_NUMBER);
                 builder.setTitle("# of songs till sleep")
                         .setView(editText)
                         .setPositiveButton("set", new DialogInterface.OnClickListener() {

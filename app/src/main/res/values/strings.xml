@@ -15,9 +15,7 @@
     <string name="title_activity_search">Search Results</string>
     <string name="search">Search</string>
 
-    <string name="title_activity_alarm">AlarmActivity</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="title_activity_alarm">Wake up</string>
     <string name="stop_alarm">Stop Alarm</string>
     <string name="select_alarm_sound">Select alarm sound</string>
     <string name="set_alarm">Set Alarm</string>

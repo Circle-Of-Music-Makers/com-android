@@ -50,8 +50,6 @@ public class AlarmSettingActivity extends AppCompatActivity {
 
         final DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
 
-        etTimePicker.setHint("\"hhmm\" in 24 hr format");
-
         bSelectAlarm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

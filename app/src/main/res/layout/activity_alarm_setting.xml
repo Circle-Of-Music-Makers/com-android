@@ -10,11 +10,19 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.sidzi.circleofmusic.ui.AlarmSettingActivity">
 
+    <TextView
+        android:id="@+id/tvLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:labelFor="@+id/etTimePicker"
+        android:text="Enter Alarm Time in 24hr format" />
+
     <EditText
         android:id="@+id/etTimePicker"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/tvLabel"
+        android:hint="e.g. 1715 or 0730"
         android:inputType="number"
         android:maxLength="4"
         android:textAlignment="center" />
