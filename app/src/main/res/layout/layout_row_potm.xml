@@ -20,7 +20,8 @@
         android:id="@+id/tvPotmTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/tvPotmMonth" />
+        android:layout_below="@+id/tvPotmMonth"
+        android:textColor="@color/textPrimary" />
 
     <TextView
         android:id="@+id/tvPotmDescription"

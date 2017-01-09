@@ -25,6 +25,7 @@
             android:name=".ui.MainActivity"
             android:label="@string/title_activity_main"
             android:launchMode="singleTask"
+            android:screenOrientation="portrait"
             android:theme="@style/splashScreen"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
@@ -37,7 +38,9 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".helpers.MediaButtonHandler">
+        <service android:name=".services.MusicPlayerService" />
+
+        <receiver android:name=".recievers.MediaButtonHandler">
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
             </intent-filter>
@@ -51,7 +54,19 @@
         <activity
             android:name=".ui.SearchActivity"
             android:label="@string/title_activity_search"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".ui.AlarmSettingActivity" />
+
+        <receiver android:name=".recievers.AlarmReciever" />
+
+        <activity
+            android:name=".ui.AlarmActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_alarm"
+            android:theme="@style/FullscreenTheme" />
+
+        <activity android:name=".ui.ListFileActivity" />
     </application>
 
 </manifest>

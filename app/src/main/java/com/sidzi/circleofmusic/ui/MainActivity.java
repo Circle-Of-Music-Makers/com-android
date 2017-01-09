@@ -3,6 +3,7 @@ package com.sidzi.circleofmusic.ui;
 import android.Manifest;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -15,20 +16,22 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.ImageButton;
+import android.widget.LinearLayout;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -39,23 +42,24 @@ import com.android.volley.toolbox.Volley;
 import com.rollbar.android.Rollbar;
 import com.sidzi.circleofmusic.BuildConfig;
 import com.sidzi.circleofmusic.R;
-import com.sidzi.circleofmusic.adapters.ChatAdapter;
 import com.sidzi.circleofmusic.adapters.PotmAdapter;
 import com.sidzi.circleofmusic.adapters.TracksAdapter;
-import com.sidzi.circleofmusic.ai.Trebie;
 import com.sidzi.circleofmusic.config;
-import com.sidzi.circleofmusic.helpers.AudioEventHandler;
 import com.sidzi.circleofmusic.helpers.BucketSaver;
 import com.sidzi.circleofmusic.helpers.DatabaseSynchronization;
 import com.sidzi.circleofmusic.helpers.LocalMusicLoader;
-import com.sidzi.circleofmusic.helpers.MediaButtonHandler;
+import com.sidzi.circleofmusic.helpers.MusicServiceConnection;
 import com.sidzi.circleofmusic.helpers.VerticalSpaceDecorationHelper;
+import com.sidzi.circleofmusic.recievers.MediaButtonHandler;
+import com.sidzi.circleofmusic.recievers.MusicPlayerViewHandler;
+import com.sidzi.circleofmusic.services.MusicPlayerService;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
-    private AudioEventHandler mAudioEventHandler;
+
+    public MusicServiceConnection mMusicServiceConnection;
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -71,12 +75,13 @@ public class MainActivity extends AppCompatActivity {
      */
     private ViewPager mViewPager;
     private SearchView mSearchView;
+    private MusicPlayerViewHandler mMusicPlayerViewHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 //        TODO remove key before commit
-        Rollbar.init(this, config.rollbar_key, "production");
+        Rollbar.init(this, config.rollbar_key, "release");
         setTheme(R.style.AppTheme_NoActionBar);
         setContentView(R.layout.activity_main);
 
@@ -110,11 +115,26 @@ public class MainActivity extends AppCompatActivity {
             });
             requestQueue.add(eosCheck);
 
-            mAudioEventHandler = new AudioEventHandler();
-            registerReceiver(mAudioEventHandler, new IntentFilter("com.sidzi.circleofmusic.PLAY_TRACK"));
+
+            IntentFilter intentFilter = new IntentFilter();
+            intentFilter.addAction(MusicPlayerService.ACTION_UPDATE_METADATA);
+            intentFilter.addAction(MusicPlayerService.ACTION_PAUSE);
+            intentFilter.addAction(MusicPlayerService.ACTION_PLAY);
+            intentFilter.addAction(MusicPlayerService.ACTION_CLOSE);
+
+
+            Intent intent = new Intent(this, MusicPlayerService.class);
+            if (MusicPlayerService.PLAYING_TRACK == null)
+                startService(intent);
+            mMusicServiceConnection = new MusicServiceConnection(this);
+            bindService(intent, mMusicServiceConnection, BIND_AUTO_CREATE);
+
+            mMusicPlayerViewHandler = new MusicPlayerViewHandler(this);
+            LocalBroadcastManager.getInstance(this).registerReceiver(mMusicPlayerViewHandler, intentFilter);
 
 
             /* Handles headphone button click */
+
 
             AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
             ComponentName componentName = new ComponentName(getPackageName(), MediaButtonHandler.class.getName());
@@ -132,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
 
             TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
             tabLayout.setupWithViewPager(mViewPager);
-            final FrameLayout fl = (FrameLayout) findViewById(R.id.flPlayer);
+            final LinearLayout fl = (LinearLayout) findViewById(R.id.llPlayer);
             mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
                 @Override
                 public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -141,15 +161,8 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public void onPageSelected(int position) {
-                    if (position == 2) {
-                        fl.setVisibility(View.GONE);
-                    } else {
-                        if (fl.getVisibility() != View.VISIBLE) {
-                            fl.setVisibility(View.VISIBLE);
-                        }
-                        if (position == 1) {
-                            mSectionsPagerAdapter.notifyDataSetChanged();
-                        }
+                    if (position >= 1) {
+                        mSectionsPagerAdapter.notifyDataSetChanged();
                     }
                 }
 
@@ -182,7 +195,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
-
         getMenuInflater().inflate(R.menu.menu_home, menu);
         return super.onCreateOptionsMenu(menu);
     }
@@ -200,6 +212,32 @@ public class MainActivity extends AppCompatActivity {
                     tabLayout.setVisibility(View.INVISIBLE);
                 }
                 break;
+            case R.id.alarm:
+                Intent intent = new Intent(this, AlarmSettingActivity.class);
+                startActivity(intent);
+                break;
+            case R.id.sleepTimer:
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                final EditText editText = new EditText(this);
+                editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+                builder.setTitle("# of songs till sleep")
+                        .setView(editText)
+                        .setPositiveButton("set", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                mMusicServiceConnection.getmMusicPlayerService().setSongsTillSleep(Integer.parseInt(((editText.getText().toString()))));
+                                dialogInterface.dismiss();
+                            }
+                        });
+                builder.create().show();
+                break;
+            case R.id.exit:
+                mMusicServiceConnection.getmMusicPlayerService().onDestroy();
+                unbindService(mMusicServiceConnection);
+                stopService(new Intent(this, MusicPlayerService.class));
+                LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(MusicPlayerService.ACTION_CLOSE));
+                finish();
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -213,18 +251,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         try {
-            unregisterReceiver(mAudioEventHandler);
             BucketSaver bucketSaver = new BucketSaver(this);
             bucketSaver.saveFile();
-            if (AudioEventHandler.mMediaPlayer.isPlaying()) {
-//                Add background service here
-                AudioEventHandler.mMediaPlayer.stop();
-            }
-            AudioEventHandler.mTrackProgressObserver.stop();
-            AudioEventHandler.mMediaPlayer.reset();
-            AudioEventHandler.mMediaPlayer.release();
-            AudioEventHandler.mMediaPlayer = null;
-            AudioEventHandler.mNotificationManager.cancelAll();
+            unbindService(mMusicServiceConnection);
         } catch (IllegalArgumentException | NullPointerException e) {
             e.printStackTrace();
         }
@@ -284,35 +313,35 @@ public class MainActivity extends AppCompatActivity {
                     final PotmAdapter potmAdapter = new PotmAdapter(getContext());
                     mRecyclerView.setAdapter(potmAdapter);
                     break;
+//                case 3:
+//                    homeView = inflater.inflate(R.layout.fragment_chat_bot, container, false);
+//                    final RecyclerView chatRecyclerView = (RecyclerView) homeView.findViewById(R.id.rvChatConsole);
+//                    final Trebie mTrebie = new Trebie(getContext());
+//                    final ChatAdapter chatAdapter = new ChatAdapter();
+//                    final LinearLayoutManager chatLayoutManager = new LinearLayoutManager(getContext());
+//                    mTrebie.setmChatAdapter(chatAdapter);
+//                    mTrebie.setmRecyclerView(chatRecyclerView);
+//                    chatLayoutManager.setStackFromEnd(true);
+//                    chatRecyclerView.setAdapter(chatAdapter);
+//                    chatRecyclerView.setLayoutManager(chatLayoutManager);
+//                    ImageButton ibSend = (ImageButton) homeView.findViewById(R.id.ibSendMessage);
+//                    final EditText etChatMessage = (EditText) homeView.findViewById(R.id.etChatMessage);
+//                    etChatMessage.setHint("Say \"help me\" to Trebie to get started");
+//                    ibSend.setOnClickListener(new View.OnClickListener() {
+//                        @Override
+//                        public void onClick(View view) {
+//                            etChatMessage.setHint("");
+//                            String message = etChatMessage.getText().toString();
+//                            if (!message.equals("")) {
+//                                chatAdapter.addMessage(message, true);
+//                                chatRecyclerView.smoothScrollToPosition(chatAdapter.getItemCount());
+//                                etChatMessage.setText("");
+//                                mTrebie.converse(message, null);
+//                            }
+//                        }
+//                    });
+//                    break;
                 case 3:
-                    homeView = inflater.inflate(R.layout.fragment_chat_bot, container, false);
-                    final RecyclerView chatRecyclerView = (RecyclerView) homeView.findViewById(R.id.rvChatConsole);
-                    final Trebie mTrebie = new Trebie(getContext());
-                    final ChatAdapter chatAdapter = new ChatAdapter();
-                    final LinearLayoutManager chatLayoutManager = new LinearLayoutManager(getContext());
-                    mTrebie.setmChatAdapter(chatAdapter);
-                    mTrebie.setmRecyclerView(chatRecyclerView);
-                    chatLayoutManager.setStackFromEnd(true);
-                    chatRecyclerView.setAdapter(chatAdapter);
-                    chatRecyclerView.setLayoutManager(chatLayoutManager);
-                    ImageButton ibSend = (ImageButton) homeView.findViewById(R.id.ibSendMessage);
-                    final EditText etChatMessage = (EditText) homeView.findViewById(R.id.etChatMessage);
-                    etChatMessage.setHint("Say \"help me\" to Trebie to get started");
-                    ibSend.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            etChatMessage.setHint("");
-                            String message = etChatMessage.getText().toString();
-                            if (!message.equals("")) {
-                                chatAdapter.addMessage(message, true);
-                                chatRecyclerView.smoothScrollToPosition(chatAdapter.getItemCount());
-                                etChatMessage.setText("");
-                                mTrebie.converse(message, null);
-                            }
-                        }
-                    });
-                    break;
-                case 4:
                     TracksAdapter tracksAdapter2 = new TracksAdapter(getContext());
                     tracksAdapter2.getBucketedTracks();
                     mRecyclerView.setAdapter(tracksAdapter2);
@@ -341,8 +370,8 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public int getCount() {
-            // Show 4 total pages.
-            return 4;
+            // Show 3 total pages.
+            return 3;
         }
 
         @Override
@@ -352,9 +381,9 @@ public class MainActivity extends AppCompatActivity {
                     return "Local";
                 case 1:
                     return "POTM";
+//                case 2:
+//                    return "Trebie";
                 case 2:
-                    return "Trebie";
-                case 3:
                     return "Bucket";
             }
             return null;

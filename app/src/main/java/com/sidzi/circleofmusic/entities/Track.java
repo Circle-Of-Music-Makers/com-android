@@ -4,8 +4,14 @@ package com.sidzi.circleofmusic.entities;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.io.Serializable;
+
 @DatabaseTable(tableName = "table_tracks")
-public class Track {
+public class Track implements Serializable, Externalizable {
     @DatabaseField(id = true)
     private String path;
     @DatabaseField
@@ -22,12 +28,23 @@ public class Track {
     public Track() {
     }
 
+    public Track(String path) {
+        this.path = path;
+    }
+
+    public Track(String name, String path, String artist) {
+        this.path = path;
+        this.name = name;
+        this.artist = artist;
+    }
+
     public Track(String name, String path, String artist, String album, Boolean bucket) {
         this.path = path;
         this.name = name;
         this.artist = artist;
         this.bucket = bucket;
         this.album = album;
+        this.play_count = 0;
     }
 
     public String getName() {
@@ -64,5 +81,22 @@ public class Track {
 
     public String getAlbum() {
         return album;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Track)
+            return ((Track) obj).getPath().contentEquals(this.path);
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput objectOutput) throws IOException {
+        objectOutput.writeObject(this);
+    }
+
+    @Override
+    public void readExternal(ObjectInput objectInput) throws IOException, ClassNotFoundException {
+        objectInput.readObject();
     }
 }

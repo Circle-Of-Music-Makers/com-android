@@ -6,10 +6,13 @@ import android.os.AsyncTask;
 
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.Dao;
+import com.sidzi.circleofmusic.config;
 import com.sidzi.circleofmusic.entities.Track;
 
+import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class DatabaseSynchronization extends AsyncTask<Void, Void, Void> {
     private Context mContext;
@@ -22,14 +25,17 @@ public class DatabaseSynchronization extends AsyncTask<Void, Void, Void> {
     protected Void doInBackground(Void... voids) {
         ArrayList<Track> mTrackList = Utils.musicLoader(mContext);
         OrmHandler ormHandler = OpenHelperManager.getHelper(mContext, OrmHandler.class);
-        for (Track t :
-                mTrackList) {
-            try {
-                Dao<Track, String> dbTrack = ormHandler.getDao(Track.class);
+        try {
+            Dao<Track, String> dbTrack = ormHandler.getDao(Track.class);
+            List<Track> _temp = dbTrack.queryForAll();
+            _temp.removeAll(mTrackList);
+            for (Track t :
+                    mTrackList) {
                 dbTrack.createIfNotExists(t);
-            } catch (SQLException e) {
-                e.printStackTrace();
             }
+            dbTrack.delete(_temp);
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         OpenHelperManager.releaseHelper();
         return null;
@@ -40,8 +46,15 @@ public class DatabaseSynchronization extends AsyncTask<Void, Void, Void> {
         SharedPreferences settings = mContext.getSharedPreferences("com_prefs", 0);
         if (settings.getBoolean("init", true)) {
             BucketSaver bucketSaver = new BucketSaver(mContext);
-            if (bucketSaver.importFile())
-                settings.edit().putBoolean("init", false).apply();
+            if (bucketSaver.importFile()) {
+                File com_dir = new File(config.com_local_url);
+                if (!com_dir.exists()) {
+                    if (!com_dir.mkdirs()) {
+                        throw new UnsupportedOperationException("Could not create com folder");
+                    }
+                }
+            }
+            settings.edit().putBoolean("init", false).apply();
         }
         super.onPostExecute(aVoid);
     }
