@@ -29,6 +29,7 @@ public class MusicPlayerService extends Service {
     final public static String ACTION_PLAY = "com.sidzi.circleofmusic.PLAY";
     public static final String ACTION_CLOSE = "com.sidzi.circleofmusic.CLOSE";
     public static Track PLAYING_TRACK = null;
+    public static boolean PLAYING_BUCKET;
     private final IBinder mMIBinder = new MusicBinder();
     public MediaPlayer mMediaPlayer = null;
     private int PLAYING_TRACK_POSITION = -1;
@@ -85,13 +86,14 @@ public class MusicPlayerService extends Service {
             mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mediaPlayer) {
-                    next();
+                    next(false);
                 }
             });
             mMediaPlayer.prepare();
             PLAYING_TRACK_POSITION = mTrackList.indexOf(new Track(track_path));
             PLAYING_TRACK = mTrackList.get(PLAYING_TRACK_POSITION);
-            uiUpdate(PLAYING_TRACK);
+            PLAYING_BUCKET = false;
+            uiUpdate(true);
             if (songsTillSleep == 0)
                 onDestroy();
             else
@@ -110,7 +112,7 @@ public class MusicPlayerService extends Service {
             mMediaPlayer.prepareAsync();
             PLAYING_TRACK = new Track(Name, Path, Artist);
             PLAYING_TRACK.setBucket(false);
-            uiUpdate(PLAYING_TRACK);
+            uiUpdate(true);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -125,10 +127,7 @@ public class MusicPlayerService extends Service {
             mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mediaPlayer) {
-                    try {
-                        bucketPlay(mBucketList.get(++PLAYING_TRACK_POSITION).getPath());
-                    } catch (IndexOutOfBoundsException ignore) {
-                    }
+                    next(true);
                 }
             });
             mMediaPlayer.prepare();
@@ -137,7 +136,8 @@ public class MusicPlayerService extends Service {
                 PLAYING_TRACK = mBucketList.get(PLAYING_TRACK_POSITION);
             } catch (IndexOutOfBoundsException | NullPointerException ignore) {
             }
-            uiUpdate(PLAYING_TRACK);
+            PLAYING_BUCKET = true;
+            uiUpdate(true);
             if (songsTillSleep == 0)
                 onDestroy();
             else
@@ -147,18 +147,24 @@ public class MusicPlayerService extends Service {
         }
     }
 
-    public void next() {
-        play(mTrackList.get(++PLAYING_TRACK_POSITION).getPath());
+    public void next(boolean bucket) {
+        try {
+            if (!bucket)
+                play(mTrackList.get(++PLAYING_TRACK_POSITION).getPath());
+            else
+                bucketPlay(mBucketList.get(++PLAYING_TRACK_POSITION).getPath());
+        } catch (IndexOutOfBoundsException ignore) {
+        }
     }
 
     public void pause() {
         mMediaPlayer.pause();
-        uiUpdate(null);
+        uiUpdate(false);
     }
 
     public void unpause() {
         mMediaPlayer.start();
-        uiUpdate(null);
+        uiUpdate(false);
     }
 
     public boolean bucketOperation() {
@@ -167,10 +173,9 @@ public class MusicPlayerService extends Service {
         return PLAYING_TRACK.getBucket();
     }
 
-    private void uiUpdate(Track track) {
-        String action = (track == null) ? (mMediaPlayer.isPlaying() ? ACTION_PLAY : ACTION_PAUSE) : ACTION_UPDATE_METADATA;
+    private void uiUpdate(boolean b) {
+        String action = (!b) ? (mMediaPlayer.isPlaying() ? ACTION_PLAY : ACTION_PAUSE) : ACTION_UPDATE_METADATA;
         Intent intent = new Intent(action);
-        intent.putExtra("track_metadata", track);
         localBroadcastManager.sendBroadcast(intent);
     }
 
@@ -185,7 +190,7 @@ public class MusicPlayerService extends Service {
             @Override
             public void onPrepared(MediaPlayer mediaPlayer) {
                 mediaPlayer.start();
-                uiUpdate(null);
+                uiUpdate(false);
             }
         });
     }

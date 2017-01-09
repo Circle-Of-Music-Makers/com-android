@@ -66,7 +66,7 @@ public class MusicPlayerViewHandler extends BroadcastReceiver {
     @Override
     public void onReceive(final Context context, Intent intent) {
 
-        final Track temp_track = (Track) intent.getSerializableExtra("track_metadata");
+        final Track temp_track = MusicPlayerService.PLAYING_TRACK;
         context.bindService(new Intent(mContext, MusicPlayerService.class), mMusicServiceConnection, Context.BIND_AUTO_CREATE);
         final MusicPlayerService mpService = mMusicServiceConnection.getmMusicPlayerService();
 
@@ -94,7 +94,7 @@ public class MusicPlayerViewHandler extends BroadcastReceiver {
         ibPlayNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mpService.next();
+                mpService.next(MusicPlayerService.PLAYING_BUCKET);
             }
         });
         switch (intent.getAction()) {
