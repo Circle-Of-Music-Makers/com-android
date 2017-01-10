@@ -31,7 +31,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -70,12 +69,7 @@ public class MainActivity extends AppCompatActivity {
      */
     private SectionsPagerAdapter mSectionsPagerAdapter;
 
-    /**
-     * The {@link ViewPager} that will host the section contents.
-     */
-    private ViewPager mViewPager;
     private SearchView mSearchView;
-    private MusicPlayerViewHandler mMusicPlayerViewHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
             mMusicServiceConnection = new MusicServiceConnection(this);
             bindService(intent, mMusicServiceConnection, BIND_AUTO_CREATE);
 
-            mMusicPlayerViewHandler = new MusicPlayerViewHandler(this);
+            MusicPlayerViewHandler mMusicPlayerViewHandler = new MusicPlayerViewHandler(this);
             LocalBroadcastManager.getInstance(this).registerReceiver(mMusicPlayerViewHandler, intentFilter);
 
 
@@ -147,12 +141,14 @@ public class MainActivity extends AppCompatActivity {
             mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
             // Set up the ViewPager with the sections adapter.
-            mViewPager = (ViewPager) findViewById(R.id.container);
+            /*
+      The {@link ViewPager} that will host the section contents.
+     */
+            ViewPager mViewPager = (ViewPager) findViewById(R.id.container);
             mViewPager.setAdapter(mSectionsPagerAdapter);
 
             TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
             tabLayout.setupWithViewPager(mViewPager);
-            final LinearLayout fl = (LinearLayout) findViewById(R.id.llPlayer);
             mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
                 @Override
                 public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {

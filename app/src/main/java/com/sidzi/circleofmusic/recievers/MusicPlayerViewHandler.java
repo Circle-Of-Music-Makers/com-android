@@ -30,7 +30,6 @@ public class MusicPlayerViewHandler extends BroadcastReceiver {
     private ImageButton ibPlay;
     private ImageButton ibAddToBucket;
     private ImageButton ibPlayNext;
-    private ProgressBar pbTrackPlay;
     private NotificationManager mNotificationManager;
     private NotificationCompat.Builder mBuilder;
     private MusicServiceConnection mMusicServiceConnection;
@@ -44,7 +43,7 @@ public class MusicPlayerViewHandler extends BroadcastReceiver {
         ibPlay = (ImageButton) ((MainActivity) mContext).findViewById(R.id.ibPlayPause);
         ibAddToBucket = (ImageButton) ((MainActivity) mContext).findViewById(R.id.ibAddToBucket);
         ibPlayNext = (ImageButton) ((MainActivity) mContext).findViewById(R.id.ibPlayNext);
-        pbTrackPlay = (ProgressBar) ((MainActivity) mContext).findViewById(R.id.pbTrackPlay);
+        ProgressBar pbTrackPlay = (ProgressBar) ((MainActivity) mContext).findViewById(R.id.pbTrackPlay);
         pbTrackPlay.getProgressDrawable().setColorFilter(mContext.getResources().getColor(R.color.primaryInverted), PorterDuff.Mode.SRC_IN);
 
         //            Music Notification

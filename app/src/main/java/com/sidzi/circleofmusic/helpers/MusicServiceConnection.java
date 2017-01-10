@@ -34,6 +34,7 @@ public class MusicServiceConnection implements ServiceConnection {
 
     @Override
     public void onServiceDisconnected(ComponentName componentName) {
+//        When the client disconnects with the service
     }
 
     public MusicPlayerService getmMusicPlayerService() {

@@ -21,11 +21,8 @@ import java.io.File;
 import java.util.ArrayList;
 
 public class ListFileActivity extends AppCompatActivity {
-    RecyclerView mRecyclerView;
 
-    RecyclerView.LayoutManager mLayoutManager;
-
-    FilesAdapter mAdapter;
+    private FilesAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,8 +31,8 @@ public class ListFileActivity extends AppCompatActivity {
 
         mAdapter = new FilesAdapter();
 
-        mRecyclerView = (RecyclerView) findViewById(R.id.rvListFiles);
-        mLayoutManager = new LinearLayoutManager(this);
+        RecyclerView mRecyclerView = (RecyclerView) findViewById(R.id.rvListFiles);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
 
         assert mRecyclerView != null;
         mRecyclerView.setLayoutManager(mLayoutManager);
@@ -64,25 +61,25 @@ public class ListFileActivity extends AppCompatActivity {
     }
 
     class FilesAdapter extends RecyclerView.Adapter<FilesAdapter.ViewHolder> {
-        ArrayList<String> fileList;
-        String path;
+        private ArrayList<String> fileList;
+        private String path;
 
         FilesAdapter() {
             path = Environment.getExternalStorageDirectory().getPath();
             setFileList();
         }
 
-        void levelDown(String next) {
+        private void levelDown(String next) {
             path = path + File.separator + next;
             setFileList();
         }
 
-        void levelUp() {
+        private void levelUp() {
             path = path.substring(0, path.lastIndexOf("/"));
             setFileList();
         }
 
-        void setFileList() {
+        private void setFileList() {
             fileList = new ArrayList<>();
             File dir = new File(path);
             if (!dir.canRead()) {
@@ -103,7 +100,7 @@ public class ListFileActivity extends AppCompatActivity {
             notifyDataSetChanged();
         }
 
-        void selectedLevel() {
+        private void selectedLevel() {
             Intent dataRec = new Intent();
             dataRec.putExtra("filepath", path);
             setResult(RESULT_OK, dataRec);
@@ -127,7 +124,7 @@ public class ListFileActivity extends AppCompatActivity {
         }
 
         class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-            TextView tvDirPath;
+            private TextView tvDirPath;
 
             ViewHolder(View view) {
                 super(view);

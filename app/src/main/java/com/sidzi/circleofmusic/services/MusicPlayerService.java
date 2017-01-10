@@ -39,11 +39,6 @@ public class MusicPlayerService extends Service {
     private Context mContext;
     private int songsTillSleep = -1;
 
-
-    public MusicPlayerService() {
-    }
-
-
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         return super.onStartCommand(intent, flags, startId);

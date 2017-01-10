@@ -36,7 +36,7 @@ import static android.os.Build.VERSION.SDK_INT;
 
 public class AlarmSettingActivity extends AppCompatActivity {
     private static final int REQUEST_ALARM_PATH = 4114;
-    EditText etTimePicker;
+    private EditText etTimePicker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,7 +137,7 @@ public class AlarmSettingActivity extends AppCompatActivity {
         });
     }
 
-    void setAlarm(String alarm, String secondary_alarm) {
+    private void setAlarm(String alarm, String secondary_alarm) {
 
         Intent intent = new Intent(this, AlarmActivity.class);
 
@@ -168,7 +168,7 @@ public class AlarmSettingActivity extends AppCompatActivity {
         Toast.makeText(getApplicationContext(), "Setting Alarm for " + dH + " hrs from now", Toast.LENGTH_LONG).show();
     }
 
-    int diffH(int c, int s) {
+    private int diffH(int c, int s) {
         if (c <= s) {
             return s - c;
         } else {
@@ -182,7 +182,7 @@ public class AlarmSettingActivity extends AppCompatActivity {
         if (requestCode == REQUEST_ALARM_PATH && resultCode == RESULT_OK) {
             String path;
             path = data.getStringExtra("filepath");
-            if (!path.equals("") && !(new File(path).isDirectory()))
+            if (!"".equals(path) && !(new File(path).isDirectory()))
                 setAlarm(path, "");
             else
                 startActivityForResult(new Intent(this, ListFileActivity.class), REQUEST_ALARM_PATH);
