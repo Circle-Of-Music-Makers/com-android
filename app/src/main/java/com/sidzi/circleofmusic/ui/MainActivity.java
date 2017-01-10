@@ -234,6 +234,8 @@ public class MainActivity extends AppCompatActivity {
                 LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(MusicPlayerService.ACTION_CLOSE));
                 finish();
                 break;
+            default:
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -265,10 +267,6 @@ public class MainActivity extends AppCompatActivity {
          * fragment.
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
-
-        public PlaceholderFragment() {
-
-        }
 
         /**
          * Returns a new instance of this fragment for the given section
@@ -342,6 +340,8 @@ public class MainActivity extends AppCompatActivity {
                     tracksAdapter2.getBucketedTracks();
                     mRecyclerView.setAdapter(tracksAdapter2);
                     break;
+                default:
+                    break;
             }
             return homeView;
         }
@@ -381,8 +381,9 @@ public class MainActivity extends AppCompatActivity {
 //                    return "Trebie";
                 case 2:
                     return "Bucket";
+                default:
+                    return null;
             }
-            return null;
         }
     }
 }

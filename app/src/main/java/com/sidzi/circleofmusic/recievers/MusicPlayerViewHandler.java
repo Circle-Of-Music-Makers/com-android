@@ -120,6 +120,8 @@ public class MusicPlayerViewHandler extends BroadcastReceiver {
             case MusicPlayerService.ACTION_CLOSE:
                 mNotificationManager.cancelAll();
                 break;
+            default:
+                break;
         }
     }
 }

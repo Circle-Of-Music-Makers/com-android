@@ -52,7 +52,7 @@ public class PotmAdapter extends RecyclerView.Adapter<PotmAdapter.ViewHolder> {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-
+//                Couldn't fetch data
             }
         });
         requestQueue.add(trackRequest);

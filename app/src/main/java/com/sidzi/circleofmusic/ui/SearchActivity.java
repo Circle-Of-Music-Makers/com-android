@@ -25,7 +25,5 @@ public class SearchActivity extends AppCompatActivity {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(tracksAdapter);
-
     }
-
 }

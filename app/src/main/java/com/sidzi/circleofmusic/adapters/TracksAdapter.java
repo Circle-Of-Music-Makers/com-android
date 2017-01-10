@@ -103,8 +103,8 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.ViewHolder
     }
 
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
-        TextView tnTextView;
-        TextView tdTextView;
+        private TextView tnTextView;
+        private TextView tdTextView;
 
 
         ViewHolder(View view) {

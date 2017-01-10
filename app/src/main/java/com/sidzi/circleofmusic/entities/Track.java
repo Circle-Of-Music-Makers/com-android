@@ -71,11 +71,11 @@ public class Track implements Serializable, Externalizable {
         return artist;
     }
 
-    public Integer getPlay_count() {
+    public Integer getPlayCount() {
         return play_count;
     }
 
-    public void setPlay_count(Integer play_count) {
+    public void setPlayCount(Integer play_count) {
         this.play_count = play_count;
     }
 

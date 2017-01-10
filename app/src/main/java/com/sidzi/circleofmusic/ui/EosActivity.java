@@ -138,7 +138,7 @@ public class EosActivity extends AppCompatActivity {
                 request.setTitle("Circle of Music App");
                 request.setDestinationInExternalPublicDir(Environment.getDownloadCacheDirectory().getAbsolutePath(), "circle-of-music.apk");
                 try {
-                    boolean deleteSuccess = new File(Environment.getExternalStoragePublicDirectory(Environment.getDownloadCacheDirectory().getAbsolutePath()) + "/circle-of-music.apk").delete();
+                    new File(Environment.getExternalStoragePublicDirectory(Environment.getDownloadCacheDirectory().getAbsolutePath()) + "/circle-of-music.apk").delete();
                 } catch (NullPointerException e) {
                     e.printStackTrace();
                 }
