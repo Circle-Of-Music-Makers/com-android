@@ -27,7 +27,9 @@ public class MusicServiceConnection implements ServiceConnection {
             Intent intent = new Intent(MusicPlayerService.ACTION_UPDATE_METADATA);
             intent.putExtra("track_metadata", MusicPlayerService.PLAYING_TRACK);
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
-            if (!mMusicPlayerService.mMediaPlayer.isPlaying())
+            if (mMusicPlayerService.mMediaPlayer.isPlaying())
+                LocalBroadcastManager.getInstance(mContext).sendBroadcast(new Intent(MusicPlayerService.ACTION_PLAY));
+            else
                 LocalBroadcastManager.getInstance(mContext).sendBroadcast(new Intent(MusicPlayerService.ACTION_PAUSE));
         }
     }
@@ -37,7 +39,7 @@ public class MusicServiceConnection implements ServiceConnection {
 //        When the client disconnects with the service
     }
 
-    public MusicPlayerService getmMusicPlayerService() {
+    public MusicPlayerService getMusicPlayerService() {
         return mMusicPlayerService;
     }
 }

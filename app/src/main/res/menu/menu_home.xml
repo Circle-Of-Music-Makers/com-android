@@ -18,6 +18,10 @@
         android:title="Sleep Timer" />
 
     <item
+        android:id="@+id/register"
+        android:title="Register" />
+
+    <item
         android:id="@+id/exit"
         android:title="Quit" />
 </menu>

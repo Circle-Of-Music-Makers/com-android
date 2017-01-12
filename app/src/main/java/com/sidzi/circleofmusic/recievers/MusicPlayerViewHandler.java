@@ -65,9 +65,11 @@ public class MusicPlayerViewHandler extends BroadcastReceiver {
     @Override
     public void onReceive(final Context context, Intent intent) {
 
-        final Track temp_track = MusicPlayerService.PLAYING_TRACK;
         context.bindService(new Intent(mContext, MusicPlayerService.class), mMusicServiceConnection, Context.BIND_AUTO_CREATE);
-        final MusicPlayerService mpService = mMusicServiceConnection.getmMusicPlayerService();
+        final MusicPlayerService mpService = mMusicServiceConnection.getMusicPlayerService();
+        final Track temp_track = MusicPlayerService.PLAYING_TRACK;
+        final int notifyId = 1;
+
 
         ibPlay.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -108,14 +110,17 @@ public class MusicPlayerViewHandler extends BroadcastReceiver {
                 ibAddToBucket.setTag(temp_track.getBucket());
                 mBuilder.setContentTitle(temp_track.getName())
                         .setContentText(temp_track.getArtist());
-                int notifyId = 1;
                 mNotificationManager.notify(notifyId, mBuilder.build());
                 break;
             case MusicPlayerService.ACTION_PAUSE:
                 ibPlay.setImageResource(R.drawable.ic_track_play);
+                mBuilder.setOngoing(false);
+                mNotificationManager.notify(notifyId, mBuilder.build());
                 break;
             case MusicPlayerService.ACTION_PLAY:
                 ibPlay.setImageResource(R.drawable.ic_track_stop);
+                mBuilder.setOngoing(true);
+                mNotificationManager.notify(notifyId, mBuilder.build());
                 break;
             case MusicPlayerService.ACTION_CLOSE:
                 mNotificationManager.cancelAll();

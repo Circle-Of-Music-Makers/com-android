@@ -121,9 +121,9 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.ViewHolder
             MusicServiceConnection mMusicServiceConnection = ((MainActivity) mContext).mMusicServiceConnection;
             mContext.bindService(intent, mMusicServiceConnection, Context.BIND_AUTO_CREATE);
             if (!bucketBool)
-                mMusicServiceConnection.getmMusicPlayerService().play(v.getTag(R.id.tag_track_path).toString());
+                mMusicServiceConnection.getMusicPlayerService().play(v.getTag(R.id.tag_track_path).toString());
             else
-                mMusicServiceConnection.getmMusicPlayerService().bucketPlay(v.getTag(R.id.tag_track_path).toString());
+                mMusicServiceConnection.getMusicPlayerService().bucketPlay(v.getTag(R.id.tag_track_path).toString());
 
         }
 
