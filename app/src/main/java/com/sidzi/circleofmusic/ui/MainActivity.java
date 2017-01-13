@@ -1,15 +1,20 @@
 package com.sidzi.circleofmusic.ui;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -27,6 +32,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -44,7 +50,6 @@ import com.sidzi.circleofmusic.fragments.PotmFragment;
 import com.sidzi.circleofmusic.fragments.TheFifthFragment;
 import com.sidzi.circleofmusic.helpers.BucketSaver;
 import com.sidzi.circleofmusic.helpers.DatabaseSynchronization;
-import com.sidzi.circleofmusic.helpers.MusicServiceConnection;
 import com.sidzi.circleofmusic.recievers.MediaButtonHandler;
 import com.sidzi.circleofmusic.recievers.MusicPlayerViewHandler;
 import com.sidzi.circleofmusic.services.MusicPlayerService;
@@ -53,8 +58,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
-
-    public MusicServiceConnection mMusicServiceConnection;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,8 +107,29 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(getApplicationContext(), MusicPlayerService.class);
             if (MusicPlayerService.PLAYING_TRACK == null)
                 startService(intent);
-            mMusicServiceConnection = new MusicServiceConnection(getApplicationContext());
-            bindService(intent, mMusicServiceConnection, BIND_AUTO_CREATE);
+            ServiceConnection musicServiceConnection = new ServiceConnection() {
+                @Override
+                public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+                    MusicPlayerService.MusicBinder musicBinder = (MusicPlayerService.MusicBinder) iBinder;
+
+                    if (MusicPlayerService.PLAYING_TRACK != null) {
+                        Intent intent = new Intent(MusicPlayerService.ACTION_UPDATE_METADATA);
+                        intent.putExtra("track_metadata", MusicPlayerService.PLAYING_TRACK);
+                        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+                        if (musicBinder.getService().mMediaPlayer.isPlaying())
+                            LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent(MusicPlayerService.ACTION_PLAY));
+                        else
+                            LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent(MusicPlayerService.ACTION_PAUSE));
+                    }
+                    unbindService(this);
+                }
+
+                @Override
+                public void onServiceDisconnected(ComponentName componentName) {
+
+                }
+            };
+            bindService(intent, musicServiceConnection, 0);
 
             MusicPlayerViewHandler mMusicPlayerViewHandler = new MusicPlayerViewHandler(this);
             LocalBroadcastManager.getInstance(this).registerReceiver(mMusicPlayerViewHandler, intentFilter);
@@ -116,6 +140,7 @@ public class MainActivity extends AppCompatActivity {
 
             AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
             ComponentName componentName = new ComponentName(getPackageName(), MediaButtonHandler.class.getName());
+            //noinspection deprecation
             audioManager.registerMediaButtonEventReceiver(componentName);
 
             Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -155,6 +180,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
         getMenuInflater().inflate(R.menu.menu_home, menu);
+        SharedPreferences settings = getSharedPreferences("com_prefs", 0);
+        if (settings.getBoolean("registered", false))
+            menu.removeItem(R.id.register);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -177,7 +205,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
                 break;
             case R.id.sleepTimer:
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                final AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 final EditText editText = new EditText(this);
                 editText.setInputType(InputType.TYPE_CLASS_NUMBER);
                 builder.setTitle("# of songs till sleep")
@@ -185,21 +213,71 @@ public class MainActivity extends AppCompatActivity {
                         .setPositiveButton("set", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                mMusicServiceConnection.getMusicPlayerService().setSongsTillSleep(Integer.parseInt(((editText.getText().toString()))));
-                                dialogInterface.dismiss();
+                                Intent intent = new Intent(getApplicationContext(), MusicPlayerService.class);
+                                ServiceConnection musicServiceConnection = new ServiceConnection() {
+                                    @Override
+                                    public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+                                        MusicPlayerService.MusicBinder musicBinder = (MusicPlayerService.MusicBinder) iBinder;
+                                        musicBinder.getService().setSongsTillSleep(Integer.parseInt(((editText.getText().toString()))));
+                                        unbindService(this);
+                                    }
+
+                                    @Override
+                                    public void onServiceDisconnected(ComponentName componentName) {
+
+                                    }
+                                };
+                                bindService(intent, musicServiceConnection, 0);
                             }
                         });
                 builder.create().show();
                 break;
             case R.id.exit:
-                mMusicServiceConnection.getMusicPlayerService().onDestroy();
-                unbindService(mMusicServiceConnection);
                 stopService(new Intent(getApplicationContext(), MusicPlayerService.class));
                 LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(MusicPlayerService.ACTION_CLOSE));
                 finish();
                 break;
             case R.id.register:
-//                POST com_url+"register" : id:Settings.Secure.ANDROID_ID , username : etUsername
+                final AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
+                final EditText etUsername = new EditText(this);
+                builder1.setTitle("Enter a username")
+                        .setView(etUsername)
+                        .setPositiveButton("register", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(final DialogInterface dialogInterface, int i) {
+                                final ProgressDialog registrationProgressDialog = new ProgressDialog(MainActivity.this);
+                                registrationProgressDialog.show();
+                                final JSONObject params = new JSONObject();
+                                try {
+                                    params.put("username", etUsername.getText().toString());
+                                    params.put("uuid", Settings.Secure.ANDROID_ID);
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                                JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, config.com_url + "register", params, new Response.Listener<JSONObject>() {
+                                    @Override
+                                    public void onResponse(JSONObject response) {
+                                        SharedPreferences settings = getSharedPreferences("com_prefs", 0);
+                                        settings.edit().putBoolean("registered", true).apply();
+                                        try {
+                                            settings.edit().putString("username", params.getString("username")).apply();
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                        registrationProgressDialog.dismiss();
+                                        Toast.makeText(MainActivity.this, "Registered", Toast.LENGTH_LONG).show();
+                                    }
+                                }, new Response.ErrorListener() {
+                                    @Override
+                                    public void onErrorResponse(VolleyError error) {
+//                                        Failed to register
+                                    }
+                                });
+                                RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
+                                requestQueue.add(jsonObjectRequest);
+                            }
+                        });
+                builder1.create().show();
                 break;
             default:
                 break;
@@ -218,7 +296,6 @@ public class MainActivity extends AppCompatActivity {
         try {
             BucketSaver bucketSaver = new BucketSaver(this);
             bucketSaver.saveFile();
-            unbindService(mMusicServiceConnection);
         } catch (IllegalArgumentException | NullPointerException e) {
             e.printStackTrace();
         }

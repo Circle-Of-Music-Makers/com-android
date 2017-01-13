@@ -1,8 +1,11 @@
 package com.sidzi.circleofmusic.adapters;
 
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,9 +20,7 @@ import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 import com.sidzi.circleofmusic.R;
 import com.sidzi.circleofmusic.entities.Potm;
-import com.sidzi.circleofmusic.helpers.MusicServiceConnection;
 import com.sidzi.circleofmusic.services.MusicPlayerService;
-import com.sidzi.circleofmusic.ui.MainActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -66,7 +67,10 @@ public class PotmAdapter extends RecyclerView.Adapter<PotmAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(PotmAdapter.ViewHolder holder, int position) {
-        holder.tvPotmMonth.setText(new DateFormatSymbols().getMonths()[potms.get(position).getMonth() - 1]);
+        try {
+            holder.tvPotmMonth.setText(new DateFormatSymbols().getMonths()[potms.get(position).getMonth() - 1]);
+        } catch (ArrayIndexOutOfBoundsException ignore) {
+        }
         holder.tvPotmTitle.setText(potms.get(position).getTitle());
         holder.tvPotmDescription.setText(potms.get(position).getDescription());
         holder.itemView.setTag(potms.get(position).getPath());
@@ -94,11 +98,22 @@ public class PotmAdapter extends RecyclerView.Adapter<PotmAdapter.ViewHolder> {
         }
 
         @Override
-        public void onClick(View v) {
+        public void onClick(final View v) {
             Intent intent = new Intent(mContext, MusicPlayerService.class);
-            MusicServiceConnection mMusicServiceConnection = ((MainActivity) mContext).mMusicServiceConnection;
+            ServiceConnection mMusicServiceConnection = new ServiceConnection() {
+                @Override
+                public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+                    MusicPlayerService.MusicBinder musicBinder = (MusicPlayerService.MusicBinder) iBinder;
+                    musicBinder.getService().play(v.getTag(R.id.tag_track_path).toString(), v.getTag(R.id.tag_track_artist).toString(), v.getTag(R.id.tag_track_name).toString());
+                    mContext.unbindService(this);
+                }
+
+                @Override
+                public void onServiceDisconnected(ComponentName componentName) {
+
+                }
+            };
             mContext.bindService(intent, mMusicServiceConnection, Context.BIND_AUTO_CREATE);
-            mMusicServiceConnection.getMusicPlayerService().play(v.getTag(R.id.tag_track_path).toString(), v.getTag(R.id.tag_track_artist).toString(), v.getTag(R.id.tag_track_name).toString());
         }
     }
 }

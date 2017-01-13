@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
-import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
@@ -59,21 +58,6 @@ public class MusicPlayerService extends Service {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        final Handler mHandler = new Handler();
-        final Runnable mRunnable = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    if (!mMediaPlayer.isPlaying())
-                        onDestroy();
-                } catch (NullPointerException e) {
-                    onDestroy();
-                } finally {
-                    mHandler.postDelayed(this, 15000);
-                }
-            }
-        };
-        mHandler.postDelayed(mRunnable, 15000);
     }
 
     @Override

@@ -35,7 +35,6 @@ public class LocalMusicFragment extends Fragment {
         LocalMusicLoader lml = new LocalMusicLoader(getContext(), tracksAdapter1);
         lml.execute();
         mRecyclerView.setAdapter(tracksAdapter1);
-
         return homeView;
     }
 }
