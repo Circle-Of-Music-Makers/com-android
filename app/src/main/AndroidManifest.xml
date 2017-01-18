@@ -34,9 +34,15 @@
 
         <service android:name=".services.MusicPlayerService" />
 
-        <receiver android:name=".recievers.MediaButtonHandler">
+        <receiver android:name=".receivers.MediaButtonHandler">
             <intent-filter android:priority="999">
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".receivers.AudioOutputChangeReceiver">
+            <intent-filter>
+                <action android:name="android.media.AUDIO_BECOMING_NOISY" />
             </intent-filter>
         </receiver>
 
@@ -52,7 +58,7 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".ui.AlarmSettingActivity" />
 
-        <receiver android:name=".recievers.AlarmReciever" />
+        <receiver android:name=".receivers.AlarmReceiver" />
 
         <activity
             android:name=".ui.AlarmActivity"

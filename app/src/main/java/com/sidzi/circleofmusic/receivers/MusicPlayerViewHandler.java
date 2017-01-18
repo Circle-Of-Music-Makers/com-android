@@ -1,4 +1,4 @@
-package com.sidzi.circleofmusic.recievers;
+package com.sidzi.circleofmusic.receivers;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;

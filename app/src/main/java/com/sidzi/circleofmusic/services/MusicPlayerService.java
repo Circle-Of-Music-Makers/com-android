@@ -42,6 +42,17 @@ public class MusicPlayerService extends Service {
     private int songsTillSleep = -1;
 
     @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        try {
+            if (ACTION_PAUSE.equals(intent.getAction())) {
+                pause();
+            }
+        } catch (NullPointerException ignore) {
+        }
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    @Override
     public void onCreate() {
         super.onCreate();
 //        This is here because onStart is not called when BIND_AUTO_CREATE is used

@@ -50,8 +50,8 @@ import com.sidzi.circleofmusic.fragments.PotmFragment;
 import com.sidzi.circleofmusic.fragments.TheFifthFragment;
 import com.sidzi.circleofmusic.helpers.BucketSaver;
 import com.sidzi.circleofmusic.helpers.DatabaseSynchronization;
-import com.sidzi.circleofmusic.recievers.MediaButtonHandler;
-import com.sidzi.circleofmusic.recievers.MusicPlayerViewHandler;
+import com.sidzi.circleofmusic.receivers.MediaButtonHandler;
+import com.sidzi.circleofmusic.receivers.MusicPlayerViewHandler;
 import com.sidzi.circleofmusic.services.MusicPlayerService;
 
 import org.json.JSONException;
