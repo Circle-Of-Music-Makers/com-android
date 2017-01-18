@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
@@ -30,6 +31,7 @@ public class MusicPlayerService extends Service {
     public static final String ACTION_CLOSE = "com.sidzi.circleofmusic.CLOSE";
     public static Track PLAYING_TRACK = null;
     public static boolean PLAYING_BUCKET;
+    private static boolean PLAYING = false;
     private final IBinder mMIBinder = new MusicBinder();
     public MediaPlayer mMediaPlayer = null;
     private int PLAYING_TRACK_POSITION = -1;
@@ -40,13 +42,9 @@ public class MusicPlayerService extends Service {
     private int songsTillSleep = -1;
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        return super.onStartCommand(intent, flags, startId);
-    }
-
-    @Override
     public void onCreate() {
         super.onCreate();
+//        This is here because onStart is not called when BIND_AUTO_CREATE is used
         mContext = this;
         localBroadcastManager = LocalBroadcastManager.getInstance(this);
         final OrmHandler ormHandler = OpenHelperManager.getHelper(this, OrmHandler.class);
@@ -62,21 +60,16 @@ public class MusicPlayerService extends Service {
 
     @Override
     public boolean onUnbind(Intent intent) {
-//        final Handler mHandler = new Handler();
-//        mHandler.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                try {
-//                    if (!mMediaPlayer.isPlaying()) {
-//                        stopSelf();
-//                    }
-//                } catch (NullPointerException e) {
-//                    stopSelf();
-//                } finally {
-//                    mHandler.postDelayed(this, 15000);
-//                }
-//            }
-//        }, 15000);
+        final Handler mHandler = new Handler();
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (!PLAYING)
+                    stopSelf();
+                else
+                    mHandler.postDelayed(this, 15000);
+            }
+        }, 15000);
         return super.onUnbind(intent);
     }
 
@@ -93,6 +86,7 @@ public class MusicPlayerService extends Service {
 
 
     public void play(String track_path) {
+        PLAYING = true;
         if (mMediaPlayer == null)
             init();
         mMediaPlayer.reset();
@@ -119,6 +113,7 @@ public class MusicPlayerService extends Service {
     }
 
     public void play(String Path, String Artist, String Name) {
+        PLAYING = true;
         if (mMediaPlayer == null)
             init();
         mMediaPlayer.reset();
@@ -134,6 +129,8 @@ public class MusicPlayerService extends Service {
     }
 
     public void bucketPlay(String track_path) {
+        PLAYING = true;
+
         if (mMediaPlayer == null)
             init();
         mMediaPlayer.reset();
@@ -173,11 +170,13 @@ public class MusicPlayerService extends Service {
     }
 
     public void pause() {
+        PLAYING = false;
         mMediaPlayer.pause();
         uiUpdate(false);
     }
 
     public void unpause() {
+        PLAYING = true;
         mMediaPlayer.start();
         uiUpdate(false);
     }

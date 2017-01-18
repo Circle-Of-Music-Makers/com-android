@@ -59,6 +59,8 @@ import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
 
+    ServiceConnection musicServiceConnection;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -107,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(getApplicationContext(), MusicPlayerService.class);
             if (MusicPlayerService.PLAYING_TRACK == null)
                 startService(intent);
-            ServiceConnection musicServiceConnection = new ServiceConnection() {
+            musicServiceConnection = new ServiceConnection() {
                 @Override
                 public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
                     MusicPlayerService.MusicBinder musicBinder = (MusicPlayerService.MusicBinder) iBinder;
@@ -121,7 +123,6 @@ public class MainActivity extends AppCompatActivity {
                         else
                             LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent(MusicPlayerService.ACTION_PAUSE));
                     }
-                    unbindService(this);
                 }
 
                 @Override
@@ -232,11 +233,6 @@ public class MainActivity extends AppCompatActivity {
                         });
                 builder.create().show();
                 break;
-            case R.id.exit:
-                stopService(new Intent(getApplicationContext(), MusicPlayerService.class));
-                LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(MusicPlayerService.ACTION_CLOSE));
-                finish();
-                break;
             case R.id.register:
                 final AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
                 final EditText etUsername = new EditText(this);
@@ -299,6 +295,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             BucketSaver bucketSaver = new BucketSaver(this);
             bucketSaver.saveFile();
+            unbindService(musicServiceConnection);
         } catch (IllegalArgumentException | NullPointerException e) {
             e.printStackTrace();
         }
