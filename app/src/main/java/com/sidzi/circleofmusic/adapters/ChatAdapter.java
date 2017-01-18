@@ -27,7 +27,7 @@
 //
 //    @Override
 //    public ChatAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-//        final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_row_chat, parent, false);
+//        final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_chat, parent, false);
 //        return new ViewHolder(view);
 //    }
 //

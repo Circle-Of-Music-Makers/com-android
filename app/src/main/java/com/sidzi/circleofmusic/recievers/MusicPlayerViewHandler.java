@@ -34,6 +34,7 @@ public class MusicPlayerViewHandler extends BroadcastReceiver {
     private ImageButton ibPlayNext;
     private NotificationManager mNotificationManager;
     private NotificationCompat.Builder mBuilder;
+    private ProgressBar pbTrackPlay;
 
     public MusicPlayerViewHandler(Context mContext) {
         super();
@@ -44,7 +45,7 @@ public class MusicPlayerViewHandler extends BroadcastReceiver {
         ibPlay = (ImageButton) ((MainActivity) mContext).findViewById(R.id.ibPlayPause);
         ibAddToBucket = (ImageButton) ((MainActivity) mContext).findViewById(R.id.ibAddToBucket);
         ibPlayNext = (ImageButton) ((MainActivity) mContext).findViewById(R.id.ibPlayNext);
-        ProgressBar pbTrackPlay = (ProgressBar) ((MainActivity) mContext).findViewById(R.id.pbTrackPlay);
+        pbTrackPlay = (ProgressBar) ((MainActivity) mContext).findViewById(R.id.pbTrackPlay);
         pbTrackPlay.getProgressDrawable().setColorFilter(mContext.getResources().getColor(R.color.primaryInverted), PorterDuff.Mode.SRC_IN);
 
         //            Music Notification
@@ -56,7 +57,6 @@ public class MusicPlayerViewHandler extends BroadcastReceiver {
                 .setSmallIcon(R.drawable.ic_statusbar)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setContentIntent(mainActivity)
-                .setOngoing(true)
                 .setLargeIcon(BitmapFactory.decodeResource(mContext.getResources(), R.mipmap.ic_launcher));
     }
 
@@ -71,10 +71,14 @@ public class MusicPlayerViewHandler extends BroadcastReceiver {
                 ibPlay.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(final View v) {
-                        if (mpService.mMediaPlayer.isPlaying()) {
-                            mpService.pause();
-                        } else {
-                            mpService.unpause();
+                        try {
+                            if (mpService.mMediaPlayer.isPlaying()) {
+                                mpService.pause();
+                            } else {
+                                mpService.unpause();
+                            }
+                        } catch (NullPointerException e) {
+                            e.printStackTrace();
                         }
                     }
                 });
@@ -120,6 +124,7 @@ public class MusicPlayerViewHandler extends BroadcastReceiver {
                 mBuilder.setContentTitle(temp_track.getName())
                         .setContentText(temp_track.getArtist());
                 mNotificationManager.notify(notifyId, mBuilder.build());
+                pbTrackPlay.setIndeterminate(true);
                 break;
             case MusicPlayerService.ACTION_PAUSE:
                 ibPlay.setImageResource(R.drawable.ic_track_play);
@@ -129,6 +134,7 @@ public class MusicPlayerViewHandler extends BroadcastReceiver {
             case MusicPlayerService.ACTION_PLAY:
                 ibPlay.setImageResource(R.drawable.ic_track_stop);
                 mBuilder.setOngoing(true);
+                pbTrackPlay.setIndeterminate(false);
                 mNotificationManager.notify(notifyId, mBuilder.build());
                 break;
             case MusicPlayerService.ACTION_CLOSE:

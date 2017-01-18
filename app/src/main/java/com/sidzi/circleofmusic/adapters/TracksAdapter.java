@@ -79,7 +79,7 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.ViewHolder
 
     @Override
     public TracksAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_row_track, parent, false);
+        final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_track, parent, false);
         return new ViewHolder(view);
     }
 
@@ -127,6 +127,7 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.ViewHolder
                         musicBinder.getService().play(v.getTag(R.id.tag_track_path).toString());
                     else
                         musicBinder.getService().bucketPlay(v.getTag(R.id.tag_track_path).toString());
+                    mContext.unbindService(this);
                 }
 
                 @Override

@@ -68,7 +68,7 @@ public class AlarmSettingActivity extends AppCompatActivity {
                                         public void onResponse(JSONObject response) {
                                             try {
                                                 final JSONArray alarms = response.getJSONArray("alarms");
-                                                final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(getApplicationContext(), R.layout.layout_row_alarm_selection);
+                                                final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(getApplicationContext(), R.layout.row_alarm_selection);
                                                 for (int i = 0; i < alarms.length(); i++)
                                                     arrayAdapter.add(alarms.get(i).toString());
                                                 innerBuilder.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
@@ -105,7 +105,7 @@ public class AlarmSettingActivity extends AppCompatActivity {
                                                     return !s.startsWith("secondary_");
                                                 }
                                             });
-                                            final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(getApplicationContext(), R.layout.layout_row_alarm_selection);
+                                            final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(getApplicationContext(), R.layout.row_alarm_selection);
                                             for (File alarm : alarms)
                                                 arrayAdapter.add(alarm.getName());
                                             innerBuilder.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {

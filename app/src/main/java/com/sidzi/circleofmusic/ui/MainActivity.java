@@ -250,7 +250,8 @@ public class MainActivity extends AppCompatActivity {
                                 final JSONObject params = new JSONObject();
                                 try {
                                     params.put("username", etUsername.getText().toString());
-                                    params.put("uuid", Settings.Secure.ANDROID_ID);
+//                                    this is temporary TODO use blockchain ==> future
+                                    params.put("uuid", Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID));
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
@@ -271,6 +272,8 @@ public class MainActivity extends AppCompatActivity {
                                     @Override
                                     public void onErrorResponse(VolleyError error) {
 //                                        Failed to register
+                                        registrationProgressDialog.dismiss();
+                                        Toast.makeText(MainActivity.this, "Registration failed", Toast.LENGTH_LONG).show();
                                     }
                                 });
                                 RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());

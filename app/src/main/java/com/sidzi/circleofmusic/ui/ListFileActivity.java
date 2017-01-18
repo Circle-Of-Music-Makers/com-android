@@ -109,7 +109,7 @@ public class ListFileActivity extends AppCompatActivity {
 
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_row_files, parent, false);
+            final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_files, parent, false);
             return new ViewHolder(view);
         }
 

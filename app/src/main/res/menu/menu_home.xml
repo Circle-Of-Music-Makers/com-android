@@ -19,7 +19,7 @@
 
     <item
         android:id="@+id/register"
-        android:title="Register" />
+        android:title="Register/Login" />
 
     <item
         android:id="@+id/exit"
