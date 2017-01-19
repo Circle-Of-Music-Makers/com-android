@@ -21,7 +21,8 @@ public class ShoutboxFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View homeView = inflater.inflate(R.layout.fragment_chat_bot, container, false);
         final RecyclerView chatRecyclerView = (RecyclerView) homeView.findViewById(R.id.rvChatConsole);
-        final ChatAdapter chatAdapter = new ChatAdapter();
+        final ChatAdapter chatAdapter = new ChatAdapter(getContext());
+        chatAdapter.populate(null);
         final LinearLayoutManager chatLayoutManager = new LinearLayoutManager(getContext());
 
         chatLayoutManager.setStackFromEnd(true);
@@ -32,13 +33,11 @@ public class ShoutboxFragment extends Fragment {
         ibSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                etChatMessage.setHint("");
                 String message = etChatMessage.getText().toString();
                 if (!message.equals("")) {
-                    chatAdapter.addMessage(message, true);
-                    chatRecyclerView.smoothScrollToPosition(chatAdapter.getItemCount());
                     etChatMessage.setText("");
 //                    Send message to server here
+                    chatAdapter.populate(message);
                 }
             }
         });

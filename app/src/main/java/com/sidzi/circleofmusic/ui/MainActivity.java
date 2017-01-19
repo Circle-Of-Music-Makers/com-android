@@ -32,6 +32,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -153,6 +154,29 @@ public class MainActivity extends AppCompatActivity {
 
             ViewPager mViewPager = (ViewPager) findViewById(R.id.container);
             mViewPager.setAdapter(mSectionsPagerAdapter);
+            final LinearLayout llPlaybackPanel = (LinearLayout) findViewById(R.id.llPlayerPanel);
+            mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                @Override
+                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+                }
+
+                @Override
+                public void onPageSelected(int position) {
+                    if (position == 4) {
+                        llPlaybackPanel.setVisibility(View.GONE);
+                    } else {
+                        if (llPlaybackPanel.getVisibility() != View.VISIBLE) {
+                            llPlaybackPanel.setVisibility(View.VISIBLE);
+                        }
+                    }
+                }
+
+                @Override
+                public void onPageScrollStateChanged(int state) {
+
+                }
+            });
 
             TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
             tabLayout.setupWithViewPager(mViewPager);
@@ -354,7 +378,7 @@ public class MainActivity extends AppCompatActivity {
                 case 3:
                     return "Com";
                 case 4:
-                    return "Chat";
+                    return "Shoutbox";
                 default:
                     return null;
             }

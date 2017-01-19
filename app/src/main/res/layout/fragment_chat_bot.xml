@@ -43,7 +43,9 @@
         android:id="@+id/rvChatConsole"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/rlChatControls" />
+        android:layout_above="@+id/rlChatControls"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin" />
 
 
 </RelativeLayout>
