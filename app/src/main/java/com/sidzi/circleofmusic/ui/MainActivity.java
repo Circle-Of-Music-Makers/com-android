@@ -47,6 +47,7 @@ import com.sidzi.circleofmusic.config;
 import com.sidzi.circleofmusic.fragments.BucketFragment;
 import com.sidzi.circleofmusic.fragments.LocalMusicFragment;
 import com.sidzi.circleofmusic.fragments.PotmFragment;
+import com.sidzi.circleofmusic.fragments.ShoutboxFragment;
 import com.sidzi.circleofmusic.fragments.TheFifthFragment;
 import com.sidzi.circleofmusic.helpers.BucketSaver;
 import com.sidzi.circleofmusic.helpers.DatabaseSynchronization;
@@ -324,6 +325,8 @@ public class MainActivity extends AppCompatActivity {
                     return new BucketFragment();
                 case 3:
                     return new TheFifthFragment();
+                case 4:
+                    return new ShoutboxFragment();
                 default:
                     return null;
             }
@@ -331,8 +334,12 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public int getCount() {
-            // Show 4 total pages.
-            return 4;
+            SharedPreferences settings = getSharedPreferences("com_prefs", 0);
+            if (!settings.getBoolean("registered", false))
+                // Show 4 total pages.
+                return 4;
+            else
+                return 5;
         }
 
         @Override
@@ -346,6 +353,8 @@ public class MainActivity extends AppCompatActivity {
                     return "Bucket";
                 case 3:
                     return "Com";
+                case 4:
+                    return "Chat";
                 default:
                     return null;
             }
