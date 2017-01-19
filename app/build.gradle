@@ -8,8 +8,8 @@ android {
         applicationId "com.sidzi.circleofmusic"
         minSdkVersion 17
         targetSdkVersion 25
-        versionCode 9
-        versionName "Harpsichord"
+        versionCode 10
+        versionName "Igil"
     }
 
     buildTypes {
