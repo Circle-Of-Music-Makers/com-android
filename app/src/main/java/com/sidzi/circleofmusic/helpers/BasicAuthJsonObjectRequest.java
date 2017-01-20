@@ -29,8 +29,6 @@ public class BasicAuthJsonObjectRequest extends JsonObjectRequest {
         Map<String, String> params = new HashMap<>();
         params.put("Authorization", AuthToken);
         params.put("Username", UserName);
-        params.put("Content-Type", "application/json");
-        params.put("Accept", "application/json");
         return params;
     }
 }

@@ -33,46 +33,15 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         super();
         mContext = context;
         chatMessageList = new ArrayList<>();
+        populate();
     }
 
-    public void populate(final String message) {
+    void populate() {
         RequestQueue rq = Volley.newRequestQueue(mContext);
-        JSONObject params;
-        String url;
-
-        final int method;
-        if (message == null) {
-            method = Request.Method.GET;
-            params = null;
-            url = "getMessages";
-        } else {
-            method = Request.Method.POST;
-            params = new JSONObject();
-            url = "postMessage";
-            try {
-                params.put("message_text", message);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-        BasicAuthJsonObjectRequest request = new BasicAuthJsonObjectRequest(mContext, method, config.com_url + url, params, new Response.Listener<JSONObject>() {
+        BasicAuthJsonObjectRequest request = new BasicAuthJsonObjectRequest(mContext, Request.Method.GET, config.com_url + "getMessages", null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
-                try {
-                    if (method == Request.Method.POST)
-                        populate(null);
-                    else {
-                        JSONArray messages_list = response.getJSONArray("messages");
-                        chatMessageList.clear();
-                        for (int i = 0; i < messages_list.length(); i++) {
-                            chatMessageList.add(new ChatMessage(messages_list.getJSONObject(i).getString("username"), messages_list.getJSONObject(i).getString("message_text")));
-                        }
-                        notifyDataSetChanged();
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
+                addToArrayList(response);
             }
         }, new Response.ErrorListener() {
             @Override
@@ -81,6 +50,41 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
             }
         });
         rq.add(request);
+    }
+
+    public void sendMessage(String message) {
+        JSONObject params = new JSONObject();
+        try {
+            params.put("message_text", message);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        RequestQueue rq = Volley.newRequestQueue(mContext);
+        BasicAuthJsonObjectRequest request = new BasicAuthJsonObjectRequest(mContext, Request.Method.POST, config.com_url + "postMessage", params, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                addToArrayList(response);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                error.printStackTrace();
+            }
+        });
+        rq.add(request);
+    }
+
+    private void addToArrayList(JSONObject response) {
+        try {
+            JSONArray messages_list = response.getJSONArray("messages");
+            chatMessageList.clear();
+            for (int i = 0; i < messages_list.length(); i++) {
+                chatMessageList.add(new ChatMessage(messages_list.getJSONObject(i).getString("username"), messages_list.getJSONObject(i).getString("message_text")));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        notifyDataSetChanged();
     }
 
     @Override
