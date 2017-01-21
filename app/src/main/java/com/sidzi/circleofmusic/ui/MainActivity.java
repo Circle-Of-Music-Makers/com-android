@@ -32,6 +32,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -47,6 +48,7 @@ import com.sidzi.circleofmusic.config;
 import com.sidzi.circleofmusic.fragments.BucketFragment;
 import com.sidzi.circleofmusic.fragments.LocalMusicFragment;
 import com.sidzi.circleofmusic.fragments.PotmFragment;
+import com.sidzi.circleofmusic.fragments.ShoutboxFragment;
 import com.sidzi.circleofmusic.fragments.TheFifthFragment;
 import com.sidzi.circleofmusic.helpers.BucketSaver;
 import com.sidzi.circleofmusic.helpers.DatabaseSynchronization;
@@ -152,6 +154,29 @@ public class MainActivity extends AppCompatActivity {
 
             ViewPager mViewPager = (ViewPager) findViewById(R.id.container);
             mViewPager.setAdapter(mSectionsPagerAdapter);
+            final LinearLayout llPlaybackPanel = (LinearLayout) findViewById(R.id.llPlayerPanel);
+            mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                @Override
+                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+                }
+
+                @Override
+                public void onPageSelected(int position) {
+                    if (position == 4) {
+                        llPlaybackPanel.setVisibility(View.GONE);
+                    } else {
+                        if (llPlaybackPanel.getVisibility() != View.VISIBLE) {
+                            llPlaybackPanel.setVisibility(View.VISIBLE);
+                        }
+                    }
+                }
+
+                @Override
+                public void onPageScrollStateChanged(int state) {
+
+                }
+            });
 
             TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
             tabLayout.setupWithViewPager(mViewPager);
@@ -324,6 +349,8 @@ public class MainActivity extends AppCompatActivity {
                     return new BucketFragment();
                 case 3:
                     return new TheFifthFragment();
+                case 4:
+                    return new ShoutboxFragment();
                 default:
                     return null;
             }
@@ -331,8 +358,12 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public int getCount() {
-            // Show 4 total pages.
-            return 4;
+            SharedPreferences settings = getSharedPreferences("com_prefs", 0);
+            if (!settings.getBoolean("registered", false))
+                // Show 4 total pages.
+                return 4;
+            else
+                return 5;
         }
 
         @Override
@@ -346,6 +377,8 @@ public class MainActivity extends AppCompatActivity {
                     return "Bucket";
                 case 3:
                     return "Com";
+                case 4:
+                    return "Shoutbox";
                 default:
                     return null;
             }
