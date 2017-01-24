@@ -1,7 +1,7 @@
 # Circle of Music Android App
 
 ## About
-Circle of Music or CoM which we like to call it, is a music sharing application developed by Siddhant Gupta, Saumil Sachdeva, and Sameer Vaze.
+Circle of Music is a music playing/sharing application developed by Siddhant , Saumil Sachdeva, and Sameer Vaze.
 
 ## Screenshots
 ![Home](https://raw.githubusercontent.com/Circle-Of-Music-Makers/com-android/master/screenshots/home.png)
