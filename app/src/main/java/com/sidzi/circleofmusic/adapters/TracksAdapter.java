@@ -1,9 +1,12 @@
 package com.sidzi.circleofmusic.adapters;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.os.IBinder;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,10 +20,8 @@ import com.j256.ormlite.stmt.PreparedQuery;
 import com.j256.ormlite.stmt.QueryBuilder;
 import com.sidzi.circleofmusic.R;
 import com.sidzi.circleofmusic.entities.Track;
-import com.sidzi.circleofmusic.helpers.MusicServiceConnection;
 import com.sidzi.circleofmusic.helpers.OrmHandler;
 import com.sidzi.circleofmusic.services.MusicPlayerService;
-import com.sidzi.circleofmusic.ui.MainActivity;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -78,7 +79,7 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.ViewHolder
 
     @Override
     public TracksAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_row_track, parent, false);
+        final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_track, parent, false);
         return new ViewHolder(view);
     }
 
@@ -103,8 +104,8 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.ViewHolder
     }
 
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
-        TextView tnTextView;
-        TextView tdTextView;
+        private TextView tnTextView;
+        private TextView tdTextView;
 
 
         ViewHolder(View view) {
@@ -116,15 +117,25 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.ViewHolder
         }
 
         @Override
-        public void onClick(View v) {
+        public void onClick(final View v) {
             Intent intent = new Intent(mContext, MusicPlayerService.class);
-            MusicServiceConnection mMusicServiceConnection = ((MainActivity) mContext).mMusicServiceConnection;
-            mContext.bindService(intent, mMusicServiceConnection, Context.BIND_AUTO_CREATE);
-            if (!bucketBool)
-                mMusicServiceConnection.getmMusicPlayerService().play(v.getTag(R.id.tag_track_path).toString());
-            else
-                mMusicServiceConnection.getmMusicPlayerService().bucketPlay(v.getTag(R.id.tag_track_path).toString());
+            ServiceConnection mMusicServiceConnection = new ServiceConnection() {
+                @Override
+                public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+                    MusicPlayerService.MusicBinder musicBinder = (MusicPlayerService.MusicBinder) iBinder;
+                    if (!bucketBool)
+                        musicBinder.getService().play(v.getTag(R.id.tag_track_path).toString());
+                    else
+                        musicBinder.getService().bucketPlay(v.getTag(R.id.tag_track_path).toString());
+                    mContext.unbindService(this);
+                }
 
+                @Override
+                public void onServiceDisconnected(ComponentName componentName) {
+
+                }
+            };
+            mContext.bindService(intent, mMusicServiceConnection, Context.BIND_AUTO_CREATE);
         }
 
         @Override

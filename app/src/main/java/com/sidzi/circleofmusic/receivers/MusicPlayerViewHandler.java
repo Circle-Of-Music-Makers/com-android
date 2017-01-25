@@ -1,12 +1,15 @@
-package com.sidzi.circleofmusic.recievers;
+package com.sidzi.circleofmusic.receivers;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.BitmapFactory;
 import android.graphics.PorterDuff;
+import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.view.View;
 import android.widget.ImageButton;
@@ -16,7 +19,6 @@ import android.widget.Toast;
 
 import com.sidzi.circleofmusic.R;
 import com.sidzi.circleofmusic.entities.Track;
-import com.sidzi.circleofmusic.helpers.MusicServiceConnection;
 import com.sidzi.circleofmusic.services.MusicPlayerService;
 import com.sidzi.circleofmusic.ui.MainActivity;
 
@@ -30,10 +32,9 @@ public class MusicPlayerViewHandler extends BroadcastReceiver {
     private ImageButton ibPlay;
     private ImageButton ibAddToBucket;
     private ImageButton ibPlayNext;
-    private ProgressBar pbTrackPlay;
     private NotificationManager mNotificationManager;
     private NotificationCompat.Builder mBuilder;
-    private MusicServiceConnection mMusicServiceConnection;
+    private ProgressBar pbTrackPlay;
 
     public MusicPlayerViewHandler(Context mContext) {
         super();
@@ -56,47 +57,60 @@ public class MusicPlayerViewHandler extends BroadcastReceiver {
                 .setSmallIcon(R.drawable.ic_statusbar)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setContentIntent(mainActivity)
-                .setOngoing(true)
                 .setLargeIcon(BitmapFactory.decodeResource(mContext.getResources(), R.mipmap.ic_launcher));
-
-        mMusicServiceConnection = new MusicServiceConnection(mContext);
-
     }
 
     @Override
     public void onReceive(final Context context, Intent intent) {
 
-        final Track temp_track = MusicPlayerService.PLAYING_TRACK;
-        context.bindService(new Intent(mContext, MusicPlayerService.class), mMusicServiceConnection, Context.BIND_AUTO_CREATE);
-        final MusicPlayerService mpService = mMusicServiceConnection.getmMusicPlayerService();
+        ServiceConnection musicServiceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+                MusicPlayerService.MusicBinder musicBinder = (MusicPlayerService.MusicBinder) iBinder;
+                final MusicPlayerService mpService = musicBinder.getService();
+                ibPlay.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(final View v) {
+                        try {
+                            if (mpService.mMediaPlayer.isPlaying()) {
+                                mpService.pause();
+                            } else {
+                                mpService.unpause();
+                            }
+                        } catch (NullPointerException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+                ibAddToBucket.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (mpService.bucketOperation()) {
+                            ((ImageButton) v).setImageResource(R.drawable.ic_track_bucket_added);
+                            Toast.makeText(context, "Added to bucket", Toast.LENGTH_SHORT).show();
+                        } else {
+                            ((ImageButton) v).setImageResource(R.drawable.ic_track_bucket_add);
+                        }
+                    }
+                });
+                ibPlayNext.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        mpService.next(MusicPlayerService.PLAYING_BUCKET);
+                    }
+                });
+                context.unbindService(this);
+            }
 
-        ibPlay.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(final View v) {
-                if (mpService.mMediaPlayer.isPlaying()) {
-                    mpService.pause();
-                } else {
-                    mpService.unpause();
-                }
+            public void onServiceDisconnected(ComponentName componentName) {
+
             }
-        });
-        ibAddToBucket.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mpService.bucketOperation()) {
-                    ((ImageButton) v).setImageResource(R.drawable.ic_track_bucket_added);
-                    Toast.makeText(context, "Added to bucket", Toast.LENGTH_SHORT).show();
-                } else {
-                    ((ImageButton) v).setImageResource(R.drawable.ic_track_bucket_add);
-                }
-            }
-        });
-        ibPlayNext.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mpService.next(MusicPlayerService.PLAYING_BUCKET);
-            }
-        });
+        };
+        context.bindService(new Intent(context, MusicPlayerService.class), musicServiceConnection, Context.BIND_AUTO_CREATE);
+        final Track temp_track = MusicPlayerService.PLAYING_TRACK;
+        final int notifyId = 1;
+
         switch (intent.getAction()) {
             case MusicPlayerService.ACTION_UPDATE_METADATA:
                 tvPlayingTrackName.setText(temp_track.getName());
@@ -109,17 +123,24 @@ public class MusicPlayerViewHandler extends BroadcastReceiver {
                 ibAddToBucket.setTag(temp_track.getBucket());
                 mBuilder.setContentTitle(temp_track.getName())
                         .setContentText(temp_track.getArtist());
-                int notifyId = 1;
                 mNotificationManager.notify(notifyId, mBuilder.build());
+                pbTrackPlay.setIndeterminate(true);
                 break;
             case MusicPlayerService.ACTION_PAUSE:
                 ibPlay.setImageResource(R.drawable.ic_track_play);
+                mBuilder.setOngoing(false);
+                mNotificationManager.notify(notifyId, mBuilder.build());
                 break;
             case MusicPlayerService.ACTION_PLAY:
                 ibPlay.setImageResource(R.drawable.ic_track_stop);
+                mBuilder.setOngoing(true);
+                pbTrackPlay.setIndeterminate(false);
+                mNotificationManager.notify(notifyId, mBuilder.build());
                 break;
             case MusicPlayerService.ACTION_CLOSE:
                 mNotificationManager.cancelAll();
+                break;
+            default:
                 break;
         }
     }

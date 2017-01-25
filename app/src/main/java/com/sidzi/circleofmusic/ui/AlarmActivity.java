@@ -1,6 +1,7 @@
 package com.sidzi.circleofmusic.ui;
 
 import android.annotation.SuppressLint;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -118,6 +119,7 @@ public class AlarmActivity extends AppCompatActivity {
 
         // Alarm Sound
         final MediaPlayer mediaPlayer = new MediaPlayer();
+        mediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
         mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mediaPlayer) {
@@ -137,6 +139,8 @@ public class AlarmActivity extends AppCompatActivity {
         findViewById(R.id.bStopAlarm).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                view.setClickable(false);
+                view.setOnClickListener(null);
                 mediaPlayer.reset();
                 try {
                     mediaPlayer.setDataSource(getIntent().getStringExtra("after_alarm_path"));

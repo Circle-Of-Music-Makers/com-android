@@ -1,6 +1,5 @@
 package com.sidzi.circleofmusic.adapters;
 
-
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -19,31 +18,33 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 import com.sidzi.circleofmusic.R;
-import com.sidzi.circleofmusic.entities.Potm;
+import com.sidzi.circleofmusic.entities.ComTrack;
 import com.sidzi.circleofmusic.services.MusicPlayerService;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 
-import java.text.DateFormatSymbols;
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.sidzi.circleofmusic.config.com_url;
 
-public class PotmAdapter extends RecyclerView.Adapter<PotmAdapter.ViewHolder> {
-    private ArrayList<Potm> potms = new ArrayList<>();
+public class ComTracksAdapter extends RecyclerView.Adapter<ComTracksAdapter.ViewHolder> {
+
+    private List<ComTrack> mTrackList;
     private Context mContext;
 
-    public PotmAdapter(Context mContext) {
+    public ComTracksAdapter(Context mContext) {
         super();
         this.mContext = mContext;
+        mTrackList = new ArrayList<>();
         RequestQueue requestQueue = Volley.newRequestQueue(mContext);
-        JsonArrayRequest trackRequest = new JsonArrayRequest(Request.Method.GET, com_url + "getPOTMs", null, new Response.Listener<JSONArray>() {
+        JsonArrayRequest trackRequest = new JsonArrayRequest(Request.Method.GET, com_url + "getTracks", null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
                 try {
                     for (int i = 0; i < response.length(); i++) {
-                        potms.add(new Potm(response.getJSONObject(i)));
+                        mTrackList.add(new ComTrack(response.getJSONObject(i)));
                     }
                     notifyDataSetChanged();
                 } catch (JSONException e) {
@@ -59,42 +60,42 @@ public class PotmAdapter extends RecyclerView.Adapter<PotmAdapter.ViewHolder> {
         requestQueue.add(trackRequest);
     }
 
+
     @Override
-    public PotmAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_potm, parent, false);
-        return new PotmAdapter.ViewHolder(view);
+    public ComTracksAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_com_track, parent, false);
+        return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(PotmAdapter.ViewHolder holder, int position) {
-        try {
-            holder.tvPotmMonth.setText(new DateFormatSymbols().getMonths()[potms.get(position).getMonth() - 1]);
-        } catch (ArrayIndexOutOfBoundsException ignore) {
-        }
-        holder.tvPotmTitle.setText(potms.get(position).getTitle());
-        holder.tvPotmDescription.setText(potms.get(position).getDescription());
-        holder.itemView.setTag(potms.get(position).getPath());
-        holder.itemView.setTag(R.id.tag_track_path, potms.get(position).getPath());
-        holder.itemView.setTag(R.id.tag_track_name, potms.get(position).getTitle());
-        holder.itemView.setTag(R.id.tag_track_artist, potms.get(position).getDescription());
+    public void onBindViewHolder(final ViewHolder holder, final int position) {
+        holder.tvComTrackName.setText(mTrackList.get(position).getTitle());
+        holder.tvComTrackInfo.setText(mTrackList.get(position).getArtist());
+        holder.tvComTrackUploader.setText(mTrackList.get(position).getUsername());
+        String temp_path = mTrackList.get(position).getPath();
+
+        holder.itemView.setTag(R.id.tag_track_path, temp_path);
+        holder.itemView.setTag(R.id.tag_track_name, mTrackList.get(position).getTitle());
+        holder.itemView.setTag(R.id.tag_track_artist, mTrackList.get(position).getArtist());
     }
 
     @Override
     public int getItemCount() {
-        return potms.size();
+        return mTrackList.size();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        private TextView tvPotmMonth;
-        private TextView tvPotmTitle;
-        private TextView tvPotmDescription;
+    class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
+        private TextView tvComTrackName;
+        private TextView tvComTrackInfo;
+        private TextView tvComTrackUploader;
 
-        ViewHolder(View itemView) {
-            super(itemView);
-            tvPotmTitle = (TextView) itemView.findViewById(R.id.tvPotmTitle);
-            tvPotmDescription = (TextView) itemView.findViewById(R.id.tvPotmDescription);
-            tvPotmMonth = (TextView) itemView.findViewById(R.id.tvPotmMonth);
-            itemView.setOnClickListener(this);
+        ViewHolder(View view) {
+            super(view);
+            this.tvComTrackName = (TextView) view.findViewById(R.id.tvComTrackName);
+            this.tvComTrackInfo = (TextView) view.findViewById(R.id.tvComTrackInfo);
+            this.tvComTrackUploader = (TextView) view.findViewById(R.id.tvComTrackUploader);
+            view.setOnClickListener(this);
+            view.setOnLongClickListener(this);
         }
 
         @Override
@@ -114,6 +115,12 @@ public class PotmAdapter extends RecyclerView.Adapter<PotmAdapter.ViewHolder> {
                 }
             };
             mContext.bindService(intent, mMusicServiceConnection, Context.BIND_AUTO_CREATE);
+        }
+
+        @Override
+        public boolean onLongClick(View v) {
+            //            Show who uploaded it
+            return true;
         }
     }
 }

@@ -8,8 +8,8 @@ android {
         applicationId "com.sidzi.circleofmusic"
         minSdkVersion 17
         targetSdkVersion 25
-        versionCode 9
-        versionName "Harpsichord"
+        versionCode 10
+        versionName "Igil"
     }
 
     buildTypes {
@@ -24,6 +24,7 @@ android {
 
 dependencies {
     compile 'com.android.volley:volley:1.0.0'
+    compile 'net.gotev:uploadservice:3.1'
     compile 'com.j256.ormlite:ormlite-android:5.0'
     compile 'com.j256.ormlite:ormlite-core:5.0'
     compile 'com.rollbar:rollbar-android:0.2.0'

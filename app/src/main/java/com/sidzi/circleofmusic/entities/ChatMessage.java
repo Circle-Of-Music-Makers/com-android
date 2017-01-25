@@ -3,7 +3,7 @@ package com.sidzi.circleofmusic.entities;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
-@DatabaseTable(tableName = "chat_trebie")
+@DatabaseTable(tableName = "table_messages")
 public class ChatMessage {
     @DatabaseField(generatedId = true)
     private int id;
@@ -12,21 +12,16 @@ public class ChatMessage {
     private String body;
 
     @DatabaseField
-    private boolean self_flag;
+    private String sender;
 
     public ChatMessage() {
     }
 
-    public ChatMessage(String body, boolean self_flag) {
-
+    public ChatMessage(String sender, String body) {
+        this.sender = sender;
         this.body = body;
-
-        this.self_flag = self_flag;
     }
 
-    public boolean isSelf_flag() {
-        return self_flag;
-    }
 
     public int getId() {
         return id;
@@ -36,14 +31,11 @@ public class ChatMessage {
         this.id = id;
     }
 
-
     public String getBody() {
         return body;
     }
 
-    public void setBody(String body) {
-        this.body = body;
+    public String getSender() {
+        return sender;
     }
-
-
 }
