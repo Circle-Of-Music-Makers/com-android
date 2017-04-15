@@ -2,10 +2,14 @@ package com.sidzi.circleofmusic.helpers;
 
 import android.content.Context;
 import android.os.Environment;
+import android.util.Log;
 
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.Dao;
 import com.sidzi.circleofmusic.entities.Track;
+
+import net.gotev.uploadservice.MultipartUploadRequest;
+import net.gotev.uploadservice.UploadNotificationConfig;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -18,6 +22,8 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.sql.SQLException;
 import java.util.List;
+
+import static com.sidzi.circleofmusic.config.com_url;
 
 
 public class BucketSaver {
@@ -54,6 +60,16 @@ public class BucketSaver {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+        try {
+            final String uploadIdentity =
+                    new MultipartUploadRequest(mContext, com_url + "backup")
+                            .addFileToUpload(blcom_file.getPath(), "file")
+                            .setNotificationConfig(new UploadNotificationConfig())
+                            .setMaxRetries(2)
+                            .startUpload();
+        } catch (Exception exc) {
+            Log.e("AndroidUploadService", exc.getMessage(), exc);
         }
     }
 
