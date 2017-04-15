@@ -1,4 +1,4 @@
-package com.sidzi.circleofmusic.ui;
+package com.sidzi.circleofmusic.activities;
 
 import android.Manifest;
 import android.app.ProgressDialog;

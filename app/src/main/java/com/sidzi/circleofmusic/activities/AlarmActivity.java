@@ -1,30 +1,25 @@
-package com.sidzi.circleofmusic.ui;
+package com.sidzi.circleofmusic.activities;
 
 import android.annotation.SuppressLint;
-import android.app.DownloadManager;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.net.Uri;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
+import android.view.WindowManager;
 
 import com.sidzi.circleofmusic.R;
 
-import java.io.File;
+import java.io.IOException;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class EosActivity extends AppCompatActivity {
+public class AlarmActivity extends AppCompatActivity {
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -35,7 +30,7 @@ public class EosActivity extends AppCompatActivity {
      * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
      * user interaction before hiding the system UI.
      */
-    private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
+    private static final int AUTO_HIDE_DELAY_MILLIS = 0;
 
     /**
      * Some older devices needs a small delay between UI widget updates
@@ -99,12 +94,15 @@ public class EosActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_eos);
+        setContentView(R.layout.activity_alarm);
 
         mVisible = true;
         mControlsView = findViewById(R.id.fullscreen_content_controls);
         mContentView = findViewById(R.id.fullscreen_content);
 
+        getWindow().addFlags(
+                WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+        );
 
         // Set up the user interaction to manually show or hide the system UI.
         mContentView.setOnClickListener(new View.OnClickListener() {
@@ -117,34 +115,47 @@ public class EosActivity extends AppCompatActivity {
         // Upon interacting with UI controls, delay any scheduled hide()
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
-        Button update_button = (Button) findViewById(R.id.update_button);
-        assert update_button != null;
-        update_button.setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.bStopAlarm).setOnTouchListener(mDelayHideTouchListener);
+
+        // Alarm Sound
+        final MediaPlayer mediaPlayer = new MediaPlayer();
+        mediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
+        mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
-            public void onClick(View v) {
-                BroadcastReceiver onComplete = new BroadcastReceiver() {
-                    @Override
-                    public void onReceive(Context context, Intent intent) {
-                        Intent promptInstall = new Intent(Intent.ACTION_VIEW)
-                                .setDataAndType(Uri.fromFile(new File(Environment.getExternalStoragePublicDirectory(Environment.getDownloadCacheDirectory().getAbsolutePath()) + "/circle-of-music.apk")),
-                                        "application/vnd.android.package-archive");
-                        startActivity(promptInstall);
-                        unregisterReceiver(this);
-                    }
-                };
-                String url = "http://circleofmusic-sidzi.rhcloud.com/circle-of-music.apk";
-                DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
-                request.setDescription("Downloading");
-                request.setTitle("Circle of Music App");
-                request.setDestinationInExternalPublicDir(Environment.getDownloadCacheDirectory().getAbsolutePath(), "circle-of-music.apk");
+            public void onPrepared(MediaPlayer mediaPlayer) {
+                mediaPlayer.start();
+            }
+        });
+        try {
+            mediaPlayer.setDataSource(getIntent().getStringExtra("alarm_path"));
+            mediaPlayer.setLooping(true);
+            mediaPlayer.prepare();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        //        End button
+
+        findViewById(R.id.bStopAlarm).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                view.setClickable(false);
+                view.setOnClickListener(null);
+                mediaPlayer.reset();
                 try {
-                    new File(Environment.getExternalStoragePublicDirectory(Environment.getDownloadCacheDirectory().getAbsolutePath()) + "/circle-of-music.apk").delete();
-                } catch (NullPointerException e) {
+                    mediaPlayer.setDataSource(getIntent().getStringExtra("after_alarm_path"));
+                    mediaPlayer.setLooping(false);
+                    mediaPlayer.prepare();
+                    mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                        @Override
+                        public void onCompletion(MediaPlayer mediaPlayer) {
+                            mediaPlayer.reset();
+                            mediaPlayer.release();
+                        }
+                    });
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
-                DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
-                manager.enqueue(request);
-                registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
             }
         });
     }

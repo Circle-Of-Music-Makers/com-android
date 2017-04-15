@@ -16,7 +16,7 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
-            android:name=".ui.MainActivity"
+            android:name=".activities.MainActivity"
             android:label="@string/title_activity_main"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
@@ -47,26 +47,26 @@
         </receiver>
 
         <activity
-            android:name=".ui.EosActivity"
+            android:name=".activities.EosActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_eos"
             android:theme="@style/FullscreenTheme" />
         <activity
-            android:name=".ui.SearchActivity"
+            android:name=".activities.SearchActivity"
             android:label="@string/title_activity_search"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".ui.AlarmSettingActivity" />
+        <activity android:name=".activities.AlarmSettingActivity" />
 
         <receiver android:name=".receivers.AlarmReceiver" />
 
         <activity
-            android:name=".ui.AlarmActivity"
+            android:name=".activities.AlarmActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_alarm"
             android:theme="@style/FullscreenTheme" />
 
-        <activity android:name=".ui.ListFileActivity" />
+        <activity android:name=".activities.ListFileActivity" />
     </application>
 
 </manifest>
