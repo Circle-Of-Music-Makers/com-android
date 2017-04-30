@@ -14,10 +14,10 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.sidzi.circleofmusic.R;
+import com.sidzi.circleofmusic.activities.ListFileActivity;
 import com.sidzi.circleofmusic.adapters.ComTracksAdapter;
 import com.sidzi.circleofmusic.helpers.FileUploader;
 import com.sidzi.circleofmusic.helpers.VerticalSpaceDecorationHelper;
-import com.sidzi.circleofmusic.ui.ListFileActivity;
 
 import java.io.File;
 

@@ -1,4 +1,4 @@
-package com.sidzi.circleofmusic.ui;
+package com.sidzi.circleofmusic.activities;
 
 import android.content.Intent;
 import android.os.Build;

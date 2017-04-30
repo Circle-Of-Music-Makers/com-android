@@ -18,9 +18,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.sidzi.circleofmusic.R;
+import com.sidzi.circleofmusic.activities.MainActivity;
 import com.sidzi.circleofmusic.entities.Track;
 import com.sidzi.circleofmusic.services.MusicPlayerService;
-import com.sidzi.circleofmusic.ui.MainActivity;
 
 import static android.content.Context.NOTIFICATION_SERVICE;
 

@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingBottom="60dp"
-    tools:context="com.sidzi.circleofmusic.ui.MainActivity$PlaceholderFragment">
+    tools:context="com.sidzi.circleofmusic.activities.MainActivity">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rVTrackList"

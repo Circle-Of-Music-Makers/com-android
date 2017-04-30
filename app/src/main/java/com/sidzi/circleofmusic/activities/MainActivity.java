@@ -1,4 +1,4 @@
-package com.sidzi.circleofmusic.ui;
+package com.sidzi.circleofmusic.activities;
 
 import android.Manifest;
 import android.app.ProgressDialog;
@@ -41,7 +41,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.rollbar.android.Rollbar;
 import com.sidzi.circleofmusic.BuildConfig;
 import com.sidzi.circleofmusic.R;
 import com.sidzi.circleofmusic.config;
@@ -66,7 +65,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Rollbar.init(this, config.rollbar_key, config.rollbar_environment);
         setTheme(R.style.AppTheme_NoActionBar);
         setContentView(R.layout.activity_main);
 

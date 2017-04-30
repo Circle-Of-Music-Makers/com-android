@@ -1,4 +1,4 @@
-package com.sidzi.circleofmusic.ui;
+package com.sidzi.circleofmusic.activities;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
