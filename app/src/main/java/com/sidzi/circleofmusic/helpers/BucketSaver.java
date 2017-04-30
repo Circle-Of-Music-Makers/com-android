@@ -73,7 +73,7 @@ public class BucketSaver {
         }
     }
 
-    public boolean importFile() {
+    boolean importFile() {
         try {
             if (blcom_file.exists()) {
                 InputStream inputStream = new FileInputStream(blcom_file);

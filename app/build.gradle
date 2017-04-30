@@ -16,7 +16,7 @@ android {
         minSdkVersion project.ext.minimumSdkVersion
         targetSdkVersion 25
         versionCode generateVersionCode()
-        versionName "Keyboard"
+        versionName getVersionName()
     }
 
     buildTypes {
@@ -32,13 +32,17 @@ private Integer generateVersionCode() {
     return ext.minimumSdkVersion * 10000000 + ext.versionMajor * 10000 + ext.versionMinor * 100 + ext.versionPatch
 }
 
+private String getVersionName() {
+    String[] versionNames = ["A", "B", "Chimes", "Drums", "Ektara", "Flute", "Guitar", "Harpsichord", "Igil", "J", "Keyboard", "Longhorn", "M", "N", "O"]
+    return versionNames[ext.versionMajor - 1]
+}
+
 
 dependencies {
     compile 'com.android.volley:volley:1.0.0'
     compile 'net.gotev:uploadservice:3.1'
     compile 'com.j256.ormlite:ormlite-android:5.0'
     compile 'com.j256.ormlite:ormlite-core:5.0'
-    compile 'com.rollbar:rollbar-android:0.2.0'
     compile "com.android.support:appcompat-v7:$supportLibrariesVersion"
     compile "com.android.support:support-v13:$supportLibrariesVersion"
     compile "com.android.support:design:$supportLibrariesVersion"

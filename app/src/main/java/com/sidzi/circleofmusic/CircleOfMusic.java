@@ -8,6 +8,7 @@ public class CircleOfMusic extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        VolleyLog.DEBUG = true;
+        if (BuildConfig.DEBUG)
+            VolleyLog.DEBUG = true;
     }
 }
