@@ -26,3 +26,5 @@
 -dontwarn org.slf4j.**
 -dontwarn java.lang.invoke.**
 -dontwarn sun.misc.**
+-dontwarn okio.**
+-dontwarn javax.annotation.**

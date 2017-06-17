@@ -8,13 +8,13 @@ ext.minimumSdkVersion = 17
 ext.supportLibrariesVersion = '25.3.1'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion '25.0.2'
+    compileSdkVersion 26
+    buildToolsVersion '26.0.0'
 
     defaultConfig {
         applicationId "com.sidzi.circleofmusic"
         minSdkVersion project.ext.minimumSdkVersion
-        targetSdkVersion 25
+        targetSdkVersion 26
         versionCode generateVersionCode()
         versionName getVersionName()
     }
@@ -40,6 +40,7 @@ private String getVersionName() {
 
 dependencies {
     compile 'com.android.volley:volley:1.0.0'
+    compile 'com.squareup.retrofit2:retrofit:2.3.0'
     compile 'net.gotev:uploadservice:3.1'
     compile 'com.j256.ormlite:ormlite-android:5.0'
     compile 'com.j256.ormlite:ormlite-core:5.0'
