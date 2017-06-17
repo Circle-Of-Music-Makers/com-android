@@ -86,10 +86,10 @@ public class MusicPlayerViewHandler extends BroadcastReceiver {
                     @Override
                     public void onClick(View v) {
                         if (mpService.bucketOperation()) {
-                            ((ImageButton) v).setImageResource(R.drawable.ic_track_bucket_added);
+                            ((ImageButton) v).setImageResource(R.drawable.ic_star_black_24dp);
                             Toast.makeText(context, "Added to bucket", Toast.LENGTH_SHORT).show();
                         } else {
-                            ((ImageButton) v).setImageResource(R.drawable.ic_track_bucket_add);
+                            ((ImageButton) v).setImageResource(R.drawable.ic_star_border_black_24dp);
                         }
                     }
                 });
@@ -116,9 +116,9 @@ public class MusicPlayerViewHandler extends BroadcastReceiver {
                 tvPlayingTrackName.setText(temp_track.getName());
                 tvPlayingArtistName.setText(temp_track.getArtist());
                 if (!temp_track.getBucket()) {
-                    ibAddToBucket.setImageResource(R.drawable.ic_track_bucket_add);
+                    ibAddToBucket.setImageResource(R.drawable.ic_star_border_black_24dp);
                 } else {
-                    ibAddToBucket.setImageResource(R.drawable.ic_track_bucket_added);
+                    ibAddToBucket.setImageResource(R.drawable.ic_star_black_24dp);
                 }
                 ibAddToBucket.setTag(temp_track.getBucket());
                 mBuilder.setContentTitle(temp_track.getName())
@@ -127,12 +127,12 @@ public class MusicPlayerViewHandler extends BroadcastReceiver {
                 pbTrackPlay.setIndeterminate(true);
                 break;
             case MusicPlayerService.ACTION_PAUSE:
-                ibPlay.setImageResource(R.drawable.ic_track_play);
+                ibPlay.setImageResource(R.drawable.ic_play_arrow_black_24dp);
                 mBuilder.setOngoing(false);
                 mNotificationManager.notify(notifyId, mBuilder.build());
                 break;
             case MusicPlayerService.ACTION_PLAY:
-                ibPlay.setImageResource(R.drawable.ic_track_stop);
+                ibPlay.setImageResource(R.drawable.ic_pause_black_24dp);
                 mBuilder.setOngoing(true);
                 pbTrackPlay.setIndeterminate(false);
                 mNotificationManager.notify(notifyId, mBuilder.build());

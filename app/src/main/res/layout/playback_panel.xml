@@ -1,77 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/llPlayerPanel"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="bottom"
     android:background="@color/primary"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:weightSum="3"
+    android:padding="2dp"
     tools:ignore="HardcodedText">
 
     <ImageButton
         android:id="@+id/ibPlayPause"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
         android:layout_gravity="center"
-        android:layout_weight=".25"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/play_and_stop_button"
-        android:src="@drawable/ic_track_play" />
+        android:src="@drawable/ic_play_arrow_black_24dp"
+        android:tint="@color/primaryInverted"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/ibPlayNext"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
         android:id="@+id/ibPlayNext"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
         android:layout_gravity="center"
-        android:layout_weight=".25"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/play_and_stop_button"
-        android:src="@drawable/ic_play_next" />
+        android:src="@drawable/ic_skip_next_black_24dp"
+        android:tint="@color/primaryInverted"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/ibPlayPause"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <RelativeLayout
+
+    <TextView
+        android:id="@+id/tvPlayingTrackName"
+        style="@style/TextAppearance.AppCompat.Medium.Inverse"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="2.25"
-        android:gravity="center">
+        android:ellipsize="end"
+        android:maxLines="1"
+        app:layout_constraintBottom_toTopOf="@id/pbTrackPlay"
+        app:layout_constraintEnd_toEndOf="@id/pbTrackPlay"
+        app:layout_constraintStart_toStartOf="@id/pbTrackPlay"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Them bullshit brothers in arms" />
 
-        <TextView
-            android:id="@+id/tvPlayingTrackName"
-            style="@style/TextAppearance.AppCompat.Medium.Inverse"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:text="Them bullshit brothers in arms" />
+    <ProgressBar
+        android:id="@+id/pbTrackPlay"
+        style="@style/Base.Widget.AppCompat.ProgressBar.Horizontal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvPlayingTrackName"
+        app:layout_constraintBottom_toTopOf="@id/tvPlayingTrackArtist"
+        app:layout_constraintEnd_toStartOf="@id/ibAddToBucket"
+        app:layout_constraintStart_toEndOf="@id/ibPlayNext"
+        app:layout_constraintTop_toBottomOf="@id/tvPlayingTrackName" />
 
-        <ProgressBar
-            android:id="@+id/pbTrackPlay"
-            style="@style/Base.Widget.AppCompat.ProgressBar.Horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/tvPlayingTrackName" />
-
-        <TextView
-            android:id="@+id/tvPlayingTrackArtist"
-            style="@style/TextAppearance.AppCompat.Small.Inverse"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/pbTrackPlay"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:text="Laughing Spot Gorillas" />
-
-    </RelativeLayout>
+    <TextView
+        android:id="@+id/tvPlayingTrackArtist"
+        style="@style/TextAppearance.AppCompat.Small.Inverse"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="1"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/pbTrackPlay"
+        app:layout_constraintStart_toStartOf="@id/pbTrackPlay"
+        app:layout_constraintTop_toBottomOf="@+id/pbTrackPlay"
+        tools:text="Laughing Spot Gorillas" />
 
     <ImageButton
         android:id="@+id/ibAddToBucket"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_weight=".25"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/add_to_bucket"
-        android:src="@drawable/ic_track_bucket_add" />
-</LinearLayout>
+        android:src="@drawable/ic_star_border_black_24dp"
+        android:tint="@color/primaryInverted"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+</android.support.constraint.ConstraintLayout>

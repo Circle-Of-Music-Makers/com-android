@@ -4,7 +4,7 @@ ext.versionMajor = 11
 ext.versionMinor = 0
 ext.versionPatch = 0
 
-ext.minimumSdkVersion = 17
+ext.minimumSdkVersion = 21
 ext.supportLibrariesVersion = '25.3.1'
 
 android {
@@ -44,6 +44,7 @@ dependencies {
     compile 'net.gotev:uploadservice:3.1'
     compile 'com.j256.ormlite:ormlite-android:5.0'
     compile 'com.j256.ormlite:ormlite-core:5.0'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile "com.android.support:appcompat-v7:$supportLibrariesVersion"
     compile "com.android.support:support-v13:$supportLibrariesVersion"
     compile "com.android.support:design:$supportLibrariesVersion"
