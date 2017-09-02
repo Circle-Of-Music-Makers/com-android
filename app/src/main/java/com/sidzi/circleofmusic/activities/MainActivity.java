@@ -43,6 +43,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.sidzi.circleofmusic.BuildConfig;
 import com.sidzi.circleofmusic.R;
+import com.sidzi.circleofmusic.RestAPI;
 import com.sidzi.circleofmusic.config;
 import com.sidzi.circleofmusic.fragments.BucketFragment;
 import com.sidzi.circleofmusic.fragments.LocalMusicFragment;
@@ -51,12 +52,17 @@ import com.sidzi.circleofmusic.fragments.ShoutboxFragment;
 import com.sidzi.circleofmusic.fragments.TheFifthFragment;
 import com.sidzi.circleofmusic.helpers.BucketSaver;
 import com.sidzi.circleofmusic.helpers.DatabaseSynchronization;
+import com.sidzi.circleofmusic.models.ComTracksResponse;
 import com.sidzi.circleofmusic.receivers.MediaButtonHandler;
 import com.sidzi.circleofmusic.receivers.MusicPlayerViewHandler;
 import com.sidzi.circleofmusic.services.MusicPlayerService;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.IOException;
+
+import retrofit2.Call;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -68,6 +74,14 @@ public class MainActivity extends AppCompatActivity {
         setTheme(R.style.AppTheme_NoActionBar);
         setContentView(R.layout.activity_main);
 
+        RestAPI restAPI = new RestAPI();
+        Call<ComTracksResponse> abd = restAPI.getTracks();
+        try {
+            abd.execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        abd.isExecuted();
 
         if (ContextCompat.checkSelfPermission(MainActivity.this,
                 Manifest.permission.READ_EXTERNAL_STORAGE)
